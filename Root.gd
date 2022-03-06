@@ -54,23 +54,23 @@ func _ready():
 	
 	#######################################################################
 	# Testing OctagonMarker.
-	var marker_a = Visualization.OctagonMarker.instance()\
-		.set_description("Root: Testvisualizer A")\
-		.primary.set_color(Vector3(0.2, 0.8, 0.3))\
-		.secondary.set_color(Vector3(0.8, 0.2, 0.8))\
-		.add_as_child(self)
-	marker_a.translate(Vector3(-1, -1, 0))
-	
-	var marker_b = marker_a.new_knockoff()\
-		.add_as_child(self)\
-		.set_description("Root: Testvisualizer B")
-	marker_b.translate(Vector3(0, 1, 1.5))
-	
-	var marker_c = marker_b.new_knockoff()\
-		.add_as_child(self)\
-		.set_description("Root: Testvisualizer C")\
-		.primary.set_color(Vector3(0.9, 0.5, 0.3))
-	marker_c.translate(Vector3(0, 1, 1.5))
+#	var marker_a = Visualization.OctagonMarker.instance()\
+#		.set_description("Root: Testvisualizer A")\
+#		.primary.set_color(Vector3(0.2, 0.8, 0.3))\
+#		.secondary.set_color(Vector3(0.8, 0.2, 0.8))\
+#		.add_as_child(self)
+#	marker_a.translate(Vector3(-1, -1, 0))
+#
+#	var marker_b = marker_a.new_knockoff()\
+#		.add_as_child(self)\
+#		.set_description("Root: Testvisualizer B")
+#	marker_b.translate(Vector3(0, 1, 1.5))
+#
+#	var marker_c = marker_b.new_knockoff()\
+#		.add_as_child(self)\
+#		.set_description("Root: Testvisualizer C")\
+#		.primary.set_color(Vector3(0.9, 0.5, 0.3))
+#	marker_c.translate(Vector3(0, 1, 1.5))
 	
 	#######################################################################
 	# Beginning of path experiments/testing.
@@ -81,4 +81,4 @@ func _ready():
 	var pathNodeE = PathNode.new().connectWithNeighbour(pathNodeD)
 	var entityB = Entity.new().addPathNode(pathNodeB)
 	var entityD = Entity.new().addPathNode(pathNodeD)
-
+	

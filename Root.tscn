@@ -1,9 +1,17 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://Root.gd" type="Script" id=1]
+[ext_resource path="res://dev/PlaneMap/PlaneMap.tscn" type="PackedScene" id=2]
+[ext_resource path="res://RootCamera.gd" type="Script" id=3]
 
 [node name="Root" type="Spatial"]
 script = ExtResource( 1 )
 
 [node name="Camera" type="Camera" parent="."]
-transform = Transform( 0.00679394, -0.258819, 0.965902, 0.00182043, 0.965926, 0.258813, -0.999975, -1.16418e-10, 0.0070336, 3.64479, 2.13061, 0 )
+transform = Transform( 0.00651808, -0.375788, 0.926683, 0.00264314, 0.926706, 0.375778, -0.999975, -4.6565e-10, 0.00703361, 4.62047, 1.91275, 0 )
+script = ExtResource( 3 )
+
+[node name="Map" parent="." instance=ExtResource( 2 )]
+
+[node name="OmniLight" type="OmniLight" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.47762, 0 )
