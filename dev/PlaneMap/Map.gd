@@ -1,55 +1,62 @@
+tool
 extends StaticBody
 
 var noise = preload("res://dev/PlaneMap/PlaneMapNoise.tres")
 var material = preload("res://dev/PlaneMap/MapMaterial.tres")
 
-func _ready():
+export var resolution = 10
+export var size = Vector2(10, 10)
+export var subdivision = Vector2(100, 100)
+
+# With some helpful input from Digital KI's post:
+#   https://digitalki.net/2018/04/25/alter-a-plane-mesh-programmatically-with-godot-3-0-2/
+# If you ever find this: There's definitely a use for this. All it needs is some noise. ;):
+func create_mesh() -> Mesh:
 	var st = SurfaceTool.new()
 	var mdt = MeshDataTool.new()
-	var size = Vector2(100, 100)
-	var scale = 0.02
 	
+	var plane = PlaneMesh.new()
+	plane.subdivide_width = subdivision.x
+	plane.subdivide_depth = subdivision.y
+	plane.size = size
+	
+	st.create_from(plane, 0)
+	var array_mesh = st.commit()
+	mdt.create_from_surface(array_mesh, 0)
+	for i in mdt.get_vertex_count():
+		var vertex = mdt.get_vertex(i)
+		vertex.y = noise.get_noise_2d(vertex.x * resolution, vertex.z * resolution)
+		mdt.set_vertex(i, vertex)
+	
+	if array_mesh.get_surface_count() > 1:
+		push_error("Map plane array mesh unexpectedly has more than one surface.")
+	array_mesh.surface_remove(0)
+	mdt.commit_to_surface(array_mesh)
+	
+	st.create_from(array_mesh, 0)
+	
+	# For smoothing, this might be interesting:
+	#   https://godotengine.org/qa/69339/regenerate-normals-after-meshdatatool-vertex-adjustments
+	
+	st.generate_normals()
 	st.set_material(material)
-	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-
-#	st.add_uv(Vector2(0, 0))
-#	st.add_vertex(Vector3(0, 0, 0))
-#	st.add_uv(Vector2(1, 0))
-#	st.add_vertex(Vector3(100, 0, 0))
-#	st.add_uv(Vector2(1, 1))
-#	st.add_vertex(Vector3(100, 100, 0))
-#	st.add_uv(Vector2(0, 1))
-#	st.add_vertex(Vector3(0, 100, 0))
-	
-	for x in size.x:
-		for y in size.y:
-			#var height = noise.get_noise_2d(x, y)
-			var height = 1
-			st.add_uv(Vector2(x * scale, y * scale))
-			st.add_vertex(Vector3(x * scale, height, y * scale))
-		
-	
 	var mesh = st.commit()
+	
+	return mesh
 
-	#st.begin(Mesh.PRIMITIVE_TRIANGLES)
+func _ready():
+	var mesh_instance := MeshInstance.new()
+	mesh_instance.set_mesh(create_mesh())
 	
-#	mdt.create_from_surface(mesh, 0)
-#	mdt.commit_to_surface(mesh)
+	# Making the map mouse-interactable.
+	mesh_instance.create_trimesh_collision()
+	var static_body: StaticBody = mesh_instance.get_node("_col")
+	static_body.connect("input_event", self, "_on_mouse_event")
 	
-	#var sphere = create_sphere()
-	# Create mesh surface from mesh array.
-	# mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh) # No blendshapes or compression used.
-	
-	# Still invisible...
-	#var sphere_st = SurfaceTool.new()
-#	sphere_st.create_from(mesh, 0)
-#	sphere_st.index()
-#	sphere_st.generate_normals(false)
-	#mesh = sphere_st.commit()
-	
-	var mesh_instance: MeshInstance = MeshInstance.new()
-	mesh_instance.set_mesh(mesh)
 	add_child(mesh_instance)
-
-func _input_event(camera, event, click_position, click_normal, shape):
-	pass
+	
+func _on_mouse_event(camera, event, click_position, click_normal, shape):
+	print(event)
+	if event is InputEventMouseButton:
+		if event.button_index == BUTTON_LEFT and event.pressed:
+			Visualization.OctagonMarker.instance().add_as_child(self).translate(click_position)

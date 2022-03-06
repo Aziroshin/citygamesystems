@@ -7,6 +7,8 @@ extents = Vector3( 2.14115, 0.0412582, 1.75519 )
 
 [node name="Map" type="StaticBody"]
 script = ExtResource( 1 )
+resolution = 20
+size = Vector2( 20, 20 )
 
 [node name="CollisionShape" type="CollisionShape" parent="."]
 shape = SubResource( 1 )
