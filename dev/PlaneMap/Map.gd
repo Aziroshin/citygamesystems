@@ -59,4 +59,10 @@ func _on_mouse_event(camera, event, click_position, click_normal, shape):
 	print(event)
 	if event is InputEventMouseButton:
 		if event.button_index == BUTTON_LEFT and event.pressed:
-			Visualization.OctagonMarker.instance().add_as_child(self).translate(click_position)
+			assert(Visualization.OctagonMarker.instance()\
+				.add_as_child(self)\
+				.set_position(click_position)\
+				.align_along(click_normal)\
+				.set_size(0.2)\
+				.resize(5)
+			)

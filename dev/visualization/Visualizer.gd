@@ -80,7 +80,7 @@ class MeshDelegate:
 	
 	# Sets the color of our mesh.
 	# Returns our visualizer, as this is a top level builder pattern
-	# methd.
+	# method.
 	func set_color(color: Vector3) -> Visualizer:
 		if self.has_mesh:
 			self._get_material_for_mutation().set_shader_param("color", color)
@@ -114,6 +114,27 @@ class MeshDelegate:
 
 func add_as_child(parent: Node) -> Visualizer:
 	parent.add_child(self)
+	return self
+
+func set_position(position: Vector3) -> Visualizer:
+	self.translate(position)
+	return self
+
+func set_size(size: float) -> Visualizer:
+	self.scale = Vector3(size, size, size)
+	return self
+
+func resize(size_coefficient: float) -> Visualizer:
+	self.scale *= size_coefficient
+	return self
+
+func align_along(vector: Vector3) -> Visualizer:
+	# Solution inspired by r/Sprowl: https://www.reddit.com/r/godot/comments/f2fowu/aligning_node_to_surface_normal/
+	self.global_transform.basis = Basis(
+		vector.cross(self.global_transform.basis.z),
+		vector,
+		self.global_transform.basis.x.cross(vector)
+	)
 	return self
 
 # This can be called at the end of an `assert()` enclosed builder pattern
