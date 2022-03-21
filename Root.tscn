@@ -90,7 +90,7 @@ material = SubResource( 4 )
 curve = SubResource( 5 )
 
 [node name="PathFollow" type="PathFollow" parent="Path"]
-offset = nan
+offset = 0
 
 [node name="CSGTorus" type="CSGTorus" parent="Path/PathFollow"]
 inner_radius = 0.266
