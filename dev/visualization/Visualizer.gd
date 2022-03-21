@@ -38,7 +38,7 @@ func new_knockoff() -> Visualizer:
 	
 	return knockoff
 	
-class MeshDelegate:
+class MeshDelegate extends Reference:
 	var visualizer: Visualizer
 	var mesh_name: String
 	var has_mesh := false
