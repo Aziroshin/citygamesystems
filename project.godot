@@ -10,9 +10,24 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "Reference",
+"class": "Cavedig",
+"language": "GDScript",
+"path": "res://dev/Cavedig/Cavedig.gd"
+}, {
+"base": "Reference",
 "class": "Visualization",
 "language": "GDScript",
 "path": "res://dev/visualization/Visualization.gd"
+}, {
+"base": "Spatial",
+"class": "VisualizationNoodle",
+"language": "GDScript",
+"path": "res://dev/visualization/VisualizationNoodle/VisualizationNoodle.gd"
+}, {
+"base": "Path",
+"class": "VisualizationNoodlePath",
+"language": "GDScript",
+"path": "res://dev/visualization/VisualizationNoodle/VisualizationNoodlePath.gd"
 }, {
 "base": "Spatial",
 "class": "Visualizer",
@@ -20,7 +35,10 @@ _global_script_classes=[ {
 "path": "res://dev/visualization/Visualizer.gd"
 } ]
 _global_script_class_icons={
+"Cavedig": "",
 "Visualization": "",
+"VisualizationNoodle": "",
+"VisualizationNoodlePath": "",
 "Visualizer": ""
 }
 

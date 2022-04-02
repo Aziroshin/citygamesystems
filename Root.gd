@@ -28,7 +28,7 @@ class PathNode:
 class PathNodePathFindState:
 	pass
 		
-		
+
 class PathNodePath:
 	var startNode
 	var endNode

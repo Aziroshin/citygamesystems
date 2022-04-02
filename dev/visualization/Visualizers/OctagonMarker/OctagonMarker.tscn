@@ -5,3 +5,9 @@
 
 [node name="OctagonMarker" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
+
+[node name="Primary" parent="." index="0"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+
+[node name="Secondary" parent="." index="1"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )

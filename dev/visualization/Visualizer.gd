@@ -1,6 +1,7 @@
 extends Spatial
 class_name Visualizer
 
+const VisualizationNoodleScene = preload("res://dev/visualization/VisualizationNoodle/VisualizationNoodle.tscn")
 const VisualizationShader = preload("res://dev/visualization/VisualizationShader.tres")
 var Self = load(filename)
 
@@ -9,8 +10,10 @@ var secondary: MeshDelegate
 var tertiary: MeshDelegate
 var quaternary: MeshDelegate
 var description: String
+var connections: NoodleConnections
 	
 func _init():
+	connections = NoodleConnections.new(self)
 	primary = MeshDelegate.new(self, "Primary")
 	secondary =  MeshDelegate.new(self, "Secondary")
 	tertiary = MeshDelegate.new(self, "Tertiary")
@@ -37,6 +40,55 @@ func new_knockoff() -> Visualizer:
 	knockoff.transform = self.transform
 	
 	return knockoff
+
+class NoodleConnections extends Reference:
+	var visualizer: Visualizer
+	var connections: Dictionary = {}
+	
+	func _init(our_visualizer: Visualizer):
+		self.visualizer = our_visualizer
+	
+	func add_connection(connection: NoodleConnection):
+		self.connections[connection.other_visualizer] = connection
+		
+	func remove_connection(other_visualizer: Visualizer):
+		self.connections.erase(other_visualizer)
+		
+	func get_connection(other_visualizer: Visualizer) -> NoodleConnection:
+		return self.connections[other_visualizer]
+		
+	# Return schema: `{other_visualizer: NoodleConnection}`.
+	func get_all_connections() -> Dictionary:
+		return self.connections
+
+class NoodleConnection extends Reference:
+	var visualizer: Visualizer
+	var other_visualizer: Visualizer
+	var noodle: VisualizationNoodle
+	var direction: int
+	
+	enum Direction {
+		NONE
+		FROM
+		TO
+	}
+
+	const OppositeDirectionOf: Dictionary = {
+		Direction.NONE: Direction.NONE,
+		Direction.TO: Direction.FROM,
+		Direction.FROM: Direction.TO
+	}
+	
+	func _init(
+		our_visualizer: Visualizer,
+		connected_visualizer: Visualizer,
+		connecting_noodle: VisualizationNoodle,
+		noodle_direction: int
+	):
+		self.visualizer = our_visualizer
+		self.other_visualizer = connected_visualizer
+		self.noodle = connecting_noodle
+		self.direction = noodle_direction
 	
 class MeshDelegate extends Reference:
 	var visualizer: Visualizer
@@ -117,16 +169,55 @@ func add_as_child(parent: Node) -> Visualizer:
 	return self
 
 func set_position(position: Vector3) -> Visualizer:
-	self.translate(position)
+	
+	# Correct
+	print("previous global marker position: %s" % global_transform.origin)
+	var needle_parent = get_tree().root
+	Cavedig.needle(get_tree().root, global_transform.origin, Cavedig.Colors.GREEN, 0.1, 0.2).set_as_toplevel(true)
+	
+	self.global_transform.origin = position
+	
+	var green_needle: CSGCylinder = Cavedig.needle(self, global_transform.origin, Vector3(0.2, 0.2, 0.2) + Cavedig.Colors.GREEN, 2, 0.05)
+	green_needle.set_as_toplevel(true)
+	#green_needle.global_transform.origin = self.global_transform.origin
+	print("marker global: %s" % green_needle.global_transform.origin)
+	print("marker local: %s" % green_needle.transform.origin)
+	
+	# Correct
+	print("global marker position: %s" % global_transform.origin)
+	var global_marker_position: CSGCylinder = Cavedig.needle(needle_parent, global_transform.origin, Cavedig.Colors.BLUE, 0.2, 0.2)
+	global_marker_position.set_as_toplevel(true)
+	print("global marker position needle, local position: %s" % global_marker_position.transform.origin)
+	
+	# Correct
+	print("local marker position: %s" % transform.origin)
+	Cavedig.needle(needle_parent, transform.origin, Vector3(0.2, 0.2, 0.2) + Cavedig.Colors.BLUE, 0.3, 0.05).set_as_toplevel(true)
+	
+	# Correct
+	# Since this is a local position, the needle has to be relative to what
+	# the position it's marking is local to: `self`, the node the mesh belongs
+	# to.
+	print("local mesh position: %s" % self.primary.mesh.transform.origin)
+	Cavedig.needle(self, self.primary.mesh.transform.origin, Vector3(-0.2, -0.2, -0.2) + Cavedig.Colors.ORANGE, 6, 0.008).set_as_toplevel(true)
+	
+	# Correct
+	print("global mesh position: %s" % self.primary.mesh.global_transform.origin)
+	Cavedig.needle(needle_parent, self.primary.mesh.global_transform.origin, Vector3(0.2, 0.2, 0.2) + Cavedig.Colors.AQUA, 5, 0.015).set_as_toplevel(true)
+	
 	return self
 
 func set_size(size: float) -> Visualizer:
+#	var previous_scale = self.scale
 	self.scale = Vector3(size, size, size)
+#	for untyped_connection in self.connections.get_all_connections().values():
+#		var connection: NoodleConnection = untyped_connection
+#		connection.direction = NoodleConnection.Direction.FROM
+#		connection.noodle.scale = connection.noodle.scale * (size)
 	return self
 
-func resize(size_coefficient: float) -> Visualizer:
-	self.scale *= size_coefficient
-	return self
+#func resize(size_coefficient: float) -> Visualizer:
+#	self.set_size(self.scale * size_coefficient)
+#	return self
 
 func align_along(vector: Vector3) -> Visualizer:
 	# Solution inspired by r/Sprowl: https://www.reddit.com/r/godot/comments/f2fowu/aligning_node_to_surface_normal/
@@ -135,6 +226,37 @@ func align_along(vector: Vector3) -> Visualizer:
 		vector,
 		self.global_transform.basis.x.cross(vector)
 	)
+	return self
+
+func noodle_to(other_visualizer: Visualizer) -> Visualizer:
+	#Cavedig.needle(needle_parent, global_transform.origin, Cavedig.Colors.YELLOW, 0.1, 0.2).set_as_toplevel(true)
+	print("source visualizer origin (yellow): %s" % global_transform.origin)
+	noodle_up(other_visualizer, NoodleConnection.Direction.TO)
+	return self
+
+func noodle_up(other_visualizer: Visualizer, direction: int) -> Visualizer:
+	var noodle: VisualizationNoodle = VisualizationNoodleScene.instance()\
+		.add_as_child(self)\
+		.set_start(global_transform.origin)
+	connections.add_connection(NoodleConnection.new(
+		self, 
+		other_visualizer,
+		noodle, 
+		direction
+	))
+	other_visualizer.get_noodled(self, noodle, NoodleConnection.OppositeDirectionOf[direction])
+	return self
+	
+func get_noodled(noodling_visualizer: Visualizer, noodle: VisualizationNoodle, direction) -> Visualizer:
+	noodle.set_end(global_transform.origin)
+	connections.add_connection(NoodleConnection.new(
+		self,
+		noodling_visualizer,
+		noodle,
+		direction
+	))
+	Cavedig.needle(self, global_transform.origin, Cavedig.Colors.SEA_GREEN, 0.05, 0.3).set_as_toplevel(true)
+	print("target visualizer origin (sea green): %s" % global_transform.origin)
 	return self
 
 # This can be called at the end of an `assert()` enclosed builder pattern
