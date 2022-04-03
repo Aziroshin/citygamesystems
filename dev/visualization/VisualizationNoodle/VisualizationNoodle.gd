@@ -38,8 +38,8 @@ func get_start() -> Vector3:
 ### Builder methods (return self)
 ###
 
-func add_as_child(node: Node) -> VisualizationNoodle:
-	node.add_child(self)
+func add_as_child_to(node: Node) -> VisualizationNoodle:
+	node.call_deferred("add_child", self)
 	
 	# Since the noodles form a connection between two visualizers which aren't
 	# necessarily hierarchically related, tying the noodle's transformation

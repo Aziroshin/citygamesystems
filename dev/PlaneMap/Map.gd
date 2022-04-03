@@ -56,26 +56,26 @@ func _ready():
 	add_child(mesh_instance)
 	
 	assert(Visualization.OctagonMarker.instance()\
-		.add_as_child(self)\
+		.add_as_child_to(self)\
 		.set_position(Vector3(2, 1, -2))\
 		.set_size(0.5)\
 		.primary.set_color(Vector3(0.2, 0.1, 0.6))\
 		.secondary.set_color(Vector3(0.2, 0.1, 0.3))\
-#		.noodle_to(
-#			Visualization.OctagonMarker.instance()\
-#			.add_as_child(self)\
-#			.set_position(Vector3(3.5, 1, -2.5))\
-#			.set_size(0.5)\
-#			.primary.set_color(Vector3(0.6, 0.1, 0.4))\
-#			.secondary.set_color(Vector3(0.6, 0.1, 0.2))\
-#		)
+		.noodle_to(
+			Visualization.OctagonMarker.instance()\
+			.add_as_child_to(self)\
+			.set_position(Vector3(3.5, 1, -2.5))\
+			.set_size(0.5)\
+			.primary.set_color(Vector3(0.6, 0.1, 0.4))\
+			.secondary.set_color(Vector3(0.6, 0.1, 0.2))\
+		)
 	)
 	
 func _on_mouse_event(camera, event, click_position, click_normal, shape):
 	if event is InputEventMouseButton:
 		if event.button_index == BUTTON_LEFT and event.pressed:
 			assert(Visualization.OctagonMarker.instance()\
-				.add_as_child(self)\
+				.add_as_child_to(self)\
 				.set_position(click_position)\
 				.align_along(click_normal)\
 				.set_size(0.2)\

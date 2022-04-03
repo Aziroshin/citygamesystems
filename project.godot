@@ -15,6 +15,11 @@ _global_script_classes=[ {
 "path": "res://dev/Cavedig/Cavedig.gd"
 }, {
 "base": "Reference",
+"class": "GdTypes",
+"language": "GDScript",
+"path": "res://global_lib/Types/GdTypes.gd"
+}, {
+"base": "Reference",
 "class": "Visualization",
 "language": "GDScript",
 "path": "res://dev/visualization/Visualization.gd"
@@ -36,6 +41,7 @@ _global_script_classes=[ {
 } ]
 _global_script_class_icons={
 "Cavedig": "",
+"GdTypes": "",
 "Visualization": "",
 "VisualizationNoodle": "",
 "VisualizationNoodlePath": "",

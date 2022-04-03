@@ -164,45 +164,45 @@ class MeshDelegate extends Reference:
 		
 		return knockoff
 
-func add_as_child(parent: Node) -> Visualizer:
+func add_as_child_to(parent: Node) -> Visualizer:
 	parent.add_child(self)
 	return self
 
 func set_position(position: Vector3) -> Visualizer:
 	
-	# Correct
-	print("previous global marker position: %s" % global_transform.origin)
-	var needle_parent = get_tree().root
-	Cavedig.needle(get_tree().root, global_transform.origin, Cavedig.Colors.GREEN, 0.1, 0.2).set_as_toplevel(true)
+#	# Correct
+#	print("previous global marker position: %s" % global_transform.origin)
+#	var needle_parent = get_tree().root
+#	Cavedig.needle(get_tree().root, global_transform.origin, Cavedig.Colors.GREEN, 0.1, 0.2).set_as_toplevel(true)
 	
 	self.global_transform.origin = position
 	
-	var green_needle: CSGCylinder = Cavedig.needle(self, global_transform.origin, Vector3(0.2, 0.2, 0.2) + Cavedig.Colors.GREEN, 2, 0.05)
-	green_needle.set_as_toplevel(true)
-	#green_needle.global_transform.origin = self.global_transform.origin
-	print("marker global: %s" % green_needle.global_transform.origin)
-	print("marker local: %s" % green_needle.transform.origin)
-	
-	# Correct
-	print("global marker position: %s" % global_transform.origin)
-	var global_marker_position: CSGCylinder = Cavedig.needle(needle_parent, global_transform.origin, Cavedig.Colors.BLUE, 0.2, 0.2)
-	global_marker_position.set_as_toplevel(true)
-	print("global marker position needle, local position: %s" % global_marker_position.transform.origin)
-	
-	# Correct
-	print("local marker position: %s" % transform.origin)
-	Cavedig.needle(needle_parent, transform.origin, Vector3(0.2, 0.2, 0.2) + Cavedig.Colors.BLUE, 0.3, 0.05).set_as_toplevel(true)
-	
-	# Correct
-	# Since this is a local position, the needle has to be relative to what
-	# the position it's marking is local to: `self`, the node the mesh belongs
-	# to.
-	print("local mesh position: %s" % self.primary.mesh.transform.origin)
-	Cavedig.needle(self, self.primary.mesh.transform.origin, Vector3(-0.2, -0.2, -0.2) + Cavedig.Colors.ORANGE, 6, 0.008).set_as_toplevel(true)
-	
-	# Correct
-	print("global mesh position: %s" % self.primary.mesh.global_transform.origin)
-	Cavedig.needle(needle_parent, self.primary.mesh.global_transform.origin, Vector3(0.2, 0.2, 0.2) + Cavedig.Colors.AQUA, 5, 0.015).set_as_toplevel(true)
+#	var green_needle: CSGCylinder = Cavedig.needle(self, global_transform.origin, Vector3(0.2, 0.2, 0.2) + Cavedig.Colors.GREEN, 2, 0.05)
+#	green_needle.set_as_toplevel(true)
+#	#green_needle.global_transform.origin = self.global_transform.origin
+#	print("marker global: %s" % green_needle.global_transform.origin)
+#	print("marker local: %s" % green_needle.transform.origin)
+#
+#	# Correct
+#	print("global marker position: %s" % global_transform.origin)
+#	var global_marker_position: CSGCylinder = Cavedig.needle(needle_parent, global_transform.origin, Cavedig.Colors.BLUE, 0.2, 0.2)
+#	global_marker_position.set_as_toplevel(true)
+#	print("global marker position needle, local position: %s" % global_marker_position.transform.origin)
+#
+#	# Correct
+#	print("local marker position: %s" % transform.origin)
+#	Cavedig.needle(needle_parent, transform.origin, Vector3(0.2, 0.2, 0.2) + Cavedig.Colors.BLUE, 0.3, 0.05).set_as_toplevel(true)
+#
+#	# Correct
+#	# Since this is a local position, the needle has to be relative to what
+#	# the position it's marking is local to: `self`, the node the mesh belongs
+#	# to.
+#	print("local mesh position: %s" % self.primary.mesh.transform.origin)
+#	Cavedig.needle(self, self.primary.mesh.transform.origin, Vector3(-0.2, -0.2, -0.2) + Cavedig.Colors.ORANGE, 6, 0.008).set_as_toplevel(true)
+#
+#	# Correct
+#	print("global mesh position: %s" % self.primary.mesh.global_transform.origin)
+#	Cavedig.needle(needle_parent, self.primary.mesh.global_transform.origin, Vector3(0.2, 0.2, 0.2) + Cavedig.Colors.AQUA, 5, 0.015).set_as_toplevel(true)
 	
 	return self
 
@@ -234,14 +234,36 @@ func noodle_to(other_visualizer: Visualizer) -> Visualizer:
 	noodle_up(other_visualizer, NoodleConnection.Direction.TO)
 	return self
 
+static func get_highest_spatial_in_hierarchy(spatial: Spatial) -> Spatial:
+	var immediate_parent_spatial = spatial.get_parent_spatial()
+	if immediate_parent_spatial:
+		return get_highest_spatial_in_hierarchy(immediate_parent_spatial)
+	return spatial
+	
+func get_highest_parent_spatial() -> GdTypes.NilableSpatial:
+	var maybe_self = get_highest_spatial_in_hierarchy(self)
+	if maybe_self.get_instance_id() == self.get_instance_id():
+		return GdTypes.NilableSpatial.new()
+	return GdTypes.NilableSpatial.new().set_value(maybe_self)
+	
 func noodle_up(other_visualizer: Visualizer, direction: int) -> Visualizer:
+	#Cavedig.needle(self.get_highest_parent_spatial().value, global_transform.origin, Cavedig.Colors.CERULEAN, 20, 0.1).set_as_toplevel(true)
+	var test_needle: CSGCylinder = Cavedig.needle(get_tree().get_root(), global_transform.origin, Cavedig.Colors.CERULEAN, 5, 0.1)
+	test_needle.name = "Testneedle"
+	test_needle.set_as_toplevel(true)
+	print("test needle name: %s" % test_needle.name)
+	get_tree().current_scene.call_deferred("add_child", test_needle)
+	print("test_needle children: %s" % PoolStringArray(get_tree().current_scene.get_children()).join(" "))
+	#var test_needle_node = get_tree().current_scene.get_node(test_needle.name)
+	#print("test needle name after found: %s " % test_needle_node.name)
+	
 	var noodle: VisualizationNoodle = VisualizationNoodleScene.instance()\
-		.add_as_child(self)\
+		.add_as_child_to(get_tree().current_scene)\
 		.set_start(global_transform.origin)
 	connections.add_connection(NoodleConnection.new(
 		self, 
 		other_visualizer,
-		noodle, 
+		noodle,
 		direction
 	))
 	other_visualizer.get_noodled(self, noodle, NoodleConnection.OppositeDirectionOf[direction])
