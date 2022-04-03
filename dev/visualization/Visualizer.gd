@@ -11,6 +11,7 @@ var tertiary: MeshDelegate
 var quaternary: MeshDelegate
 var description: String
 var connections: NoodleConnections
+var _size: float = 1.0
 	
 func _init():
 	connections = NoodleConnections.new(self)
@@ -207,7 +208,9 @@ func set_position(position: Vector3) -> Visualizer:
 	return self
 
 func set_size(size: float) -> Visualizer:
+	# TODO: Resize noodles.
 #	var previous_scale = self.scale
+	self._size = size
 	self.scale = Vector3(size, size, size)
 #	for untyped_connection in self.connections.get_all_connections().values():
 #		var connection: NoodleConnection = untyped_connection
@@ -247,18 +250,9 @@ func get_highest_parent_spatial() -> GdTypes.NilableSpatial:
 	return GdTypes.NilableSpatial.new().set_value(maybe_self)
 	
 func noodle_up(other_visualizer: Visualizer, direction: int) -> Visualizer:
-	#Cavedig.needle(self.get_highest_parent_spatial().value, global_transform.origin, Cavedig.Colors.CERULEAN, 20, 0.1).set_as_toplevel(true)
-	var test_needle: CSGCylinder = Cavedig.needle(get_tree().get_root(), global_transform.origin, Cavedig.Colors.CERULEAN, 5, 0.1)
-	test_needle.name = "Testneedle"
-	test_needle.set_as_toplevel(true)
-	print("test needle name: %s" % test_needle.name)
-	get_tree().current_scene.call_deferred("add_child", test_needle)
-	print("test_needle children: %s" % PoolStringArray(get_tree().current_scene.get_children()).join(" "))
-	#var test_needle_node = get_tree().current_scene.get_node(test_needle.name)
-	#print("test needle name after found: %s " % test_needle_node.name)
-	
 	var noodle: VisualizationNoodle = VisualizationNoodleScene.instance()\
 		.add_as_child_to(get_tree().current_scene)\
+		.set_size(self._size)\
 		.set_start(global_transform.origin)
 	connections.add_connection(NoodleConnection.new(
 		self, 

@@ -13,7 +13,7 @@ _data = {
 script = ExtResource( 2 )
 
 [node name="Sleeve" type="CSGPolygon" parent="."]
-polygon = PoolVector2Array( 0.5, 0, 1, 0.866025, 0.5, 1.73205, -0.5, 1.73205, -1, 0.866025, -0.5, 0, 0.5, -3.06162e-16 )
+polygon = PoolVector2Array( 0.25, -0.603553, 0.603553, -0.25, 0.603553, 0.25, 0.25, 0.603553, -0.25, 0.603553, -0.603553, 0.25, -0.603553, -0.25, -0.25, -0.603553, 0.25, -0.603553 )
 mode = 2
 path_node = NodePath("../Path")
 path_interval_type = 0
@@ -25,7 +25,9 @@ path_continuous_u = true
 path_u_distance = 1.0
 path_joined = false
 script = ExtResource( 1 )
-sides = 6
+sides = 8
+side_scale = 0.1
+offset = Vector2( 0, 0 )
 
 [node name="Path" type="Path" parent="."]
 curve = SubResource( 1 )
