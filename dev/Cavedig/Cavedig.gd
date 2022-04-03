@@ -21,7 +21,7 @@ static func needle(
 ) -> CSGCylinder:
 	var shader = load("res://dev/visualization/VisualizationShader.tres")
 	var debug_cylinder = CSGCylinder.new()
-	parent.add_child(debug_cylinder)
+	parent.call_deferred("add_child", debug_cylinder)
 	debug_cylinder.material_override = shader.duplicate()
 	debug_cylinder.material_override.set_shader_param("color", color)
 	debug_cylinder.height = height
