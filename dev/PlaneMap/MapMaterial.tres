@@ -67,20 +67,20 @@ void light() {
 
 }
 "
-graph_offset = Vector2( -495, 138 )
-nodes/fragment/0/position = Vector2( 1000, 140 )
+graph_offset = Vector2( -303.326, -23.2348 )
+nodes/fragment/0/position = Vector2( 860, 140 )
 nodes/fragment/2/node = SubResource( 1 )
-nodes/fragment/2/position = Vector2( -200, 220 )
+nodes/fragment/2/position = Vector2( 340, 80 )
 nodes/fragment/3/node = SubResource( 3 )
-nodes/fragment/3/position = Vector2( -200, 340 )
+nodes/fragment/3/position = Vector2( 340, 200 )
 nodes/fragment/5/node = SubResource( 4 )
-nodes/fragment/5/position = Vector2( 500, 320 )
+nodes/fragment/5/position = Vector2( 580, 140 )
 nodes/fragment/6/node = SubResource( 5 )
-nodes/fragment/6/position = Vector2( -280, 480 )
+nodes/fragment/6/position = Vector2( 0, 460 )
 nodes/fragment/7/node = SubResource( 6 )
-nodes/fragment/7/position = Vector2( -40, 480 )
+nodes/fragment/7/position = Vector2( 240, 320 )
 nodes/fragment/9/node = SubResource( 7 )
-nodes/fragment/9/position = Vector2( -100, 620 )
+nodes/fragment/9/position = Vector2( 500, 540 )
 nodes/fragment/connections = PoolIntArray( 2, 0, 5, 0, 3, 0, 5, 1, 5, 0, 0, 0, 6, 0, 7, 0, 7, 2, 5, 2, 6, 0, 0, 7, 7, 1, 0, 9, 6, 0, 0, 15, 7, 0, 0, 11, 9, 0, 0, 10 )
 
 [resource]
