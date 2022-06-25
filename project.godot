@@ -54,6 +54,37 @@ config/name="citygamesystems"
 run/main_scene="res://Root.tscn"
 config/icon="res://icon.png"
 
+[editor_plugins]
+
+enabled=PoolStringArray( "res://addons/geometry_functions/plugin.cfg" )
+
+[input]
+
+camera_left={
+"deadzone": 0.5,
+"events": [  ]
+}
+camera_right={
+"deadzone": 0.5,
+"events": [  ]
+}
+camera_up={
+"deadzone": 0.5,
+"events": [  ]
+}
+camera_down={
+"deadzone": 0.5,
+"events": [  ]
+}
+camera_zoom_in={
+"deadzone": 0.5,
+"events": [  ]
+}
+camera_zoom_out={
+"deadzone": 0.5,
+"events": [  ]
+}
+
 [rendering]
 
 environment/default_environment="res://default_env.tres"
