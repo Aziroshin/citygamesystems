@@ -6,83 +6,60 @@
 ;   [section] ; section goes between []
 ;   param=value ; assign values to parameters
 
-config_version=4
+config_version=5
 
-_global_script_classes=[ {
+_global_script_classes=[{
 "base": "Reference",
-"class": "Cavedig",
-"language": "GDScript",
+"class": &"Cavedig",
+"language": &"GDScript",
 "path": "res://dev/Cavedig/Cavedig.gd"
 }, {
 "base": "Reference",
-"class": "GdTypes",
-"language": "GDScript",
-"path": "res://global_lib/Types/GdTypes.gd"
-}, {
-"base": "Reference",
-"class": "Visualization",
-"language": "GDScript",
+"class": &"Visualization",
+"language": &"GDScript",
 "path": "res://dev/visualization/Visualization.gd"
-}, {
-"base": "Spatial",
-"class": "VisualizationNoodle",
-"language": "GDScript",
-"path": "res://dev/visualization/VisualizationNoodle/VisualizationNoodle.gd"
-}, {
-"base": "Path",
-"class": "VisualizationNoodlePath",
-"language": "GDScript",
-"path": "res://dev/visualization/VisualizationNoodle/VisualizationNoodlePath.gd"
-}, {
-"base": "Spatial",
-"class": "Visualizer",
-"language": "GDScript",
-"path": "res://dev/visualization/Visualizer.gd"
-} ]
+}]
 _global_script_class_icons={
 "Cavedig": "",
-"GdTypes": "",
-"Visualization": "",
-"VisualizationNoodle": "",
-"VisualizationNoodlePath": "",
-"Visualizer": ""
+"Visualization": ""
 }
 
 [application]
 
 config/name="citygamesystems"
 run/main_scene="res://Root.tscn"
+config/features=PackedStringArray("4.0")
 config/icon="res://icon.png"
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/geometry_functions/plugin.cfg" )
+enabled=PackedStringArray()
 
 [input]
 
 camera_left={
 "deadzone": 0.5,
-"events": [  ]
+"events": []
 }
 camera_right={
 "deadzone": 0.5,
-"events": [  ]
+"events": []
 }
 camera_up={
 "deadzone": 0.5,
-"events": [  ]
+"events": []
 }
 camera_down={
 "deadzone": 0.5,
-"events": [  ]
+"events": []
 }
 camera_zoom_in={
 "deadzone": 0.5,
-"events": [  ]
+"events": []
 }
 camera_zoom_out={
 "deadzone": 0.5,
-"events": [  ]
+"events": []
 }
 
 [rendering]
