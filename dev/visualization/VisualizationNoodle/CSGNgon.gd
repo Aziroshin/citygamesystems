@@ -1,4 +1,4 @@
-# N-gon resting on its "bottom" edge.
+# N-gon
 # Illustration (just imagine the angles and sides being the same :p):
 #  ___
 # /   \
@@ -26,14 +26,23 @@ func ngon_vertices(n: int, side_scale: float) -> PoolVector2Array:
 		
 	var vertices := PoolVector2Array([Vector2(side_scale - side_scale / 2, 0)])
 	for vertex_index in range(1, n+1):
-		var side_vector = deg2rad(90+360/n*vertex_index)
+		
+		# TODO: Try this formula for vector_length: 2 * sin(deg2rad(360 / 2n))
+		# It just produces a line, so, we've obviously done something wrong. xD
+		#var vector_length = deg2rad(360 / 2 * n)
+		#var vector_length = deg2rad(90+360/n*vertex_index)
+		#var vector_length = deg2rad(360.0/n*vertex_index)
+		var vector_length = deg2rad(1.0)
+		print("vector_length: %s, radians: %s" % [vector_length, deg2rad(vector_length)])
+	
 		vertices.append(Vector2(
-			sin(side_vector) * side_scale,
-			-1 * cos(side_vector) * side_scale
+			sin(vector_length) * side_scale/n,
+			-1 * cos(vector_length) * side_scale/n
 		))
+		
 	return vertices
 	
-# Takes a a polygon for reference and a `Vector2` representing a vertex and
+# Takes a polygon for reference and a `Vector2` representing a vertex and
 # returns the resultant of the last vertex in the polygon and the specified
 # vertex. If the polygon has no vertices, the specified vertex is returned.
 func new_vertex(reference_polygon: PoolVector2Array, new_vector: Vector2) -> Vector2:
