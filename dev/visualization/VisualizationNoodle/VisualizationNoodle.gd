@@ -1,19 +1,27 @@
-tool
-extends Spatial
+@tool
+extends Node3D
 class_name VisualizationNoodle
 
 var is_post_ready: bool = false
 const DEFAULT_START = Vector3(0, 0, 1)
 const DEFAULT_END = Vector3(0, 0, -1)
-onready var sleeve = $Sleeve
-onready var path = $Path
+@onready var sleeve = $Sleeve
+@onready var path = $Path
 
 # Since we're also using builder methods for setting and getting start
 # and end position, but, at the same time, want tool-compatible
 # configurability and the ability to set default values, we're setgetting
 # the builder methods for the start and end position here.s
-export var start: Vector3 = DEFAULT_START setget set_start, get_start
-export var end: Vector3 = DEFAULT_END setget set_end, get_end
+@export var start: Vector3 = DEFAULT_START:
+	get:
+		return get_start()
+	set(value):
+		set_start(value)
+@export var end: Vector3 = DEFAULT_END:
+	get:
+		return get_end()
+	set(value):
+		set_end(value)
 
 func _ready():
 	path.curve.clear_points()
@@ -80,13 +88,13 @@ func _deferred_set_end(position: Vector3):
 ### Builder methods (return self)
 ###
 
-func add_as_child_to(node: Node) -> VisualizationNoodle:
+func add_as_child_to(node: Node3D) -> VisualizationNoodle:
 	node.call_deferred("add_child", self)
 	
 	# Since the noodles form a connection between two visualizers which aren't
 	# necessarily hierarchically related, tying the noodle's transformation
 	# to one of them would unnecessarily complicate things.
-	self.set_as_toplevel(true)
+	self.set_as_top_level(true)
 	
 	return self
 

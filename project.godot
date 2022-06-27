@@ -9,19 +9,37 @@
 config_version=5
 
 _global_script_classes=[{
-"base": "Reference",
+"base": "RefCounted",
 "class": &"Cavedig",
 "language": &"GDScript",
 "path": "res://dev/Cavedig/Cavedig.gd"
 }, {
-"base": "Reference",
+"base": "RefCounted",
+"class": &"NilableNode3D",
+"language": &"GDScript",
+"path": "res://global_lib/nilable_types/nilable_node3d.gd"
+}, {
+"base": "RefCounted",
 "class": &"Visualization",
 "language": &"GDScript",
 "path": "res://dev/visualization/Visualization.gd"
+}, {
+"base": "Node3D",
+"class": &"VisualizationNoodle",
+"language": &"GDScript",
+"path": "res://dev/visualization/VisualizationNoodle/VisualizationNoodle.gd"
+}, {
+"base": "Node3D",
+"class": &"Visualizer",
+"language": &"GDScript",
+"path": "res://dev/visualization/Visualizer.gd"
 }]
 _global_script_class_icons={
 "Cavedig": "",
-"Visualization": ""
+"NilableNode3D": "",
+"Visualization": "",
+"VisualizationNoodle": "",
+"Visualizer": ""
 }
 
 [application]
@@ -33,7 +51,7 @@ config/icon="res://icon.png"
 
 [editor_plugins]
 
-enabled=PackedStringArray()
+enabled=PackedStringArray("res://addons/geometry_functions/plugin.cfg")
 
 [input]
 

@@ -1,4 +1,4 @@
-extends Spatial
+extends Node3D
 
 #enum {}
 
@@ -52,8 +52,8 @@ class Entity:
 		
 func _ready():
 	
-	#######################################################################
-	# Testing OctagonMarker.
+#######################################################################
+# Testing OctagonMarker.
 #	var marker_a = Visualization.OctagonMarker.instance()\
 #		.set_description("Root: Testvisualizer A")\
 #		.primary.set_color(Vector3(0.2, 0.8, 0.3))\

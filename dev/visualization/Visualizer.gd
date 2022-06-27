@@ -1,9 +1,12 @@
-extends Spatial
+extends Node3D
 class_name Visualizer
 
 const VisualizationNoodleScene = preload("res://dev/visualization/VisualizationNoodle/VisualizationNoodle.tscn")
 const VisualizationShader = preload("res://dev/visualization/VisualizationShader.tres")
-var Self = load(filename)
+
+# This used to be `load(filename)`. With godot 4.0, I'm not sure what to
+# change this to at the moment. `load(scene_file_path)` might be wrong.
+var Self = load(scene_file_path)
 
 var primary: MeshDelegate
 var secondary: MeshDelegate
@@ -42,7 +45,7 @@ func new_knockoff() -> Visualizer:
 	
 	return knockoff
 
-class NoodleConnections extends Reference:
+class NoodleConnections extends RefCounted:
 	var visualizer: Visualizer
 	var connections: Dictionary = {}
 	
@@ -62,16 +65,16 @@ class NoodleConnections extends Reference:
 	func get_all_connections() -> Dictionary:
 		return self.connections
 
-class NoodleConnection extends Reference:
+class NoodleConnection extends RefCounted:
 	var visualizer: Visualizer
 	var other_visualizer: Visualizer
 	var noodle: VisualizationNoodle
 	var direction: int
 	
 	enum Direction {
-		NONE
-		FROM
-		TO
+		NONE,
+		FROM,
+		TO,
 	}
 
 	const OppositeDirectionOf: Dictionary = {
@@ -91,11 +94,11 @@ class NoodleConnection extends Reference:
 		self.noodle = connecting_noodle
 		self.direction = noodle_direction
 	
-class MeshDelegate extends Reference:
+class MeshDelegate extends RefCounted:
 	var visualizer: Visualizer
 	var mesh_name: String
 	var has_mesh := false
-	var mesh: MeshInstance
+	var mesh: MeshInstance3D
 	var _material: ShaderMaterial
 	var _material_is_unique := false
 	
@@ -108,7 +111,7 @@ class MeshDelegate extends Reference:
 	# Sets our mesh.
 	# Even though this is a `_` method, this may still be called from
 	# other places within the Visualizer lib.
-	func _set_mesh(new_mesh: MeshInstance) -> MeshDelegate:
+	func _set_mesh(new_mesh: MeshInstance3D) -> MeshDelegate:
 		self.mesh = new_mesh
 		self.has_mesh = true
 		self._set_material(VisualizationShader)
@@ -165,11 +168,11 @@ class MeshDelegate extends Reference:
 		
 		return knockoff
 
-func add_as_child_to(parent: Node) -> Visualizer:
+func add_as_child_to(parent: Node3D) -> Visualizer:
 	parent.add_child(self)
 	return self
 
-func set_position(position: Vector3) -> Visualizer:
+func position_at(position: Vector3) -> Visualizer:
 	
 #	# Correct
 #	print("previous global marker position: %s" % global_transform.origin)
@@ -237,20 +240,20 @@ func noodle_to(other_visualizer: Visualizer) -> Visualizer:
 	noodle_up(other_visualizer, NoodleConnection.Direction.TO)
 	return self
 
-static func get_highest_spatial_in_hierarchy(spatial: Spatial) -> Spatial:
+static func get_highest_spatial_in_hierarchy(spatial: Node3D) -> Node3D:
 	var immediate_parent_spatial = spatial.get_parent_spatial()
 	if immediate_parent_spatial:
 		return get_highest_spatial_in_hierarchy(immediate_parent_spatial)
 	return spatial
 	
-func get_highest_parent_spatial() -> GdTypes.NilableSpatial:
+func get_highest_parent_spatial() -> NilableNode3D:
 	var maybe_self = get_highest_spatial_in_hierarchy(self)
 	if maybe_self.get_instance_id() == self.get_instance_id():
-		return GdTypes.NilableSpatial.new()
-	return GdTypes.NilableSpatial.new().set_value(maybe_self)
+		return NilableNode3D.new()
+	return NilableNode3D.new().set_value(maybe_self)
 	
 func noodle_up(other_visualizer: Visualizer, direction: int) -> Visualizer:
-	var noodle: VisualizationNoodle = VisualizationNoodleScene.instance()\
+	var noodle: VisualizationNoodle = VisualizationNoodleScene.instantiate()\
 		.add_as_child_to(get_tree().current_scene)\
 		.set_size(self._size)\
 		.set_start(global_transform.origin)
@@ -271,7 +274,7 @@ func get_noodled(noodling_visualizer: Visualizer, noodle: VisualizationNoodle, d
 		noodle,
 		direction
 	))
-	Cavedig.needle(self, global_transform.origin, Cavedig.Colors.SEA_GREEN, 0.05, 0.3).set_as_toplevel(true)
+	Cavedig.needle(self, global_transform.origin, Cavedig.Colors.SEA_GREEN, 0.05, 0.3).set_as_top_level(true)
 	print("target visualizer origin (sea green): %s" % global_transform.origin)
 	return self
 

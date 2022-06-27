@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://mok17iig5p1l"]
 
 [ext_resource type="Script" path="res://Root.gd" id="1"]
-[ext_resource type="PackedScene" path="res://dev/PlaneMap/PlaneMap.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://1t8u33ggj154" path="res://dev/PlaneMap/PlaneMap.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://world_objects/PlayerWorldInterface/PlayerWorldInterface.tscn" id="3"]
 
 [node name="Root" type="Node3D"]
@@ -11,15 +11,14 @@ script = ExtResource( "1" )
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.94062, 5.68458, -6.54661)
 
 [node name="Map" parent="." instance=ExtResource( "2" )]
-resolution = 10
-size = Vector2(10, 10)
 subdivision = Vector2(50, 50)
 
 [node name="OmniLight" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.22485, 0)
 light_color = Color(0.964706, 0.929412, 0.745098, 1)
-light_energy = 0.4
+light_energy = 0.8
 omni_range = 12.1831
+omni_attenuation = 0.0743256
 
 [node name="0" type="Node3D" parent="."]
 

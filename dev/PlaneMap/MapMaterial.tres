@@ -1,87 +1,87 @@
-[gd_resource type="ShaderMaterial" load_steps=8 format=2]
+[gd_resource type="ShaderMaterial" load_steps=8 format=3 uid="uid://dxaa0fb7c3gi4"]
 
-[sub_resource type="VisualShaderNodeColorConstant" id=1]
-constant = Color( 0.22657, 0.75, 0.196289, 1 )
+[sub_resource type="VisualShaderNodeColorConstant" id="1"]
+constant = Color(0.22657, 0.75, 0.196289, 1)
 
-[sub_resource type="VisualShaderNodeColorConstant" id=3]
-constant = Color( 0.307159, 0.714844, 0.514187, 1 )
+[sub_resource type="VisualShaderNodeColorConstant" id="3"]
+constant = Color(0.307159, 0.714844, 0.514187, 1)
 
-[sub_resource type="VisualShaderNodeVectorScalarMix" id=4]
+[sub_resource type="VisualShaderNodeMix" id="4"]
+default_input_values = [0, Vector3(0, 0, 0), 1, Vector3(1, 1, 1), 2, 0.5]
+op_type = 4
 
-[sub_resource type="VisualShaderNodeInput" id=5]
+[sub_resource type="VisualShaderNodeInput" id="5"]
 input_name = "normal"
 
-[sub_resource type="VisualShaderNodeVectorDecompose" id=6]
+[sub_resource type="VisualShaderNodeVectorDecompose" id="6"]
 
-[sub_resource type="VisualShaderNodeFresnel" id=7]
-default_input_values = [ 2, false, 3, 1.2 ]
+[sub_resource type="VisualShaderNodeFresnel" id="7"]
+default_input_values = [2, false, 3, 1.2]
 
-[sub_resource type="VisualShader" id=2]
+[sub_resource type="VisualShader" id="2"]
 code = "shader_type spatial;
-render_mode specular_schlick_ggx;
 
 
-
-
-void vertex() {
-// Output:0
-
-}
 
 void fragment() {
-// Color:2
-	vec3 n_out2p0 = vec3(0.226570, 0.750000, 0.196289);
-	float n_out2p1 = 1.000000;
+// ColorConstant:2
+	vec4 n_out2p0 = vec4(0.226570, 0.750000, 0.196289, 1.000000);
 
-// Color:3
-	vec3 n_out3p0 = vec3(0.307159, 0.714844, 0.514187);
-	float n_out3p1 = 1.000000;
+
+// ColorConstant:3
+	vec4 n_out3p0 = vec4(0.307159, 0.714844, 0.514187, 1.000000);
+
 
 // Input:6
 	vec3 n_out6p0 = NORMAL;
+
 
 // VectorDecompose:7
 	float n_out7p0 = n_out6p0.x;
 	float n_out7p1 = n_out6p0.y;
 	float n_out7p2 = n_out6p0.z;
 
-// VectorScalarMix:5
-	vec3 n_out5p0 = mix(n_out2p0, n_out3p0, n_out7p2);
+
+// Mix:5
+	vec3 n_out5p0 = mix(vec3(n_out2p0.xyz), vec3(n_out3p0.xyz), n_out7p2);
+
 
 // Fresnel:9
 	float n_in9p3 = 1.20000;
 	float n_out9p0 = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), n_in9p3);
 
+
 // Output:0
 	ALBEDO = n_out5p0;
 	NORMAL = n_out6p0;
-	NORMALMAP_DEPTH = n_out7p1;
+	NORMAL_MAP_DEPTH = n_out7p1;
 	RIM = n_out9p0;
 	RIM_TINT = n_out7p0;
-	ANISOTROPY_FLOW = n_out6p0.xy;
+	ANISOTROPY_FLOW = vec2(n_out6p0.xy);
 
-}
-
-void light() {
-// Output:0
 
 }
 "
-graph_offset = Vector2( -303.326, -23.2348 )
-nodes/fragment/0/position = Vector2( 860, 140 )
-nodes/fragment/2/node = SubResource( 1 )
-nodes/fragment/2/position = Vector2( 340, 80 )
-nodes/fragment/3/node = SubResource( 3 )
-nodes/fragment/3/position = Vector2( 340, 200 )
-nodes/fragment/5/node = SubResource( 4 )
-nodes/fragment/5/position = Vector2( 580, 140 )
-nodes/fragment/6/node = SubResource( 5 )
-nodes/fragment/6/position = Vector2( 0, 460 )
-nodes/fragment/7/node = SubResource( 6 )
-nodes/fragment/7/position = Vector2( 240, 320 )
-nodes/fragment/9/node = SubResource( 7 )
-nodes/fragment/9/position = Vector2( 500, 540 )
-nodes/fragment/connections = PoolIntArray( 2, 0, 5, 0, 3, 0, 5, 1, 5, 0, 0, 0, 6, 0, 7, 0, 7, 2, 5, 2, 6, 0, 0, 7, 7, 1, 0, 9, 6, 0, 0, 15, 7, 0, 0, 11, 9, 0, 0, 10 )
+graph_offset = Vector2(-984.484, 87.319)
+engine_version = {
+"major": 4,
+"minor": 0
+}
+nodes/fragment/0/position = Vector2(860, 140)
+nodes/fragment/2/node = SubResource( "1" )
+nodes/fragment/2/position = Vector2(360, 100)
+nodes/fragment/3/node = SubResource( "3" )
+nodes/fragment/3/position = Vector2(360, 220)
+nodes/fragment/5/node = SubResource( "4" )
+nodes/fragment/5/position = Vector2(600, 140)
+nodes/fragment/6/node = SubResource( "5" )
+nodes/fragment/6/position = Vector2(0, 460)
+nodes/fragment/7/node = SubResource( "6" )
+nodes/fragment/7/position = Vector2(240, 320)
+nodes/fragment/9/node = SubResource( "7" )
+nodes/fragment/9/position = Vector2(500, 540)
+nodes/fragment/connections = PackedInt32Array(2, 0, 5, 0, 3, 0, 5, 1, 5, 0, 0, 0, 6, 0, 7, 0, 7, 2, 5, 2, 6, 0, 0, 16, 7, 0, 0, 12, 9, 0, 0, 11, 7, 1, 0, 10, 6, 0, 0, 8)
 
 [resource]
-shader = SubResource( 2 )
+render_priority = 0
+shader = SubResource( "2" )

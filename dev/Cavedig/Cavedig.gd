@@ -1,4 +1,4 @@
-extends Reference
+extends RefCounted
 class_name Cavedig
 
 const Colors: Dictionary = {
@@ -13,14 +13,14 @@ const Colors: Dictionary = {
 }
 
 static func needle(
-	parent: Node,
+	parent: Node3D,
 	position: Vector3,
 	color: Vector3 = Vector3(0.5, 0.5, 0.5),
 	height: float = 10.0,
 	radius: float = 0.05
-) -> CSGCylinder:
+) -> CSGCylinder3D:
 	var shader = load("res://dev/visualization/VisualizationShader.tres")
-	var debug_cylinder = CSGCylinder.new()
+	var debug_cylinder = CSGCylinder3D.new()
 	parent.call_deferred("add_child", debug_cylinder)
 	debug_cylinder.material_override = shader.duplicate()
 	debug_cylinder.material_override.set_shader_param("color", color)

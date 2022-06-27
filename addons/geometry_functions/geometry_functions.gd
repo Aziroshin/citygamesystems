@@ -1,4 +1,4 @@
-tool
+@tool
 extends EditorPlugin
 
 func ngon(n=8):
