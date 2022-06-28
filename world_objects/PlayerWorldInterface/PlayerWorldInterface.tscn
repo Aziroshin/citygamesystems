@@ -1,11 +1,16 @@
-[gd_scene load_steps=2 format=3 uid="uid://dfmyxto2aquei"]
+[gd_scene load_steps=3 format=3 uid="uid://dfmyxto2aquei"]
 
 [ext_resource type="Script" path="res://world_objects/PlayerWorldInterface/PlayerWorldInterface.gd" id="1"]
 
-[node name="PlayerWorldInterface" type="Node3D"]
+[sub_resource type="SphereShape3D" id="SphereShape3D_tpvg5"]
+
+[node name="PlayerWorldInterface" type="CharacterBody3D"]
 script = ExtResource( "1" )
 
 [node name="SpringArm" type="SpringArm3D" parent="."]
 
 [node name="Camera" type="Camera3D" parent="SpringArm"]
-transform = Transform3D(-0.669416, -0.543314, 0.506648, 0, 0.681998, 0.731354, -0.742888, 0.48958, -0.45654, 4.5696, 5.6755, -6.85062)
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 10.1839, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource( "SphereShape3D_tpvg5" )

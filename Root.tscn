@@ -8,7 +8,8 @@
 script = ExtResource( "1" )
 
 [node name="PlayerWorldInterface" parent="." instance=ExtResource( "3" )]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.94062, 5.68458, -6.54661)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.941, 0.734703, -6.547)
+default_speed = 512.0
 overwrite_existing_actions = true
 
 [node name="Map" parent="." instance=ExtResource( "2" )]

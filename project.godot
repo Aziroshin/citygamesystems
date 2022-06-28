@@ -63,11 +63,11 @@ camera_right={
 "deadzone": 0.5,
 "events": []
 }
-camera_up={
+camera_forward={
 "deadzone": 0.5,
 "events": []
 }
-camera_down={
+camera_backward={
 "deadzone": 0.5,
 "events": []
 }
@@ -76,6 +76,14 @@ camera_zoom_in={
 "events": []
 }
 camera_zoom_out={
+"deadzone": 0.5,
+"events": []
+}
+camera_up={
+"deadzone": 0.5,
+"events": []
+}
+camera_down={
 "deadzone": 0.5,
 "events": []
 }
