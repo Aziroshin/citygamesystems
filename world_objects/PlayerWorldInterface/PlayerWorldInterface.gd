@@ -13,6 +13,7 @@ const MOVE_DOWN_ACTION := "camera_down"
 
 @export var default_speed := 128.0
 @export var overwrite_existing_actions := false
+@export var double_tap_interval := 0.2
 @export var initial_motion_mode: MotionMode = MOTION_MODE_FLOATING
 ###########################################################################
 
@@ -62,6 +63,7 @@ func force_from_forces(forces: Array[Vector3]) -> Vector3:
 	
 func _ready():
 	ensure_actions_configured()
+	motion_mode = initial_motion_mode
 
 func _physics_process(delta: float) -> void:
 	var forces: Array[Vector3]
