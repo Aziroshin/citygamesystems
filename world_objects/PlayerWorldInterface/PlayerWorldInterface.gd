@@ -11,9 +11,9 @@ const MOVE_BACKWARD_ACTION := "camera_backward"
 const MOVE_UP_ACTION := "camera_up"
 const MOVE_DOWN_ACTION := "camera_down"
 
-@export var default_speed = 128.0
+@export var default_speed := 128.0
 @export var overwrite_existing_actions := false
-@export var double_tap_interval = 0.2
+@export var initial_motion_mode: MotionMode = MOTION_MODE_FLOATING
 ###########################################################################
 
 @onready var camera: Camera3D = $SpringArm/Camera
