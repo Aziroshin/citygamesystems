@@ -13,7 +13,3 @@ func set_value(new_value: Node3D) -> NilableNode3D:
 	value = new_value
 	return self
 	
-func get_value_or(do_this: Callable) -> Node3D:
-	if not is_nil:
-		return value
-	return do_this.call()
