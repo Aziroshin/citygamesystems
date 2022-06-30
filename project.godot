@@ -15,9 +15,19 @@ _global_script_classes=[{
 "path": "res://dev/Cavedig/Cavedig.gd"
 }, {
 "base": "RefCounted",
+"class": &"NilableInt",
+"language": &"GDScript",
+"path": "res://global_lib/nilable_types/nilable_int.gd"
+}, {
+"base": "RefCounted",
 "class": &"NilableNode3D",
 "language": &"GDScript",
 "path": "res://global_lib/nilable_types/nilable_node3d.gd"
+}, {
+"base": "RefCounted",
+"class": &"NilableTransform3D",
+"language": &"GDScript",
+"path": "res://global_lib/nilable_types/nilable_transform3d.gd"
 }, {
 "base": "RefCounted",
 "class": &"Visualization",
@@ -36,7 +46,9 @@ _global_script_classes=[{
 }]
 _global_script_class_icons={
 "Cavedig": "",
+"NilableInt": "",
 "NilableNode3D": "",
+"NilableTransform3D": "",
 "Visualization": "",
 "VisualizationNoodle": "",
 "Visualizer": ""
