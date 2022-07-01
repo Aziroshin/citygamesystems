@@ -6,10 +6,10 @@ var value: Node3D:
 	get:
 		return value
 	set(new_value):
-		set_value(new_value)
+		is_nil = false
+		value = new_value
 
 func set_value(new_value: Node3D) -> NilableNode3D:
-	is_nil = false
 	value = new_value
 	return self
 	

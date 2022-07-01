@@ -6,9 +6,9 @@ var value: Transform3D:
 	get:
 		return value
 	set(new_value):
-		set_value(new_value)
+		is_nil = false
+		value = new_value
 
 func set_value(new_value: Transform3D) -> NilableTransform3D:
-	is_nil = false
 	value = new_value
 	return self
