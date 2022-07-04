@@ -6,6 +6,9 @@
 
 [node name="PlayerWorldInterface" type="CharacterBody3D"]
 script = ExtResource( "1" )
+default_speed = 256.0
+config_file_path = "user://dev.config"
+config_section = "dev_camera"
 
 [node name="SpringArm" type="SpringArm3D" parent="."]
 
