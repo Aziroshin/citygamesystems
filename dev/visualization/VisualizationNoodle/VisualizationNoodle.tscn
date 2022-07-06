@@ -1,19 +1,20 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=4 format=3 uid="uid://d25q842rixke1"]
 
-[ext_resource path="res://dev/visualization/VisualizationNoodle/CSGNgon.gd" type="Script" id=1]
-[ext_resource path="res://dev/visualization/VisualizationNoodle/VisualizationNoodle.gd" type="Script" id=2]
+[ext_resource type="Script" path="res://dev/visualization/VisualizationNoodle/CSGNgon.gd" id="1"]
+[ext_resource type="Script" path="res://dev/visualization/VisualizationNoodle/VisualizationNoodle.gd" id="2"]
 
-[sub_resource type="Curve3D" id=1]
+[sub_resource type="Curve3D" id="1"]
 _data = {
-"points": PoolVector3Array( 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, -1 ),
-"tilts": PoolRealArray( 0, 0 )
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, -1),
+"tilts": PackedFloat32Array(0, 0)
 }
+point_count = 2
 
-[node name="Noodle" type="Spatial"]
-script = ExtResource( 2 )
+[node name="Noodle" type="Node3D"]
+script = ExtResource( "2" )
 
-[node name="Sleeve" type="CSGPolygon" parent="."]
-polygon = PoolVector2Array( 0.5, 0, 0.502182, -0.124981, 0.504363, -0.249962, 0.506545, -0.374943, 0.508726, -0.499924, 0.510908, -0.624905, 0.513089, -0.749886, 0.515271, -0.874867, 0.517452, -0.999848 )
+[node name="Sleeve" type="CSGPolygon3D" parent="."]
+polygon = PackedVector2Array(0.5, -0.150888, 0.588388, -0.0625, 0.588388, 0.0625, 0.5, 0.150888, 0.375, 0.150888, 0.286612, 0.0625, 0.286612, -0.0625, 0.375, -0.150888, 0.5, -0.150888)
 mode = 2
 path_node = NodePath("../Path")
 path_interval_type = 0
@@ -24,9 +25,9 @@ path_local = false
 path_continuous_u = true
 path_u_distance = 1.0
 path_joined = false
-script = ExtResource( 1 )
+script = ExtResource( "1" )
 sides = 8
-offset = Vector2( 0, 0 )
+offset = Vector2(0, 0)
 
-[node name="Path" type="Path" parent="."]
-curve = SubResource( 1 )
+[node name="Path" type="Path3D" parent="."]
+curve = SubResource( "1" )
