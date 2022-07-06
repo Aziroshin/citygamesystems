@@ -111,8 +111,12 @@ func ensure_action_configured(action: String, overwrite: bool = false) -> void:
 func ensure_actions_configured(overwrite: bool = false) -> void:
 	for action in action_default_keys.keys():
 		ensure_action_configured(action, overwrite)
-		
-		
+###########################################################################
+
+
+###########################################################################
+# Config
+###########################################################################
 # Checks whether we have everything to access the config.
 func check_config_access() -> bool:
 	if config_file_path == "" or config_section == "":
@@ -120,12 +124,8 @@ func check_config_access() -> bool:
 			push_error("No config file path and/or section configured for %s" % name)
 		return false
 	return true
-###########################################################################
-
-
-###########################################################################
-# Config
-###########################################################################
+	
+	
 # Saves config value and returns true or fails and returns false.
 func save_config_value(section: String, key: String, value) -> bool:
 	if check_config_access():
