@@ -13,10 +13,22 @@ const DEFAULT_SIDE_SCALE := 1.0
 const DEFAULT_OFFSET := Vector2(0, 1)
 const DEFAULT_CENTERED := true
 
-@export var sides := DEFAULT_SIDES
-@export var side_scale := DEFAULT_SIDE_SCALE
-@export var offset := DEFAULT_OFFSET
-@export var centered := DEFAULT_CENTERED
+@export var sides := DEFAULT_SIDES:
+	set(value):
+		sides = value
+		_update()
+@export var side_scale := DEFAULT_SIDE_SCALE:
+	set(value):
+		side_scale = value
+		_update()
+@export var offset := DEFAULT_OFFSET:
+	set(value):
+		offset = value
+		_update()
+@export var centered := DEFAULT_CENTERED:
+	set(value):
+		centered = value
+		_update()
 
 # Returns a `PoolVector2array` of angle-adjusted basic vectors, with
 # each corresponding to a vertice in an n-gon.
@@ -119,6 +131,10 @@ func create_ngon(
 		return create_centered_ngon(n, side_scale)
 	return create_positive_ngon(n, side_scale, offset)
 
-func _enter_tree():
+# Updates the n-gon.
+func _update():
 	polygon = create_ngon(sides, side_scale, offset)
 	print("ngon: %s" % polygon)
+
+func _enter_tree():
+	_update()
