@@ -14,7 +14,7 @@ point_count = 2
 script = ExtResource( "2" )
 
 [node name="Sleeve" type="CSGPolygon3D" parent="."]
-polygon = PackedVector2Array(0.5, -0.150888, 0.588388, -0.0625, 0.588388, 0.0625, 0.5, 0.150888, 0.375, 0.150888, 0.286612, 0.0625, 0.286612, -0.0625, 0.375, -0.150888, 0.5, -0.150888)
+polygon = PackedVector2Array(0, 0.1, 0.0707107, 0.0707107, 0.1, 6.12323e-18, 0.0707107, -0.0707107, 1.22465e-17, -0.1, -0.0707107, -0.0707107, -0.1, -1.83697e-17, -0.0707107, 0.0707107)
 mode = 2
 path_node = NodePath("../Path")
 path_interval_type = 0
@@ -27,7 +27,7 @@ path_u_distance = 1.0
 path_joined = false
 script = ExtResource( "1" )
 sides = 8
-offset = Vector2(0, 0)
+circumradius = 0.1
 
 [node name="Path" type="Path3D" parent="."]
 curve = SubResource( "1" )

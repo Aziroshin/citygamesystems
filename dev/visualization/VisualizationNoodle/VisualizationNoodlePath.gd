@@ -1,13 +1,21 @@
-tool
-extends Path
+@tool
+extends Path3D
 class_name VisualizationNoodlePath
 
 # Since we're also using builder methods for setting and getting start
 # and end position, but, at the same time, want tool-compatible
-# configurability and the ability to set default values, we're setgetting
+# configurability and the ability to set default values, we're "setgetting"
 # the builder methods here.
-export var start: Vector3 = Vector3(0, 0, 1) setget set_start, get_start
-export var end: Vector3 = Vector3(0, 0, -1) setget set_end, get_end
+@export var start: Vector3 = Vector3(0, 0, 1):
+	get:
+		return get_start()
+	set(value):
+		set_start(value)
+@export var end: Vector3 = Vector3(0, 0, -1):
+	get:
+		return get_end()
+	set(value):
+		set_end(value)
 
 func _init():
 	curve.add_point(start)

@@ -63,13 +63,13 @@ func _ready():
 		.secondary.set_color(Vector3(0.2, 0.1, 0.3))\
 		# TODO [bug, prio:critical]: The map isn't showing, and it's related
 		# to this:
-#		.noodle_to(Visualization.OctagonMarker.instantiate()\
-#			.add_as_child_to(self)\
-#			.position_at(Vector3(3.5, 1, -2.5))\
-#			.set_size(0.5)\
-#			.primary.set_color(Vector3(0.6, 0.1, 0.4))\
-#			.secondary.set_color(Vector3(0.6, 0.1, 0.2))\
-#		)\
+		.noodle_to(Visualization.OctagonMarker.instantiate()\
+			.add_as_child_to(self)\
+			.position_at(Vector3(3.5, 1, -2.5))\
+			.set_size(0.5)\
+			.primary.set_color(Vector3(0.6, 0.1, 0.4))\
+			.secondary.set_color(Vector3(0.6, 0.1, 0.2))\
+		)\
 	)
 	
 func _on_mouse_event(camera, event, click_position, click_normal, shape):

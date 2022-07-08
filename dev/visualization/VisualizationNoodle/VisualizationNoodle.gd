@@ -77,8 +77,7 @@ func _deferred_set_start(position: Vector3):
 		print("noodle start (orange): %s" % global_transform.origin)
 		Cavedig.needle(self, path.curve.get_point_position(0), Cavedig.Colors.ORANGE)
 
-func _deferred_set_end(position: Vector3):
-	end = position
+func _deferred_set_end(position: Vector3):	
 	if is_post_ready:
 		path.curve.set_point_position(get_end_idx(), position)
 	print("noodle end (aqua): %s" % global_transform.origin)
