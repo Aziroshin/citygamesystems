@@ -33,23 +33,38 @@ const DEFAULT_CENTERED := true
 # Returns a `PoolVector2array` of angle-adjusted basic vectors, with
 # each corresponding to a vertice in an n-gon.
 func ngon_vertices(n: int, side_scale: float) -> Array[Vector2]:
+	# Maybe this will help to get a good n-gon:
+	# https://math.stackexchange.com/questions/41940/is-there-an-equation-to-describe-regular-polygons
+	# https://www.geogebra.org/m/cXXGKUQk
+	
 	if n < 3:
 		return Array()
 		
-	var vertices: Array[Vector2] = Array([Vector2(side_scale - side_scale / 2, 0)])
-	for vertex_index in range(1, n+1):
+	# Vertex on apothem middle.
+	#var vertices: Array[Vector2] = Array([Vector2(side_scale - side_scale / 2, 0)])
+	
+	var vertices: Array[Vector2] = Array()
+	
+	for vertex_index in range(0, n+1):
 		
-		# TODO: Try this formula for vector_length: 2 * sin(deg2rad(360 / 2n))
 		# It just produces a line, so, we've obviously done something wrong. xD
 		#var vector_length = deg2rad(360 / 2 * n)
+		
+		# Kinda works, but one side ends up being off in length, particularly
+		# with n < 32. <- Note: That error went away, and I'm not sure why. =\
 		#var vector_length = deg2rad(90+360/n*vertex_index)
-		#var vector_length = deg2rad(360.0/n*vertex_index)
-		var vector_length = deg2rad(1.0)
+		var vector_length = deg2rad(360.0/n*vertex_index)
+		
+		# Note: This should give the side length, not the length of the
+		# vertice's origin vector, but it might still come in handy.
+		# 2 * sin(deg2rad(180/n))
+		
 		print("vector_length: %s, radians: %s" % [vector_length, deg2rad(vector_length)])
-	
+		
+		var a := 2.0
 		vertices.append(Vector2(
-			sin(vector_length) * side_scale/n,
-			-1 * cos(vector_length) * side_scale/n
+			sin(vector_length/2*PI) * side_scale/n,
+			-1 * cos(vector_length/2*PI) * side_scale/n
 		))
 		
 	return vertices
