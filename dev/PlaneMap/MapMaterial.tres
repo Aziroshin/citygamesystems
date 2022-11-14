@@ -63,25 +63,21 @@ void fragment() {
 }
 "
 graph_offset = Vector2(-984.484, 87.319)
-engine_version = {
-"major": 4,
-"minor": 0
-}
 nodes/fragment/0/position = Vector2(860, 140)
-nodes/fragment/2/node = SubResource( "1" )
+nodes/fragment/2/node = SubResource("1")
 nodes/fragment/2/position = Vector2(360, 100)
-nodes/fragment/3/node = SubResource( "3" )
+nodes/fragment/3/node = SubResource("3")
 nodes/fragment/3/position = Vector2(360, 220)
-nodes/fragment/5/node = SubResource( "4" )
+nodes/fragment/5/node = SubResource("4")
 nodes/fragment/5/position = Vector2(600, 140)
-nodes/fragment/6/node = SubResource( "5" )
+nodes/fragment/6/node = SubResource("5")
 nodes/fragment/6/position = Vector2(0, 460)
-nodes/fragment/7/node = SubResource( "6" )
+nodes/fragment/7/node = SubResource("6")
 nodes/fragment/7/position = Vector2(240, 320)
-nodes/fragment/9/node = SubResource( "7" )
+nodes/fragment/9/node = SubResource("7")
 nodes/fragment/9/position = Vector2(500, 540)
 nodes/fragment/connections = PackedInt32Array(2, 0, 5, 0, 3, 0, 5, 1, 5, 0, 0, 0, 6, 0, 7, 0, 7, 2, 5, 2, 6, 0, 0, 16, 7, 0, 0, 12, 9, 0, 0, 11, 7, 1, 0, 10, 6, 0, 0, 8)
 
 [resource]
 render_priority = 0
-shader = SubResource( "2" )
+shader = SubResource("2")

@@ -11,7 +11,7 @@ _data = {
 point_count = 2
 
 [node name="Noodle" type="Node3D"]
-script = ExtResource( "2" )
+script = ExtResource("2")
 
 [node name="Sleeve" type="CSGPolygon3D" parent="."]
 polygon = PackedVector2Array(0, 0.1, 0.0707107, 0.0707107, 0.1, 6.12323e-18, 0.0707107, -0.0707107, 1.22465e-17, -0.1, -0.0707107, -0.0707107, -0.1, -1.83697e-17, -0.0707107, 0.0707107)
@@ -25,9 +25,9 @@ path_local = false
 path_continuous_u = true
 path_u_distance = 1.0
 path_joined = false
-script = ExtResource( "1" )
+script = ExtResource("1")
 sides = 8
 circumradius = 0.1
 
 [node name="Path" type="Path3D" parent="."]
-curve = SubResource( "1" )
+curve = SubResource("1")

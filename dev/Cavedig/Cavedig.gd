@@ -23,7 +23,7 @@ static func needle(
 	var debug_cylinder = CSGCylinder3D.new()
 	parent.call_deferred("add_child", debug_cylinder)
 	debug_cylinder.material_override = shader.duplicate()
-	debug_cylinder.material_override.set_shader_param("color", color)
+	debug_cylinder.material_override.set_shader_parameter("color", color)
 	debug_cylinder.height = height
 	debug_cylinder.radius = radius
 	debug_cylinder.global_transform.origin = position

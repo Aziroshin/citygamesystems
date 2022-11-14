@@ -6,9 +6,9 @@
 size = Vector3(4.2823, 0.0825164, 3.51038)
 
 [node name="Map" type="StaticBody3D"]
-script = ExtResource( "1" )
+script = ExtResource("1")
 resolution = 20
 size = Vector2(20, 20)
 
 [node name="CollisionShape" type="CollisionShape3D" parent="."]
-shape = SubResource( "1" )
+shape = SubResource("1")

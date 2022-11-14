@@ -139,7 +139,7 @@ class MeshDelegate extends RefCounted:
 	# method.
 	func set_color(color: Vector3) -> Visualizer:
 		if self.has_mesh:
-			self._get_material_for_mutation().set_shader_param("color", color)
+			self._get_material_for_mutation().set_shader_parameter("color", color)
 			return self.visualizer
 		return self.visualizer
 	
