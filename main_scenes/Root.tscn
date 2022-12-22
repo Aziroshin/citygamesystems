@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://dcyc4ttxlquv3"]
+
+[ext_resource type="Script" path="res://main_scenes/Root.gd" id="1_nsrb6"]
+[ext_resource type="PackedScene" uid="uid://d2ekswsupdhqe" path="res://main_scenes/main_scenes_lib/dev_menu.tscn" id="2_fqu3p"]
+
+[node name="Root" type="Node3D"]
+script = ExtResource("1_nsrb6")
+
+[node name="DevMenu" parent="." instance=ExtResource("2_fqu3p")]
+root_scene_node_path = NodePath("..")
+toggle_action = &"toggle_dev_menu"

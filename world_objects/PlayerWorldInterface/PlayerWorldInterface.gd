@@ -1,7 +1,12 @@
 extends CharacterBody3D
 
-# Note: When copy-pasting this, don't forget to also get `NilableTransform3D`
-# from `res://global_lib/nilable_types/nilable_transform3d.gd`
+# Note: When copy-pasting this, don't forget to also get these files:
+# For `NilableTransform3D`: `res://global_lib/nilable_types/nilable_transform3d.gd
+# For `NilableInt`: `res://global_lib/nilable_types/nilable_int.gd`
+
+# If you don't want these files but only the contents, you'll have to refactor
+# them into class syntax (take everything except the first two lines, indent
+# it all and write, for example, `class NilableInt:` (unintended) above it).
 
 ###########################################################################
 # Config
@@ -137,7 +142,8 @@ func save_config_value(section: String, key: String, value) -> bool:
 	return false
 	
 	
-func load_config_value(section: String, key: String):
+# Loads config and returns config value, or `null` if it fails.
+func load_config_value(section: String, key: String) -> Variant:
 	var config := ConfigFile.new()
 	config.load(config_file_path)
 	return config.get_value(config_section, key)

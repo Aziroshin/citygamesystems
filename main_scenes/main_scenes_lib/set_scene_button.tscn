@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=3 uid="uid://bp30t5m6xmhfc"]
+
+[ext_resource type="Script" path="res://main_scenes/main_scenes_lib/set_scene_button.gd" id="1_rnbic"]
+
+[node name="SceneItem" type="HBoxContainer"]
+offset_right = 119.0
+offset_bottom = 31.0
+script = ExtResource("1_rnbic")
+metadata/scene_resource_path = ""
+
+[node name="SetSceneButton" type="Button" parent="."]
+offset_right = 119.0
+offset_bottom = 31.0
+size_flags_horizontal = 3
+text = "Visualizer Test"
+
+[connection signal="button_up" from="SetSceneButton" to="." method="_on_set_scene_button_button_up"]
