@@ -274,7 +274,7 @@ func get_noodled(noodling_visualizer: Visualizer, noodle: VisualizationNoodle, d
 		noodle,
 		direction
 	))
-	Cavedig.needle(self, global_transform.origin, Cavedig.Colors.SEA_GREEN, 0.05, 0.3).set_as_top_level(true)
+	Cavedig.needle(self, global_transform, Cavedig.Colors.SEA_GREEN, 0.05, 0.3).set_as_top_level(true)
 	print("target visualizer origin (sea green): %s" % global_transform.origin)
 	return self
 

@@ -12,7 +12,7 @@ _global_script_classes=[{
 "base": "RefCounted",
 "class": &"Cavedig",
 "language": &"GDScript",
-"path": "res://dev/Cavedig/Cavedig.gd"
+"path": "res://dev/cavedig/cavedig.gd"
 }, {
 "base": "RefCounted",
 "class": &"Config",
