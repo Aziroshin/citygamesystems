@@ -6,7 +6,7 @@ extends CharacterBody3D
 
 # If you don't want these files but only the contents, you'll have to refactor
 # them into class syntax (take everything except the first two lines, indent
-# it all and write, for example, `class NilableInt:` (unintended) above it).
+# it all and write, for example, `class NilableInt:` (unindented) above it).
 
 ###########################################################################
 # Config
@@ -18,6 +18,10 @@ const MOVE_FORWARD_ACTION := "camera_forward"
 const MOVE_BACKWARD_ACTION := "camera_backward"
 const MOVE_UP_ACTION := "camera_up"
 const MOVE_DOWN_ACTION := "camera_down"
+const ROTATE_LEFT_ACTION := "camera_rotate_left"
+const ROTATE_RIGHT_ACTION := "camera_rotate_right"
+const PITCH_UP_ACTION := "camera_pitch_up"
+const PITCH_DOWN_ACTION := "camera_pitch_down"
 
 ### Action names for editor-only functionality.
 # This is a special action for quick in-editor testing, which should be
@@ -27,6 +31,8 @@ const SAVE_AND_QUIT_EDITOR_ACTION := "dev_camera_save_and_quit"
 
 ### Exports
 @export var default_speed := 128.0
+@export var default_rotation_speed := 6.0
+@export var default_pitch_speed := 2.0
 @export var overwrite_existing_actions := false
 @export var double_tap_interval := 0.2
 @export var initial_motion_mode: MotionMode = MOTION_MODE_FLOATING
@@ -49,7 +55,11 @@ const action_default_keys := {
 	MOVE_BACKWARD_ACTION: KEY_S,
 	MOVE_UP_ACTION: KEY_SPACE,
 	MOVE_DOWN_ACTION: KEY_SHIFT,
-	SAVE_AND_QUIT_EDITOR_ACTION: KEY_F4
+	SAVE_AND_QUIT_EDITOR_ACTION: KEY_F4,
+	ROTATE_LEFT_ACTION: KEY_Q,
+	ROTATE_RIGHT_ACTION: KEY_E,
+	PITCH_UP_ACTION: KEY_R,
+	PITCH_DOWN_ACTION: KEY_F
 }
 
 ### Config file anatomy.
@@ -229,6 +239,31 @@ func _physics_process(delta: float) -> void:
 		
 	if Input.is_action_pressed(MOVE_DOWN_ACTION):
 		forces.append(-transform.basis.y)
+		
+	if Input.is_action_pressed(ROTATE_LEFT_ACTION):
+		transform = transform.rotated(
+			Vector3(0, 1, 0),
+			default_rotation_speed * delta
+		)
+		
+	if Input.is_action_pressed(ROTATE_RIGHT_ACTION):
+		transform = transform.rotated(
+			Vector3(0, 1, 0),
+			default_rotation_speed * delta * -1
+		)
+		
+	if Input.is_action_pressed(PITCH_UP_ACTION):
+		camera.transform = camera.transform.rotated_local(
+			Vector3(1, 0, 0),
+			default_pitch_speed * delta
+		)
+		
+	if Input.is_action_pressed(PITCH_DOWN_ACTION):
+		camera.transform = camera.transform.rotated_local(
+			Vector3(1, 0, 0),
+			default_pitch_speed * delta * -1
+		)
+		
 	#######################################################################
 	
 	# If we're flying without being in floating mode, add a gravity force.
