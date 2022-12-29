@@ -22,6 +22,7 @@ const ROTATE_LEFT_ACTION := "camera_rotate_left"
 const ROTATE_RIGHT_ACTION := "camera_rotate_right"
 const PITCH_UP_ACTION := "camera_pitch_up"
 const PITCH_DOWN_ACTION := "camera_pitch_down"
+const RESET_TRANSFORM_ACTION := "camera_reset_transform"
 
 ### Action names for editor-only functionality.
 # This is a special action for quick in-editor testing, which should be
@@ -48,18 +49,19 @@ const SAVE_AND_QUIT_EDITOR_ACTION := "dev_camera_save_and_quit"
 
 ### Default keys for actions.
 ### If more than a key is needed, refactor the value to be an object instead.
-const action_default_keys := {
-	MOVE_LEFT_ACTION: KEY_A,
-	MOVE_RIGHT_ACTION: KEY_D,
-	MOVE_FORWARD_ACTION: KEY_W,
-	MOVE_BACKWARD_ACTION: KEY_S,
-	MOVE_UP_ACTION: KEY_SPACE,
-	MOVE_DOWN_ACTION: KEY_SHIFT,
-	SAVE_AND_QUIT_EDITOR_ACTION: KEY_F4,
-	ROTATE_LEFT_ACTION: KEY_Q,
-	ROTATE_RIGHT_ACTION: KEY_E,
-	PITCH_UP_ACTION: KEY_R,
-	PITCH_DOWN_ACTION: KEY_F
+var action_default_keys := {
+	MOVE_LEFT_ACTION: create_input_event(KEY_A),
+	MOVE_RIGHT_ACTION: create_input_event(KEY_D),
+	MOVE_FORWARD_ACTION: create_input_event(KEY_W),
+	MOVE_BACKWARD_ACTION: create_input_event(KEY_S),
+	MOVE_UP_ACTION: create_input_event(KEY_SPACE),
+	MOVE_DOWN_ACTION: create_input_event(KEY_SHIFT),
+	SAVE_AND_QUIT_EDITOR_ACTION: create_input_event(KEY_F4),
+	ROTATE_LEFT_ACTION: create_input_event(KEY_Q),
+	ROTATE_RIGHT_ACTION: create_input_event(KEY_E),
+	PITCH_UP_ACTION: create_input_event(KEY_R),
+	PITCH_DOWN_ACTION: create_input_event(KEY_F),
+	RESET_TRANSFORM_ACTION: create_input_event(KEY_DELETE, [Modifiers.ALT])
 }
 
 ### Config file anatomy.
@@ -72,6 +74,7 @@ const CONFIG_VALUE_NAME_MOTION_MODE := "motion_mode"
 # Non-config globals
 ###########################################################################
 var delta_without_up_action := 0.0
+var transform_before_config_load: Transform3D = transform
 ###########################################################################
 
 
@@ -97,6 +100,35 @@ func force_from_forces(forces: Array[Vector3]) -> Vector3:
 ###########################################################################
 # Actions
 ###########################################################################
+enum Modifiers {
+	SHIFT,
+	CONTROL_OR_META,
+	ALT,
+}
+
+func create_input_event(keycode: int, modifiers: PackedInt64Array = PackedInt64Array() ) -> InputEvent:
+	var key_event_for_action := InputEventKey.new()
+	key_event_for_action.keycode = keycode
+	# TODO: [bug] The autoremap somehow breaks input.
+	# key_event_for_action.command_or_control_autoremap = true
+	
+	for modifier in modifiers:
+		if modifier == Modifiers.SHIFT:
+			key_event_for_action.shift_pressed = true
+		if modifier == Modifiers.CONTROL_OR_META:
+			# Faking `command_or_control_autoremap` until we can get it working.
+			# This won't take into account unorthodox keyboard situations, of
+			# course.
+			if OS.get_name() == "OSX":
+				key_event_for_action.control = true
+			else:
+				key_event_for_action.meta = true
+		if modifier == Modifiers.ALT:
+			key_event_for_action.alt_pressed = true
+			
+	return key_event_for_action
+
+
 # Set a key for an action.
 # This alters `InputMap` at runtime and doesn't write to the project.
 func set_action_key(action: String, keycode: int):
@@ -112,12 +144,12 @@ func set_action_key(action: String, keycode: int):
 func ensure_action_configured(action: String, overwrite: bool = false) -> void:
 	if not InputMap.has_action(action):
 		InputMap.add_action(action)
-		set_action_key(action, action_default_keys[action])
+		InputMap.action_add_event(action, action_default_keys[action])
 		if enable_integration_warnings:
 			push_warning("Action not found: %s. Spoofing it with hotkey: %s."\
 				% [action, InputMap.action_get_events(action)[0].as_text()])
 	elif overwrite:
-		set_action_key(action, action_default_keys[action])
+		InputMap.action_add_event(action, action_default_keys[action])
 		
 		
 # Add (and overwrite if specified) actions as required to provide reasonable
@@ -187,6 +219,9 @@ func load_motion_mode() -> NilableInt:
 # The Stuff
 ###########################################################################
 func _ready():
+	# Store initial transform in case we want to reset to it.
+	transform_before_config_load = transform
+	
 	# Load transform
 	var transform_data_from_config := load_transform()
 	if not transform_data_from_config.is_nil:
@@ -263,6 +298,10 @@ func _physics_process(delta: float) -> void:
 			Vector3(1, 0, 0),
 			default_pitch_speed * delta * -1
 		)
+		
+	if Input.is_action_pressed(RESET_TRANSFORM_ACTION):
+		print("Reset requested.")
+		transform = transform_before_config_load
 		
 	#######################################################################
 	
