@@ -9,8 +9,7 @@ script = ExtResource("1_rnbic")
 metadata/scene_resource_path = ""
 
 [node name="SetSceneButton" type="Button" parent="."]
-offset_right = 119.0
-offset_bottom = 31.0
+layout_mode = 2
 size_flags_horizontal = 3
 text = "Visualizer Test"
 

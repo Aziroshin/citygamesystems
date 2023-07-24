@@ -9,6 +9,6 @@ offset_bottom = 40.0
 script = ExtResource("1_qw3cm")
 
 [node name="ScenePicker" type="VBoxContainer" parent="."]
-offset_bottom = 40.0
+layout_mode = 2
 size_flags_vertical = 3
 script = ExtResource("1_qajvu")
