@@ -1,10 +1,10 @@
 extends VBoxContainer
 
-### Defaults.
+### GlobalDefaults.
 # Path to the directory with the scenes to pick.
-const MAIN_SCENES_PATH = Defaults.MAIN_SCENES_PATH
-const DEV_CONFIG_FILE_DEFAULT_PATH := Defaults.DEV_CONFIG_FILE_DEFAULT_PATH
-const DEFAULT_SCENE_PATH: String = Defaults.DEFAULT_SCENE_PATH
+const MAIN_SCENES_PATH = GlobalDefaults.MAIN_SCENES_PATH
+const DEV_CONFIG_FILE_DEFAULT_PATH := GlobalDefaults.DEV_CONFIG_FILE_DEFAULT_PATH
+const DEFAULT_SCENE_PATH: String = GlobalDefaults.DEFAULT_SCENE_PATH
 
 #### Config model.
 const SCENE_PICKER_CONFIG_SECTION := ScenePickerConfigModel.SCENE_PICKER_CONFIG_SECTION

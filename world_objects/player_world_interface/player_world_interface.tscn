@@ -1,6 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://dfmyxto2aquei"]
+[gd_scene load_steps=3 format=3 uid="uid://t6fjyxuaed8g"]
 
-[ext_resource type="Script" path="res://world_objects/PlayerWorldInterface/PlayerWorldInterface.gd" id="1"]
+[ext_resource type="Script" path="res://world_objects/player_world_interface/player_world_interface.gd" id="1"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_tpvg5"]
 
@@ -13,7 +13,7 @@ config_section = "dev_camera"
 [node name="SpringArm" type="SpringArm3D" parent="."]
 
 [node name="Camera" type="Camera3D" parent="SpringArm"]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 10.1839, 0)
+transform = Transform3D(-1, 0, -1.50996e-07, 0, 1, 0, 1.50996e-07, 0, -1, 0, 10.1839, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("SphereShape3D_tpvg5")

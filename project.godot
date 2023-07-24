@@ -8,104 +8,12 @@
 
 config_version=5
 
-_global_script_classes=[{
-"base": "RefCounted",
-"class": &"Cavedig",
-"language": &"GDScript",
-"path": "res://dev/cavedig/cavedig.gd"
-}, {
-"base": "RefCounted",
-"class": &"Config",
-"language": &"GDScript",
-"path": "res://global_lib/config/config.gd"
-}, {
-"base": "RefCounted",
-"class": &"ConfigSection",
-"language": &"GDScript",
-"path": "res://global_lib/config/config_section.gd"
-}, {
-"base": "RefCounted",
-"class": &"Defaults",
-"language": &"GDScript",
-"path": "res://global_defaults.gd"
-}, {
-"base": "RefCounted",
-"class": &"DevMenuConfigModel",
-"language": &"GDScript",
-"path": "res://global_lib/config_models/dev_menu_config_model.gd"
-}, {
-"base": "RefCounted",
-"class": &"NilableInt",
-"language": &"GDScript",
-"path": "res://global_lib/nilable_types/nilable_int.gd"
-}, {
-"base": "RefCounted",
-"class": &"NilableNode3D",
-"language": &"GDScript",
-"path": "res://global_lib/nilable_types/nilable_node3d.gd"
-}, {
-"base": "RefCounted",
-"class": &"NilableSkeleton3D",
-"language": &"GDScript",
-"path": "res://global_lib/nilable_types/nilable_skeleton3d.gd"
-}, {
-"base": "RefCounted",
-"class": &"NilableTransform3D",
-"language": &"GDScript",
-"path": "res://global_lib/nilable_types/nilable_transform3d.gd"
-}, {
-"base": "RefCounted",
-"class": &"ScenePickerConfigModel",
-"language": &"GDScript",
-"path": "res://global_lib/config_models/scene_picker_config_model.gd"
-}, {
-"base": "RefCounted",
-"class": &"Visualization",
-"language": &"GDScript",
-"path": "res://dev/visualization/Visualization.gd"
-}, {
-"base": "Node3D",
-"class": &"VisualizationNoodle",
-"language": &"GDScript",
-"path": "res://dev/visualization/VisualizationNoodle/VisualizationNoodle.gd"
-}, {
-"base": "Path3D",
-"class": &"VisualizationNoodlePath",
-"language": &"GDScript",
-"path": "res://dev/visualization/VisualizationNoodle/VisualizationNoodlePath.gd"
-}, {
-"base": "Node3D",
-"class": &"Visualizer",
-"language": &"GDScript",
-"path": "res://dev/visualization/Visualizer.gd"
-}]
-_global_script_class_icons={
-"Cavedig": "",
-"Config": "",
-"ConfigSection": "",
-"Defaults": "",
-"DevMenuConfigModel": "",
-"NilableInt": "",
-"NilableNode3D": "",
-"NilableSkeleton3D": "",
-"NilableTransform3D": "",
-"ScenePickerConfigModel": "",
-"Visualization": "",
-"VisualizationNoodle": "",
-"VisualizationNoodlePath": "",
-"Visualizer": ""
-}
-
 [application]
 
 config/name="citygamesystems"
-run/main_scene="res://main_scenes/Root.tscn"
-config/features=PackedStringArray("4.0")
+run/main_scene="res://main_scenes/root.tscn"
+config/features=PackedStringArray("4.1")
 config/icon="res://icon.png"
-
-[editor_plugins]
-
-enabled=PackedStringArray("res://addons/geometry_functions/plugin.cfg")
 
 [input]
 
@@ -143,7 +51,7 @@ camera_down={
 }
 toggle_dev_menu={
 "deadzone": 0.5,
-"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194340,"unicode":0,"echo":false,"script":null)
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194340,"key_label":0,"unicode":0,"echo":false,"script":null)
 ]
 }
 

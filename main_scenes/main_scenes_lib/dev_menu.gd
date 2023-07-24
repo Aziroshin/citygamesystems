@@ -1,7 +1,7 @@
 extends GridContainer
 
-### Defaults.
-const DEV_CONFIG_FILE_DEFAULT_PATH := Defaults.DEV_CONFIG_FILE_DEFAULT_PATH
+### GlobalDefaults.
+const DEV_CONFIG_FILE_DEFAULT_PATH := GlobalDefaults.DEV_CONFIG_FILE_DEFAULT_PATH
 
 ### Config model.
 const DEV_MENU_CONFIG_SECTION := DevMenuConfigModel.DEV_MENU_CONFIG_SECTION
