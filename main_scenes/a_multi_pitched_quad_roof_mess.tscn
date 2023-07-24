@@ -9,7 +9,7 @@ script = ExtResource("1_5ffth")
 [node name="PlayerWorldInterface" parent="." instance=ExtResource("2_5w7f0")]
 transform = Transform3D(0.999649, 0, 0.026491, 0, 1, 0, -0.026491, 0, 0.999649, -19.1498, -0.317393, -8.58459)
 default_speed = 512.0
-overwrite_existing_actions = true
+override_existing_actions = true
 initial_motion_mode = 0
 
 [node name="OmniLight" type="OmniLight3D" parent="."]

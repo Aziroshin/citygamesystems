@@ -34,7 +34,8 @@ const SAVE_AND_QUIT_EDITOR_ACTION := "dev_camera_save_and_quit"
 @export var default_speed := 128.0
 @export var default_rotation_speed := 6.0
 @export var default_pitch_speed := 2.0
-@export var overwrite_existing_actions := false
+## This happens at runtime and doesn't write to the project.
+@export var override_existing_actions := false
 @export var double_tap_interval := 0.2
 @export var initial_motion_mode: MotionMode = MOTION_MODE_FLOATING
 @export var config_file_path := ""
@@ -137,27 +138,27 @@ func set_action_key(action: String, keycode: int):
 	InputMap.action_add_event(action, key_event_for_action)
 	
 	
-# Add (and overwrite if specified) an action as required to make sure it's
+# Add (and override if specified) an action as required to make sure it's
 # reasonably set up as configured without having to set it up in the Input Map
 # first.
 # This alters `InputMap` at runtime and doesn't write to the project.
-func ensure_action_configured(action: String, overwrite: bool = false) -> void:
+func ensure_action_configured(action: String, override: bool = false) -> void:
 	if not InputMap.has_action(action):
 		InputMap.add_action(action)
 		InputMap.action_add_event(action, action_default_keys[action])
 		if enable_integration_warnings:
 			push_warning("Action not found: %s. Spoofing it with hotkey: %s."\
 				% [action, InputMap.action_get_events(action)[0].as_text()])
-	elif overwrite:
+	elif override:
 		InputMap.action_add_event(action, action_default_keys[action])
 		
 		
-# Add (and overwrite if specified) actions as required to provide reasonable
+# Add (and override if specified) actions as required to provide reasonable
 # controls as configured without having to set them up in the Input Map first.
 # This alters `InputMap` at runtime and doesn't write to the project.
-func ensure_actions_configured(overwrite: bool = false) -> void:
+func ensure_actions_configured(override: bool = false) -> void:
 	for action in action_default_keys.keys():
-		ensure_action_configured(action, overwrite)
+		ensure_action_configured(action, override)
 ###########################################################################
 
 
@@ -234,7 +235,7 @@ func _ready():
 	else:
 		motion_mode = initial_motion_mode
 	
-	ensure_actions_configured(overwrite_existing_actions)
+	ensure_actions_configured(override_existing_actions)
 	
 	
 func _physics_process(delta: float) -> void:

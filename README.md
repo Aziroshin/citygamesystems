@@ -167,8 +167,8 @@ instantiated, regardless of scene.
 It's built to work out of the box with sane defaults once copied into a project.
 Features are configurable in the inspector, and if you'd like to customize the
 keybindings, just add the relevant action(s) to the input map (it's designed to
-leave your project's actions alone unless you check `Overwrite Existing Actions`
-in the inspector).
+prioritize your project's action settings unless you check
+`Override Existing Actions` in the inspector).
 
 It supports floating as well as collision-based "sliding" on a surface,
 switching between the modes by double-tapping space (by default).

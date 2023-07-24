@@ -96,7 +96,7 @@ script = SubResource("GDScript_ovcf0")
 [node name="PlayerWorldInterface" parent="." instance=ExtResource("2_bwpw3")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.941, 2.14225, -6.547)
 default_speed = 512.0
-overwrite_existing_actions = true
+override_existing_actions = true
 initial_motion_mode = 0
 
 [node name="Map" parent="." instance=ExtResource("3_oqnec")]
