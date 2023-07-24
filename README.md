@@ -29,7 +29,7 @@ based on the contents of the folder `res://main_scenes`. By default, `F9`
 toggles the visibility of the dev-menu. The chosen scene is saved in
 `user://dev.config`, as defined in `res://global_defaults.gd`. For camera
 controls and how to save the camera's state, see
-[PlayerWorldInterface](#PlayerWorldInterface).
+[PlayerWorldInterface](#playerworldinterface).
 
 ## Libraries
 In the `global_libs` directory, there are a number of fits and starts of
