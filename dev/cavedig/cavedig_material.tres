@@ -1,8 +1,8 @@
-[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://oyy136ikmj8h"]
 
 [ext_resource type="Shader" path="res://dev/cavedig/cavedig_shader.gdshader" id="1_mi0m5"]
 
 [resource]
 render_priority = 0
-shader = ExtResource( "1_mi0m5" )
-shader_param/color = null
+shader = ExtResource("1_mi0m5")
+shader_parameter/color = null
