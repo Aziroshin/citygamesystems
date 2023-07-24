@@ -1,0 +1,35 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://dg5rq82qvdil1"
+path.s3tc="res://.godot/imported/01392-3252335151-tiled roof doubleroman grovebury interlocked tiles interocked roof tiles tiled roof regent renown rounded tiles medieva_normal.png-75008be53d334dd67df9bb3858121462.s3tc.ctex"
+metadata={
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
+}
+
+[deps]
+
+source_file="res://assets/parts/textures/01392-3252335151-tiled roof doubleroman grovebury interlocked tiles interocked roof tiles tiled roof regent renown rounded tiles medieva_normal.png"
+dest_files=["res://.godot/imported/01392-3252335151-tiled roof doubleroman grovebury interlocked tiles interocked roof tiles tiled roof regent renown rounded tiles medieva_normal.png-75008be53d334dd67df9bb3858121462.s3tc.ctex"]
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/hdr_compression=1
+compress/normal_map=1
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=1
+roughness/src_normal="res://assets/parts/textures/01392-3252335151-tiled roof doubleroman grovebury interlocked tiles interocked roof tiles tiled roof regent renown rounded tiles medieva_normal.png"
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0
