@@ -168,7 +168,10 @@ It's built to work out of the box with sane defaults once copied into a project.
 Features are configurable in the inspector, and if you'd like to customize the
 keybindings, just add the relevant action(s) to the input map (it's designed to
 prioritize your project's action settings unless you check
-`Override Existing Actions` in the inspector).
+`Override Existing Actions` in the inspector. Caveat: If your project has
+actions with the same name but not keybinding and `PlayerWorldInterface` is not
+configured to override, it will currently have no keybinding for the affected
+actions as a result).
 
 It supports floating as well as collision-based "sliding" on a surface,
 switching between the modes by double-tapping space (by default).
