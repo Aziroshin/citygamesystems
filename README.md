@@ -1,6 +1,5 @@
 # citygamesystems
 
------------
 Staging ground for the exploration and development
 of systems useful for infrastructure simulation toys
 and games, with a focus on the city simulator genre.
@@ -10,10 +9,10 @@ for other projects and for reference.
 
 ## Reading Guide:
 
-- Paths or file names pefixed by "(*)" indicate that they are *somewhere*
+- Paths or file names pefixed by "(\*)" indicate that they are *somewhere*
 in the code base. This is useful if they're they're somewhat likely to
 change location and unlikely to be mixed up with other files when using
-some tool to search the code base (so, maybe not (*)`facade.tscn` or
+some tool to search the code base (so, maybe not (\*)`facade.tscn` or
 something. :p).
 - When referencing object oriented code, method and member names are
 prefixed by `.`.
@@ -105,7 +104,7 @@ visualize vertices and their values in `ArrayMesh.ARRAY_VERTEX`-arrays.
 The place for city-specific `mesh_lib`-like/based stuff. Currently contains
 `ATwoSidedRoof` (an `AMultiSegment`), an attempt at a procedural gabled roof
 with an ascending/descending ridge (the corresponding "Mess" workspace is
-(*)`a_side_roof_mess.*`).
+(\*)`a_side_roof_mess.*`).
 
 ### part_lib
 A system to stick Node3Ds together by the means of `PartConnector` objects.
@@ -152,7 +151,7 @@ the size of a part according to some other metric, like columns in a facade
 grid, for example. Currently, the function `respan_3_columns` makes use of it.
 
 A very basic, experimental example of this can be looked at in
-(*)`blender_house_assembly_mess.gd`.
+(\*)`blender_house_assembly_mess.gd`.
 
 ## PlayerWorldInterface
 Basically a camera, focused on an RTS-style view and with development features
@@ -207,7 +206,7 @@ supporting mouse clicks for testing things.
 ### Facade D: A Rough Prototype for Prefabricated Building Parts
 The project files for this can be found [here](https://projectfiles.aziroshin.com/citygamesystems/dev/parts/facades/facade_d/). They're CC0.
 
-The 3D model itself, (*)`facade_b.gltf`, is used in
+The 3D model itself, (\*)`facade_b.gltf`, is used in
 `main_scenes/blender_house_aassembly_mess.*`.
 
 This is a first stab at a workflow for building parts (using `part_lib`)
