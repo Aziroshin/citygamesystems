@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3 uid="uid://cr5u4jqs44n2v"]
+
+[ext_resource type="Script" path="res://main_scenes/simple_house_assembly_mess.gd" id="1_7c3w6"]
+[ext_resource type="PackedScene" uid="uid://t6fjyxuaed8g" path="res://world_objects/player_world_interface/player_world_interface.tscn" id="2_73dku"]
+
+[node name="HouseAssemblyTest" type="Node3D"]
+script = ExtResource("1_7c3w6")
+
+[node name="PlayerWorldInterface" parent="." instance=ExtResource("2_73dku")]
+
+[node name="OmniLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.22485, 0)
+light_color = Color(0.964706, 0.929412, 0.745098, 1)
+light_energy = 0.8
+omni_range = 12.1831
+omni_attenuation = 0.0743256
+
+[node name="CSGCylinder3D" type="CSGCylinder3D" parent="."]
+visible = false
+
+[node name="CSGTorus3D" type="CSGTorus3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.054029)
+visible = false
+outer_radius = 2.593
