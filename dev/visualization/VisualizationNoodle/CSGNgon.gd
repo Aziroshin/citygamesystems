@@ -29,7 +29,7 @@ const DEFAULT_OFFSET := Vector2(0, 0)
 # whereas each vector points from Vector2(0, 0) to the origin
 # of the vertex, thus describing the n-gon.
 func ngon_vertices(n: int, circumradius: float) -> Array[Vector2]:
-	var vertices: Array[Vector2] = Array()
+	var vertices: Array[Vector2] = []
 	if n < 3:
 		return vertices
 		
@@ -43,7 +43,7 @@ func ngon_vertices(n: int, circumradius: float) -> Array[Vector2]:
 	return vertices
 
 func offset_polygon(vertices: Array[Vector2], offset: Vector2) -> Array[Vector2]:
-	var offset_polygon: Array[Vector2] = Array()
+	var offset_polygon: Array[Vector2] = []
 	for vertex in vertices:
 		offset_polygon.append(vertex - offset)
 	return offset_polygon
