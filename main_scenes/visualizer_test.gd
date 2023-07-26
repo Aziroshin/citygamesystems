@@ -3,8 +3,6 @@ extends Node3D
 @onready var map := $Map
 
 
-#enum {}
-
 #class PathNodeNetworkGroupNetwork:
 #	var name
 #	func _init(name):
@@ -54,7 +52,6 @@ class Entity:
 		return self
 		
 func _ready():
-	
 	assert(Visualization.OctagonMarker.instantiate()\
 		.add_as_child_to(map)\
 		.position_at(Vector3(2, 1, -2))\
