@@ -1,5 +1,8 @@
 extends Node3D
 
+@onready var map := $Map
+
+
 #enum {}
 
 #class PathNodeNetworkGroupNetwork:
@@ -52,6 +55,21 @@ class Entity:
 		
 func _ready():
 	
+	assert(Visualization.OctagonMarker.instantiate()\
+		.add_as_child_to(map)\
+		.position_at(Vector3(2, 1, -2))\
+		.set_size(0.5)\
+		.primary.set_color(Vector3(0.2, 0.1, 0.6))\
+		.secondary.set_color(Vector3(0.2, 0.1, 0.3))\
+		.noodle_to(Visualization.OctagonMarker.instantiate()\
+			.add_as_child_to(map)\
+			.position_at(Vector3(3.5, 1, -2.5))\
+			.set_size(0.5)\
+			.primary.set_color(Vector3(0.6, 0.1, 0.4))\
+			.secondary.set_color(Vector3(0.6, 0.1, 0.2))\
+		)\
+	)
+	
 #######################################################################
 # Testing OctagonMarker.
 #	var marker_a = Visualization.OctagonMarker.instance()\
@@ -82,3 +100,21 @@ func _ready():
 	var entityB = Entity.new().addPathNode(pathNodeB)
 	var entityD = Entity.new().addPathNode(pathNodeD)
 	
+	
+func _on_map_input_event(
+	camera: Node,
+	event: InputEvent,
+	position: Vector3,
+	normal: Vector3,
+	shape_idx: int
+) -> void:
+	if event is InputEventMouseButton:
+#		if event.button_index == BUTTON_LEFT and event.pressed:
+		assert(Visualization.OctagonMarker.instantiate()\
+			.add_as_child_to(self)\
+			.position_at(position)\
+			.align_along(normal)\
+			.set_size(0.2)\
+			.primary.set_color(Vector3(0.2, 0.7, 0.2))\
+			.secondary.set_color(Vector3(0.4, 1, 0.4))\
+		)

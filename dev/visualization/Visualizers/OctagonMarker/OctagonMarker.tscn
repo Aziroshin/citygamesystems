@@ -3,8 +3,8 @@
 [ext_resource type="PackedScene" uid="uid://cssqht5ydkf7u" path="res://dev/visualization/Visualizers/OctagonMarker/OctagonMarker.gltf" id="1"]
 [ext_resource type="Script" path="res://dev/visualization/Visualizer.gd" id="2"]
 
-[node name="OctagonMarker" instance=ExtResource( "1" )]
-script = ExtResource( "2" )
+[node name="OctagonMarker" instance=ExtResource("1")]
+script = ExtResource("2")
 
 [node name="Primary" parent="." index="0"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
