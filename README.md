@@ -7,6 +7,8 @@ and games, with a focus on the city simulator genre.
 It contains various more or less loose parts that might prove useful
 for other projects and for reference.
 
+To see which license applies to which parts, see [Licensing](#licensing).
+
 ## Reading Guide:
 
 - Paths or file names pefixed by "(\*)" indicate that they are *somewhere*
@@ -280,3 +282,21 @@ The template idea could be expanded into fully automated facade generation
 at runtime, albeit it would either have to be exact enough to map to a 3D
 facade model, or such a model would have to be generated based on the
 generated facade texture (basically what's been done by hand in this case).
+
+## Licensing
+The default license for the project is MIT (refer to [LICENSE-MIT](LICENSE-MIT)).
+The license of the blender addon [raw_export](utils/raw_export/blender_addon/raw_export)
+is [GPL-3.0-or-later](utils/raw_export/blender_addon/raw_export/LICENSE.md) (the [LICENSE-GPL](LICENSE-GPL) file in the repository's root is included for
+the sole purpose of github picking it up (via [licensee](https://github.com/licensee/licensee)),
+so that it's clear that not everything is licensed under the MIT).
+
+#### Some files are also released according to the CC0:
+
+Textures (the CC0 also applies to the corresponding PBR maps for each file):
+- [assets/parts/textures/01392-3252335151-tiled roof doubleroman grovebury interlocked tiles interocked roof tiles tiled roof regent renown rounded tiles medieva.png](assets/parts/textures/01392-3252335151-tiled roof doubleroman grovebury interlocked tiles interocked roof tiles tiled roof regent renown rounded tiles medieva.png)
+- [assets/parts/textures/dark_wood_a_1_4_from_mitsua_01488-4241078918-Ebony wood planks wood grain inside of tree dark wood wooden planks wenge dark wood slab anime manga watercolor drawing.png](assets/parts/textures/dark_wood_a_1_4_from_mitsua_01488-4241078918-Ebony wood planks wood grain inside of tree dark wood wooden planks wenge dark wood slab anime manga watercolor drawing.png)
+- [assets/parts/textures/facade_d_1024x1024_1_6.png](assets/parts/textures/facade_d_1024x1024_1_6.png)
+- [assets/parts/textures/roof_facade.png](assets/parts/textures/roof_facade.png)
+
+Misc:
+- [coord_texture.png](utils/raw_export/blender_addon/dev/coord_texture.png)

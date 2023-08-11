@@ -12,3 +12,13 @@ data_*/
 # IDE
 .vscode
 .idea
+
+# Python
+__pycache__
+
+# Blender
+*.blend1
+
+# Project-specific ignores
+utils/raw_export/blender_addon/dev/.env
+utils/raw_export/blender_addon/dev/blender_user_config
