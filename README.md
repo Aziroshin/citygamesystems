@@ -293,8 +293,8 @@ so that it's clear that not everything is licensed under the MIT).
 #### Some files are also released according to the CC0:
 
 Textures (the CC0 also applies to the corresponding PBR maps for each file):
-- [assets/parts/textures/01392-3252335151-tiled roof doubleroman grovebury interlocked tiles interocked roof tiles tiled roof regent renown rounded tiles medieva.png](assets/parts/textures/01392-3252335151-tiled roof doubleroman grovebury interlocked tiles interocked roof tiles tiled roof regent renown rounded tiles medieva.png)
-- [assets/parts/textures/dark_wood_a_1_4_from_mitsua_01488-4241078918-Ebony wood planks wood grain inside of tree dark wood wooden planks wenge dark wood slab anime manga watercolor drawing.png](assets/parts/textures/dark_wood_a_1_4_from_mitsua_01488-4241078918-Ebony wood planks wood grain inside of tree dark wood wooden planks wenge dark wood slab anime manga watercolor drawing.png)
+- [assets/parts/textures/01392-3252335151-tiled roof doubleroman grovebury interlocked tiles interocked roof tiles tiled roof regent renown rounded tiles medieva.png](assets/parts/textures/01392-3252335151-tiled%20roof%20doubleroman%20grovebury%20interlocked%20tiles%20interocked%20roof%20tiles%20tiled%20roof%20regent%20renown%20rounded%20tiles%20medieva.png)
+- [assets/parts/textures/dark_wood_a_1_4_from_mitsua_01488-4241078918-Ebony wood planks wood grain inside of tree dark wood wooden planks wenge dark wood slab anime manga watercolor drawing.png](assets/parts/textures/dark_wood_a_1_4_from_mitsua_01488-4241078918-Ebony%20wood%20planks%20wood%20grain%20inside%20of%20tree%20dark%20wood%20wooden%20planks%20wenge%20dark%20wood%20slab%20anime%20manga%20watercolor%20drawing.png)
 - [assets/parts/textures/facade_d_1024x1024_1_6.png](assets/parts/textures/facade_d_1024x1024_1_6.png)
 - [assets/parts/textures/roof_facade.png](assets/parts/textures/roof_facade.png)
 
