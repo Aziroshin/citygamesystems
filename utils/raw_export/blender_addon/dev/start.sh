@@ -25,7 +25,7 @@ OVERRIDE_BLENDER_USER_SCRIPTS="${OVERRIDE_BLENDER_USER_SCRIPTS:-"yes"}"
 ADDON_DIR="${ADDON_DIR:-"$(realpath "$SCRIPT_DIR/../$ADDON_NAME")"}"
 # `m1` limits to the first line and `-o` only prints the match.
 BLENDER_VERSION="${BLENDER_VERSION\
-:-"$("$BLENDER_BIN" --version| grep -m1 -o "[0-9]\.[0-9]")"}"
+:-"$("$BLENDER_BIN" --version | grep -m1 -o "[0-9]\.[0-9]")"}"
 BLENDER_VERSION_BASE_DIR="${BLENDER_VERSION_BASE_DIR\
 :-$BLENDER_CONFIG_DIR/$BLENDER_VERSION}"
 BLENDER_VERSION_SCRIPTS_DIR="${BLENDER_VERSION_SCRIPTS_DIR\
