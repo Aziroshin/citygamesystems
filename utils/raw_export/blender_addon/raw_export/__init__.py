@@ -5,7 +5,7 @@ import pprint
 from abc import abstractproperty, abstractmethod, ABC
 from json import JSONEncoder
 from pathlib import Path
-from typing import List, Union, Tuple, Dict, TypeVar, OrderedDict, Type, Literal, TypeAlias
+from typing import List, Union, Tuple, Dict, TypeVar, OrderedDict, Type, Literal, TypeAlias, Iterable
 # Blender
 import bpy
 import bpy.types
@@ -54,6 +54,14 @@ ndarray_vector_dtype: numpy.dtype = numpy.dtype([("x", float), ("y", float), ("z
 
 def bmvert_location_as_vector(vert: BMVert) -> Vector:
     return Vector((vert.co.x, vert.co.y, vert.co.z))
+
+
+# TODO [typing]: Find a way to type `iterable4`, which is supposed to
+#  receive a value from `diffuse_color` of `Material`
+#  (which is `bpy_prop_array`).
+def iterable4_to_vector(iterable: Iterable) -> Vector:
+    return Vector((item for item in iterable))
+    # return Vector((iterable4[0], iterable4[1], iterable4[2], iterable4[3]))
 
 
 def get_all_uv_coords() -> List[Vector]:
@@ -421,7 +429,7 @@ class RawExport(bpy.types.Operator):
                     materials_pre_json.append(BasicMaterialData(
                         index=material_index,
                         name=material.name,
-                        color=material.diffuse_color[0]
+                        color=iterable4_to_vector(material.diffuse_color)
                     ))
             else:
                 materials_pre_json.append(DefaultMaterialData(
@@ -471,7 +479,8 @@ class RawExport(bpy.types.Operator):
             }
         }
 
-        print(json.dumps(mesh_pre_json, cls=AllJSONEncoders))
+        with open(DEVFIXTURE_output_path, "w") as output_file:
+            output_file.write(json.dumps(mesh_pre_json, cls=AllJSONEncoders, indent=4))
 
         return {"FINISHED"}
 
