@@ -35,7 +35,7 @@ T = TypeVar("T")
 ###########################################################################
 # Config
 ###########################################################################
-
+DEVFIXTURE_output_path = "../../../../assets/parts/raw_export_test_cube.json"
 ###########################################################################
 
 
@@ -474,9 +474,14 @@ class RawExport(bpy.types.Operator):
             "uvs": uvs_pre_json,
             "indices": indices_pre_json,
             "material_indices": material_indices_pre_json,
-            "materials": {
-                index: materials_pre_json[index] for index in range(material_index)
-            }
+            # List version of `materials`.
+            "materials": [
+                materials_pre_json[index] for index in range(material_index)
+            ]
+            # Dict version of `materials`.
+            # "materials": {
+            #     index: materials_pre_json[index] for index in range(material_index)
+            # }
         }
 
         with open(DEVFIXTURE_output_path, "w") as output_file:
