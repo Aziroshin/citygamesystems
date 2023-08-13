@@ -308,15 +308,15 @@ MaterialDataTypeStr: TypeAlias = Literal[
 
 
 class MaterialData(ABC, JSONSerializable):
-    index: int
     type: MaterialDataTypeStr
+    index: int
     name: str
 
 
 class DefaultMaterialData(MaterialData):
-    type: MaterialDataTypeStr = "DEFAULT"
 
     def __init__(self, index: int):
+        self.type = "DEFAULT"
         self.index = index
         self.name = "Default"
 
@@ -329,10 +329,10 @@ class DefaultMaterialData(MaterialData):
 
 
 class BasicMaterialData(MaterialData):
-    type: MaterialDataTypeStr = "BASIC"
     color: Vector
 
     def __init__(self, index: int, name: str, color: Vector):
+        self.type = "BASIC"
         self.index = index
         self.name = name
         self.color = color
@@ -347,10 +347,10 @@ class BasicMaterialData(MaterialData):
 
 
 class ImageTextureMaterialData(MaterialData):
-    type: MaterialDataTypeStr = "IMAGE_FILES"
     filenames: List[str]
 
     def __init__(self, index: int, name: str, filenames: List[str] = []):
+        self.type = "IMAGE_FILES"
         self.index = index
         self.name = name
         self.filenames = filenames
