@@ -11,5 +11,5 @@ func load_and_get_test_cube() -> Resource:
 func _ready() -> void:
 	var file := FileAccess.get_file_as_string(test_cube_path)
 	var obj: Dictionary = JSON.parse_string(file)
-	var object_data: RawExport.RawObjectData = RawExport.RawObjectData.from_json(file)
+	var object_data := RawExport.RawObjectData_from_json(file)
 	print(object_data.to_json())

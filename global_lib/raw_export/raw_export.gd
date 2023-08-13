@@ -52,10 +52,10 @@ class DefaultMaterialData extends MaterialData:
 		self.index = index
 		self.name = "Default"
 
-	static func from_dict(dict: Dictionary) -> DefaultMaterialData:
-		return DefaultMaterialData.new(
-			dict.index
-		)
+static func DefaultMaterialData_from_dict(dict: Dictionary) -> DefaultMaterialData:
+	return DefaultMaterialData.new(
+		dict.index
+	)
 
 
 class BasicMaterialData extends MaterialData:
@@ -71,19 +71,19 @@ class BasicMaterialData extends MaterialData:
 		self.name = name
 		self.color = color
 		
-	static func from_dict(dict:Dictionary) -> BasicMaterialData:
-		return BasicMaterialData.new(
-			dict.index,
-			dict.name,
-			RawExport.convert_array_to_color(dict.color)
-		)
-		
 	func to_dict() -> Dictionary:
 		var dict := super()
 		dict.merge({
 			"color": self.color
 		})
 		return dict
+		
+static func BasicMaterialData_from_dict(dict:Dictionary) -> BasicMaterialData:
+	return BasicMaterialData.new(
+		dict.index,
+		dict.name,
+		RawExport.convert_array_to_color(dict.color)
+	)
 
 class ImageTextureMaterialData extends MaterialData:
 	var filenames: PackedStringArray
@@ -104,19 +104,19 @@ class ImageTextureMaterialData extends MaterialData:
 	func add_file_name(filename: String) -> void:
 		self.filenames.append(filename)
 		
-	static func from_dict(dict: Dictionary) -> ImageTextureMaterialData:
-		return ImageTextureMaterialData.new(
-			dict.index,
-			dict.name,
-			dict.filenames
-		)
-		
 	func to_dict() -> Dictionary:
 		var dict := super()
 		dict.merge({
 			"filenames": self.filenames
 		})
 		return dict
+		
+static func ImageTextureMaterialData_from_dict(dict: Dictionary) -> ImageTextureMaterialData:
+	return ImageTextureMaterialData.new(
+		dict.index,
+		dict.name,
+		dict.filenames
+	)
 		
 		
 class RawObjectData extends JsonSerializable:
@@ -145,27 +145,6 @@ class RawObjectData extends JsonSerializable:
 	func to_json() -> String:
 		return JSON.stringify(self.to_dict())
 		
-	static func from_json(json_string: String) -> RawObjectData:
-		var obj: Dictionary = JSON.parse_string(json_string)
-		
-		var materials = Array()
-		for material in obj.materials:
-			if material.type == DEFAULT_MATERIAL_TYPE:
-				materials.append(DefaultMaterialData.from_dict(material))
-			elif material.type == BASIC_MATERIAL_TYPE:
-				materials.append(BasicMaterialData.from_dict(material))
-			elif material.type == IMAGE_FILES_MATERIAL_TYPE:
-				materials.append(ImageTextureMaterialData.from_dict(material))
-		
-		return RawObjectData.new(
-			RawExport.convert_array_to_packed_vector3_array(obj.vertices),
-			RawExport.convert_array_to_packed_vector3_array(obj.normals),
-			RawExport.convert_array_to_packed_vector2_array(obj.uvs),
-			obj.indices,
-			obj.material_indices,
-			materials
-		)
-		
 	func to_dict() -> Dictionary:
 		var materials := Array()
 		for material in self.materials:
@@ -178,3 +157,24 @@ class RawObjectData extends JsonSerializable:
 			"material_indices": self.material_indices,
 			"materials": materials
 		}
+
+static func RawObjectData_from_json(json_string: String) -> RawObjectData:
+	var obj: Dictionary = JSON.parse_string(json_string)
+	
+	var materials = Array()
+	for material in obj.materials:
+		if material.type == DEFAULT_MATERIAL_TYPE:
+			materials.append(DefaultMaterialData_from_dict(material))
+		elif material.type == BASIC_MATERIAL_TYPE:
+			materials.append(BasicMaterialData_from_dict(material))
+		elif material.type == IMAGE_FILES_MATERIAL_TYPE:
+			materials.append(ImageTextureMaterialData_from_dict(material))
+	
+	return RawObjectData.new(
+		RawExport.convert_array_to_packed_vector3_array(obj.vertices),
+		RawExport.convert_array_to_packed_vector3_array(obj.normals),
+		RawExport.convert_array_to_packed_vector2_array(obj.uvs),
+		obj.indices,
+		obj.material_indices,
+		materials
+	)
