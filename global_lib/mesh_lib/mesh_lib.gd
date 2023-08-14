@@ -631,10 +631,10 @@ class AHorizontallyFoldedTriangle extends AMultiSegment:
 			)
 			number_of_segments_created += 1
 			
-	func get_segments() -> Array[ATransformableSegment]:
+	func get_segments() -> Array[AVertexTrackingSegment]:
 		# TODO: `base_quads.duplicate` isn't working for some reason. When
 		# subsequently calling .append, the array stays empty.
-		var segments: Array[ATransformableSegment] = []
+		var segments: Array[AVertexTrackingSegment] = []
 		for quad in base_quads:
 			segments.append(quad)
 		segments.append(tip_tri)
@@ -680,8 +680,8 @@ class AHorizontallyFoldedPlane extends AMultiSegment:
 		
 		apply_all()
 		
-	func get_segments() -> Array[ATransformableSegment]:
-		var segments: Array[ATransformableSegment] = []
+	func get_segments() -> Array[AVertexTrackingSegment]:
+		var segments: Array[AVertexTrackingSegment] = []
 		for quad in quads:
 			segments.append(quad)
 		return segments
@@ -745,8 +745,8 @@ class AFoldedPlane extends AMultiSegment:
 #	func get_segments() -> Array[ATransformableSegment]:
 #		return strips as Array[ATransformableSegment]
 		
-	func get_segments() -> Array[ATransformableSegment]:
-		var segments: Array[ATransformableSegment] = []
+	func get_segments() -> Array[AVertexTrackingSegment]:
+		var segments: Array[AVertexTrackingSegment] = []
 		for strip in strips:
 			segments.append(strip)
 		return segments
