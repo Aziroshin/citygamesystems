@@ -15,17 +15,17 @@ static func convert_array_to_color(array: Array) -> Color:
 
 static func convert_array_to_packed_vector3_array(array: Array) -> PackedVector3Array:
 	var packed_vector3_array = PackedVector3Array()
-	if not len(packed_vector3_array) == 3:
-		push_error("Not a Vector3 array.")
 	for element in array:
+		if not element is Vector3 and not len(element) == 3:
+			push_error("Not a Vector3 array.")
 		packed_vector3_array.append(Vector3(element[0], element[1], element[2]))
 	return packed_vector3_array
 	
 static func convert_array_to_packed_vector2_array(array: Array) -> PackedVector2Array:
 	var packed_vector3_array = PackedVector2Array()
-	if not len(packed_vector3_array) == 2:
-		push_error("Not a Vector2 array.")
 	for element in array:
+		if not element is Vector2 and not len(element) == 2:
+			push_error("Not a Vector2 array.")
 		packed_vector3_array.append(Vector2(element[0], element[1]))
 	return packed_vector3_array
 
