@@ -506,6 +506,19 @@ class AMultiSegment extends AVertexTrackingSegment:
 		return self
 	
 	
+class AMultiQuad extends AMultiSegment:
+	var base_quads: Array[AQuad]
+	
+	func add_quad(quad: AQuad):
+		base_quads.append(quad)
+		
+	func get_segments() -> Array[AVertexTrackingSegment]:
+		var segments: Array[AVertexTrackingSegment] = []
+		for quad in base_quads:
+			segments.append(quad)
+		return segments
+	
+	
 class LineVertexArrayChecker:
 	const CLASS_NAME := "LineVertexArrayChecker"
 	
