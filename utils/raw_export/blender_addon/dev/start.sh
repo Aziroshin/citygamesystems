@@ -34,6 +34,10 @@ BLENDER_VERSION_CONFIG_DIR="${BLENDER_VERSION_CONFIG_DIR\
 :-"$BLENDER_VERSION_BASE_DIR/config"}"
 BLENDER_VERSION_ADDONS_DIR="${BLENDER_VERSION_ADDONS_DIR\
 :-"$BLENDER_VERSION_BASE_DIR/scripts/addons"}"
+BLENDER_VERSION_PRESETS_DIR="${BLENDER_VERSION_PRESETS_DIR\
+:-"$BLENDER_VERSION_SCRIPTS_DIR/presets"}"
+BLENDER_SYSTEM_PRESETS_DIR="${BLENDER_SYSTEM_PRESETS_DIR\
+:-"$HOME/.config/blender/$BLENDER_VERSION/scripts/presets"}"
 BLENDER_VERSION_ADDON_DIR_LINK="${BLENDER_VERSION_ADDON_DIR_LINK\
 :-"$BLENDER_VERSION_ADDONS_DIR/$ADDON_NAME"}"
 BLENDER_VERSION_ADDON_DIR_LINK_TARGET="${BLENDER_VERSION_ADDON_DIR_LINK_TARGET\
@@ -53,6 +57,29 @@ fi
 ### BEGIN: Action! ############################################################
 if [ ! -e "$BLENDER_VERSION_ADDONS_DIR" ]; then
   mkdir -p "$BLENDER_VERSION_ADDONS_DIR"
+fi
+
+# In case either are later changed to "yes, make sure the overriding config
+# directory exists, else the user's config might get overwritten with defaults.
+if [ "$OVERRIDE_BLENDER_USER_CONFIG" = "yes" ] || [ ! "$OVERRIDE_BLENDER_USER_RESOURCES" = "yes" ]; then
+  mkdir -p "$BLENDER_VERSION_CONFIG_DIR"
+fi
+
+if [ ! "$OVERRIDE_BLENDER_USER_CONFIG" = "yes" ] || [ ! "$OVERRIDE_BLENDER_USER_RESOURCES" = "yes" ]; then
+    if [ ! -e "$BLENDER_VERSION_PRESETS_DIR" ]; then
+      ln -s "$BLENDER_SYSTEM_PRESETS_DIR" "$BLENDER_VERSION_PRESETS_DIR"
+    fi
+
+    if [ ! -e "$BLENDER_VERSION_PRESETS_DIR/__init__.py" ]; then
+      printf "ERROR: The presets-dir at "
+      printf  "\"%s\" is empty. " "$BLENDER_VERSION_PRESETS_DIR"
+      printf "This is a sign something went wrong when symlinking the presets-dir "
+      printf "from the user's home directory. Since this could result in the "
+      printf "user's blender settings getting overwritten with defaults, the "
+      printf "script won't proceed any further. "
+      printf "Exiting.\n"
+      exit 1;
+    fi
 fi
 
 # TODO [bug,prio=low]: Evaluates to true even if it exists.
