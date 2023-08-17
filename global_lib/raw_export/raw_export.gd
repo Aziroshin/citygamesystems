@@ -123,7 +123,7 @@ class RawObjectData extends JsonSerializable:
 	var vertices: PackedVector3Array
 	var normals: PackedVector3Array
 	var uvs: PackedVector2Array
-	var indices: PackedInt64Array
+	var indices: PackedInt32Array
 	var material_indices: PackedInt64Array
 	var materials: Array
 	
@@ -131,7 +131,7 @@ class RawObjectData extends JsonSerializable:
 		vertices := PackedVector3Array(),
 		normals := PackedVector3Array(),
 		uvs := PackedVector2Array(),
-		indices := PackedInt64Array(),
+		indices := PackedInt32Array(),
 		material_indices := PackedInt64Array(),
 		materials := Array()
 	):

@@ -3,8 +3,8 @@ extends Node3D
 const test_cube_path: StringName = "res://assets/parts/raw_export_test_cube.json"
 
 ### "Imports": MeshLib
-const AQuad := MeshLib.AQuad
-const AMultiQuad := MeshLib.AMultiQuad
+const ATri := MeshLib.ATri
+const AMultiTri := MeshLib.AMultiTri
 ### "imports": MeshDebugLib
 const ADebugOverlay := MeshDebugLib.ADebugOverlay
 
@@ -17,24 +17,23 @@ func load_and_get_test_cube() -> Resource:
 	return load_and_get_raw_export(test_cube_path)
 
 
-func add_indices_to_surface_arrays(surface_arrays: Array, indices: PackedInt64Array):
+func add_indices_to_surface_arrays(surface_arrays: Array, indices: PackedInt32Array):
 	surface_arrays[ArrayMesh.ARRAY_INDEX] = indices
 
 
 func add_vertices_to_surface_arrays(surface_arrays: Array, vertices: PackedVector3Array):
-	var multi_quad := AMultiQuad.new()
-	for i_face in range(len(vertices) / 4):
-		var offset = i_face * 4
-		var quad := AQuad.new(
+	var multi_tri := AMultiTri.new()
+	for i_face in range(len(vertices) / 3):
+		var offset = i_face * 3
+		var tri := ATri.new(
 			vertices[offset],
 			vertices[offset+1],
 			vertices[offset+2],
-			vertices[offset+3]
 		)
-		multi_quad.add_quad(quad)
-	multi_quad.apply_all()
+		multi_tri.add_tri(tri)
+	multi_tri.apply_all()
 
-	var surface_array_vertex := multi_quad.get_array_vertex()
+	var surface_array_vertex := multi_tri.get_array_vertex()
 	surface_arrays[ArrayMesh.ARRAY_VERTEX] = surface_array_vertex
 
 
