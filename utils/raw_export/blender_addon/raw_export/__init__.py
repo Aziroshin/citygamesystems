@@ -460,7 +460,7 @@ class RawExport(bpy.types.Operator):
         make_y_up = True
 
         # Input - prototypal, might come from somewhere else eventually.
-        face_count = 4
+        face_count = 3
 
         mesh: BMesh = bmesh.new()
         obj: bpy.types.ObjectBase = bpy.context.active_object
