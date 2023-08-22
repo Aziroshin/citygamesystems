@@ -2,21 +2,17 @@
 # Copyright (C) 2023 Aziroshin (Christian Knuchel)
 import json
 import pprint
-from abc import abstractproperty, abstractmethod, ABC
+from abc import abstractmethod, ABC
 from json import JSONEncoder
 from pathlib import Path
-from typing import List, Union, Tuple, Dict, TypeVar, OrderedDict, Type, Literal, TypeAlias, Iterable
+from typing import List, Dict, TypeVar, Type, Literal, TypeAlias, Iterable, TypedDict, \
+    NamedTuple
 # Blender
 import bpy
 import bpy.types
-import bpy_types
 import bmesh
-from bmesh.types import BMesh, BMVert, BMEdge, BMElemSeq, BMFace, BMLayerItem, BMLoopUV
-from mathutils import Vector, Matrix
-# numpy
-import numpy
-from numpy import ndarray
-import itertools
+from bmesh.types import BMesh, BMVert, BMFace, BMLayerItem, BMLoopUV
+from mathutils import Vector
 
 bl_info = {
     "name": "raw_export",
@@ -37,13 +33,6 @@ T = TypeVar("T")
 ###########################################################################
 DEVFIXTURE_output_path = "../../../../assets/parts/raw_export_test_cube.json"
 ###########################################################################
-
-
-###########################################################################
-# Types
-# Reference: numpy typing: https://numpy.org/devdocs/reference/typing.html
-###########################################################################
-ndarray_vector_dtype: numpy.dtype = numpy.dtype([("x", float), ("y", float), ("z", float)])
 
 
 ###########################################################################
@@ -367,6 +356,91 @@ class ImageTextureMaterialData(MaterialData):
         }
 
 
+class DebugCubeTriDict(TypedDict):
+    axis: Literal["x", "y", "z"]
+    axis_sign: Literal["+", "-"]
+    vertices: List[Vector]
+    uvs: List[Vector]
+
+
+class DebugCubeFaceDict(TypedDict):
+    tris: List[DebugCubeTriDict]
+
+
+class DebugCubeSideDict(TypedDict):
+    faces_match: bool
+    faces: List[DebugCubeFaceDict]
+
+
+class AxisSignInfo(NamedTuple):
+    axis: Literal["x", "y", "z"]
+    sign: Literal["+", "-"]
+
+
+def get_cube_same_sign_axis_info(vectors: List[Vector]) -> AxisSignInfo:
+    """Determines axis and sign of a test cube side by a list of vectors.
+    This strictly assumes a cube centered on the world origin with each side
+    being made up of two triangles. Behaviour outside these parameters is
+    undefined."""
+
+    axes: List[Literal["x"], Literal["y"], Literal["z"]] = ["x", "y", "z"]
+    columns: List[List[float]] = [
+        [vectors[0].x, vectors[1].x, vectors[2].x],
+        [vectors[0].y, vectors[1].y, vectors[2].y],
+        [vectors[0].z, vectors[1].z, vectors[2].z]
+    ]
+
+    i_axes = 0
+    for column in columns:
+        if all(map(lambda component: component > 0, column)):
+            return AxisSignInfo(axes[i_axes], "+")
+        elif all(map(lambda component: component < 0, column)):
+            return AxisSignInfo(axes[i_axes], "-")
+        i_axes += 1
+
+
+def generate_cube_debug_side_list(pre_json: Dict) -> List[DebugCubeSideDict]:
+    sides: List[DebugCubeSideDict] = []
+    pre_json_vertices: List[Vector] = pre_json["vertices"]
+    pre_json_uvs: List[Vector] = pre_json["uvs"]
+    vertex_count = len(pre_json_vertices)
+
+    if not vertex_count % 6 == 0:
+        raise TypeError(
+            "Number of vertices must be divisible by 6, "
+            "as one side consists of two tris (with two overlapping)."
+        )
+
+    side_count = int(vertex_count / 6)
+    for i_side in range(side_count):
+        verts: List[Vector] = [pre_json_vertices[6*i_side+i] for i in range(6)]
+        uvs: List[Vector] = [pre_json_uvs[6*i_side+i] for i in range(6)]
+        tri1_axis_sign_info: AxisSignInfo =\
+            get_cube_same_sign_axis_info(verts[:3])
+        tri2_axis_sign_info: AxisSignInfo =\
+            get_cube_same_sign_axis_info(verts[3:])
+
+        sides.append({
+                "faces_match": tri1_axis_sign_info == tri1_axis_sign_info,
+                "faces": [
+                    {
+                        "axis": tri1_axis_sign_info.axis,
+                        "axis_sign": tri1_axis_sign_info.sign,
+                        "vertices": verts[:3],
+                        "uvs": uvs[:3]
+                    },
+                    {
+                        "axis": tri2_axis_sign_info.axis,
+                        "axis_sign": tri2_axis_sign_info.sign,
+                        "vertices": verts[3:],
+                        "uvs": uvs[3:]
+                    },
+                ]
+        })
+
+    return sides
+
+
 class RawExport(bpy.types.Operator):
     bl_idname = "object.raw_export"
     bl_label = "raw_export"
@@ -483,6 +557,8 @@ class RawExport(bpy.types.Operator):
             #     index: materials_pre_json[index] for index in range(material_index)
             # }
         }
+
+        pprint.pprint(generate_cube_debug_side_list(mesh_pre_json), indent=4)
 
         with open(DEVFIXTURE_output_path, "w") as output_file:
             output_file.write(json.dumps(mesh_pre_json, cls=AllJSONEncoders, indent=4))
