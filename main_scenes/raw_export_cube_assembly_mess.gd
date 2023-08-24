@@ -26,17 +26,40 @@ func add_vertices_to_surface_arrays(surface_arrays: Array, vertices: PackedVecto
 	for i_face in range(len(vertices) / 3):
 		var offset = i_face * 3
 		var tri := ATri.new(
-			vertices[offset+2],
-			vertices[offset+1],
+			# Inverted
+#			vertices[offset+2],
+#			vertices[offset+1],
+#			vertices[offset],
 			vertices[offset],
+			vertices[offset+1],
+			vertices[offset+2],
 		)
 		multi_tri.add_tri(tri)
 	multi_tri.apply_all()
 	#multi_tri.flip_tris()
 	#multi_tri.apply_all()
 
-	var surface_array_vertex := multi_tri.get_array_vertex()
-	surface_arrays[ArrayMesh.ARRAY_VERTEX] = surface_array_vertex
+	#var surface_array_vertex := multi_tri.get_array_vertex()
+	#surface_arrays[ArrayMesh.ARRAY_VERTEX] = surface_array_vertex
+	
+	# Y-up
+	for i_vert in range(len(vertices)):
+		var vert := vertices[i_vert]
+		var y := vert.y
+		vert.y = vert.z
+		vert.z = y
+		vertices[i_vert] = vert
+	
+	# For UV Y-Flip
+#	for i_vert in range(3):
+#		var i_mid_vert := i_vert + 1
+#		var mid_vert := vertices[i_mid_vert]
+#		vertices[i_mid_vert] = vertices[i_vert]
+#		vertices[i_vert] = mid_vert
+	
+	surface_arrays[ArrayMesh.ARRAY_VERTEX] = vertices
+	
+	print(surface_arrays[ArrayMesh.ARRAY_VERTEX])
 	
 #	surface_arrays[ArrayMesh.ARRAY_VERTEX] = PackedVector3Array()
 #	for i_quad in range(len(vertices) / 6):
@@ -75,21 +98,18 @@ func add_normals_to_surface_arrays(surface_arrays: Array, normals: PackedVector3
 	# For testing, to see whether the normals are flipped.
 	var rearranged_normals = PackedVector3Array()
 	for i_tri in range(len(normals) / 3):
-		rearranged_normals.append(normals[3*i_tri+2])
-		rearranged_normals.append(normals[3*i_tri+1])
 		rearranged_normals.append(normals[3*i_tri])
+		rearranged_normals.append(normals[3*i_tri+1])
+		rearranged_normals.append(normals[3*i_tri+2])
 		
 	surface_arrays[ArrayMesh.ARRAY_NORMAL] = rearranged_normals
 	
 	
 func add_uvs_to_surface_arrays(surface_arrays: Array, uvs: PackedVector2Array):
-	surface_arrays[ArrayMesh.ARRAY_TEX_UV] = uvs
 	
 	var rearranged_uvs = PackedVector2Array()
 	for i_tri in range(len(uvs) / 3):
-		print(i_tri, uvs[3*i_tri+2])
-		print(i_tri,uvs[3*i_tri+1])
-		print(i_tri, uvs[3*i_tri])
+		# Invert (to match inverted vertices).
 		
 		# Blue Test.
 #		rearranged_uvs.append(Vector2(0.62, 0.25))
@@ -101,9 +121,9 @@ func add_uvs_to_surface_arrays(surface_arrays: Array, uvs: PackedVector2Array):
 #		rearranged_uvs.append(uvs[3*i_tri+1])
 #		rearranged_uvs.append(uvs[3*i_tri])
 		
-		var uv1 = uvs[3*i_tri+2]
+		var uv1 = uvs[3*i_tri]
 		var uv2 = uvs[3*i_tri+1]
-		var uv3 = uvs[3*i_tri]
+		var uv3 = uvs[3*i_tri+2]
 		
 		# Bug: Not mirrored anymore, but the mapping is broken in some places.
 		# It's still rotated by 180° now, though. 
@@ -111,9 +131,13 @@ func add_uvs_to_surface_arrays(surface_arrays: Array, uvs: PackedVector2Array):
 		# calculations done below, that's why that one's broken.
 		# -X, +Y and -Y are a "pair", and everything else is flipped 180°
 		# relative to them.
-		rearranged_uvs.append(Vector2(uv1.x, 1 - uv1.y))
-		rearranged_uvs.append(Vector2(uv2.x, 1 - uv2.y))
-		rearranged_uvs.append(Vector2(uv3.x, 1 - uv2.y))
+		rearranged_uvs.append(Vector2(uv1.x, 1.0 - uv1.y))
+		rearranged_uvs.append(Vector2(uv2.x, 1.0 - uv2.y))
+		rearranged_uvs.append(Vector2(uv3.x, 1.0 - uv3.y))
+
+#		rearranged_uvs.append(Vector2(uv1.x, uv1.y))
+#		rearranged_uvs.append(Vector2(uv2.x, uv2.y))
+#		rearranged_uvs.append(Vector2(uv3.x, uv3.y))
 		
 	surface_arrays[ArrayMesh.ARRAY_TEX_UV] = rearranged_uvs
 	
@@ -121,7 +145,6 @@ func add_uvs_to_surface_arrays(surface_arrays: Array, uvs: PackedVector2Array):
 #	for uv in uvs:
 #		surface_arrays[ArrayMesh.ARRAY_TEX_UV][i] = surface_arrays[ArrayMesh.ARRAY_TEX_UV][i] * -1
 #		i += 1
-
 
 func _mess(show_debug_overlay) -> Node3D:
 	var file := FileAccess.get_file_as_string(test_cube_path)
@@ -140,6 +163,16 @@ func _mess(show_debug_overlay) -> Node3D:
 		array_mesh_node.add_child(ADebugOverlay.new().visualize_array_vertex(
 			surface_arrays[ArrayMesh.ARRAY_VERTEX]
 		))
+		
+		
+	for i_face in range(len(surface_arrays[ArrayMesh.ARRAY_VERTEX]) / 3):
+		print(i_face)
+		print(surface_arrays[ArrayMesh.ARRAY_VERTEX][3*i_face])
+		print(surface_arrays[ArrayMesh.ARRAY_VERTEX][3*i_face+1])
+		print(surface_arrays[ArrayMesh.ARRAY_VERTEX][3*i_face+2])
+		print(surface_arrays[ArrayMesh.ARRAY_TEX_UV][3*i_face])
+		print(surface_arrays[ArrayMesh.ARRAY_TEX_UV][3*i_face+1])
+		print(surface_arrays[ArrayMesh.ARRAY_TEX_UV][3*i_face+2])
 	
 	var material := StandardMaterial3D.new()
 	material.albedo_texture = load("res://assets/parts/textures/coord_texture.png")
