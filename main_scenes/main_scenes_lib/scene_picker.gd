@@ -136,8 +136,6 @@ func _ready():
 		var file_res_path = "%s%s" % [MAIN_SCENES_PATH, file_name]
 		
 		if file_name.get_extension() == "tscn" and not file_res_path in scene_blacklist:
-			print(file_res_path)
-			print(str(scene_blacklist))
 			var new_button: HBoxContainer = SetSceneButton.instantiate()
 			new_button.init(file_res_path, file_name.get_basename())
 			new_button.scene_picked.connect(_on_set_scene_button_button_up)
@@ -164,7 +162,6 @@ func set_scene_from_resource(scene: Resource) -> void:
 
 func set_scene_by_resource_path(path: String) -> void:
 	set_scene_from_resource(load(path))
-	print("[DEBUG] scene should be showing now.")
 
 
 func set_scene_by_resource_name(name: String) -> void:
