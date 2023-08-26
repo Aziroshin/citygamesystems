@@ -189,7 +189,7 @@ func save_config_value(section: String, key: String, value) -> bool:
 func load_config_value(section: String, key: String) -> Variant:
 	var config := ConfigFile.new()
 	config.load(config_file_path)
-	return config.get_value(config_section, key)
+	return config.get_value(section, key)
 	
 	
 func save_transform() -> bool:
