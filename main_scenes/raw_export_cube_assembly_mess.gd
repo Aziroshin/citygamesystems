@@ -123,19 +123,32 @@ static func invert_surface_arrays_tris(surface_arrays: Array):
 		)
 		
 		
-static func swap_last_vertices_two_for_each_tri(surface_arrays: Array):
-	for i_face in int(len(surface_arrays[ArrayMesh.ARRAY_VERTEX]) / 3):
-		var i_first_vert := i_face * 3
-		swap_values_of_arrays(
-			[
-				surface_arrays[ArrayMesh.ARRAY_VERTEX],
-				surface_arrays[ArrayMesh.ARRAY_TEX_UV],
-				surface_arrays[ArrayMesh.ARRAY_NORMAL]
-			],
-			[i_first_vert+1],
-			[i_first_vert+2]
-		)
+static func flip_x(surface_arrays: Array):
+	for i_vert in len(surface_arrays[ArrayMesh.ARRAY_VERTEX]):
+		surface_arrays[ArrayMesh.ARRAY_VERTEX][i_vert].x = -surface_arrays[\
+			ArrayMesh.ARRAY_VERTEX][i_vert].x
 		
+		
+static func invert_surface_arrays(surface_arrays: Array):
+	var array_vertex: PackedVector3Array = surface_arrays[ArrayMesh.ARRAY_VERTEX]
+	var array_tex_uv: PackedVector2Array = surface_arrays[ArrayMesh.ARRAY_TEX_UV]
+	var array_normal: PackedVector3Array = surface_arrays[ArrayMesh.ARRAY_NORMAL]
+	var inverted_array_vertex := PackedVector3Array()
+	var inverted_array_tex_uv := PackedVector2Array()
+	var inverted_array_normal := PackedVector3Array()
+	var length := len(surface_arrays[ArrayMesh.ARRAY_VERTEX])
+	
+	for i_vert in range(length):
+		var i_vert_inverted := length - i_vert - 1
+		inverted_array_vertex.append(array_vertex[i_vert_inverted])
+		inverted_array_tex_uv.append(array_tex_uv[i_vert_inverted])
+		inverted_array_normal.append(array_normal[i_vert_inverted])
+		
+	surface_arrays[ArrayMesh.ARRAY_VERTEX] = inverted_array_vertex
+	surface_arrays[ArrayMesh.ARRAY_TEX_UV] = inverted_array_tex_uv
+	surface_arrays[ArrayMesh.ARRAY_NORMAL] = inverted_array_normal
+	
+	
 func _mess(show_debug_overlay) -> Node3D:
 	var file := FileAccess.get_file_as_string(test_cube_path)
 	var obj: Dictionary = JSON.parse_string(file)
@@ -152,13 +165,8 @@ func _mess(show_debug_overlay) -> Node3D:
 	add_vertices_to_surface_arrays(surface_arrays, object_data.vertices)
 	add_normals_to_surface_arrays(surface_arrays, object_data.normals)
 	add_uvs_to_surface_arrays(surface_arrays, object_data.uvs)
-	
-	# Swapping the last two vertices is inspired by this:
-	# https://github.com/Ezcha/gd-obj/blob/1e1de657d0812bba93d70408a667c4718b5f34ab/obj-parse/ObjParse.gd#L251C41-L251C41
-	swap_last_vertices_two_for_each_tri(surface_arrays)
-	# But without inverting each tri the surface is on the inside of the cube,
-	# so we invert:
-	invert_surface_arrays_tris(surface_arrays)
+	flip_x(surface_arrays)
+	invert_surface_arrays(surface_arrays)
 	
 	var array_mesh_node := CityGeoFuncs.get_array_mesh_node(surface_arrays)
 	if show_debug_overlay:
