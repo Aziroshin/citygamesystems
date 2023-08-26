@@ -239,7 +239,7 @@ func _ready():
 	
 	
 func _physics_process(delta: float) -> void:
-	var forces: Array[Vector3]
+	var forces: Array[Vector3] = []
 	
 	#######################################################################
 	# Input
