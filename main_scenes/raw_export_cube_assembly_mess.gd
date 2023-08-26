@@ -173,7 +173,7 @@ func _mess(show_debug_overlay) -> Node3D:
 	var material_static := load("res://main_scenes/raw_export_cube_assembly_mess.tres")
 	array_mesh_node.material_override = material
 	
-	array_mesh_node.set_scale(Vector3(-1, 1, 1))
+	# array_mesh_node.set_scale(Vector3(-1, 1, 1))
 	return array_mesh_node
 
 
