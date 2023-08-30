@@ -103,6 +103,21 @@ static func get_array_mesh_node(surface_arrays: Array) -> MeshInstance3D:
 	mesh_instance.material_override = material
 	return mesh_instance
 	
+static func get_multi_surface_array_mesh_node(
+	surface_arrays_array: Array[Array],
+	primitive := Mesh.PRIMITIVE_TRIANGLES
+) -> MeshInstance3D:
+	var array_mesh := ArrayMesh.new()
+	var mesh_instance := MeshInstance3D.new()
+	
+	for surface_arrays in surface_arrays_array:
+		array_mesh.add_surface_from_arrays(
+			primitive,
+			surface_arrays
+			)
+	mesh_instance.mesh = array_mesh
+	
+	return mesh_instance
 	
 static func get_array_mesh_node_from_vertices(
 	array_vertex: PackedVector3Array
