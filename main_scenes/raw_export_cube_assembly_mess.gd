@@ -42,26 +42,20 @@ static func y_up_vertices(vertices: PackedVector3Array) -> PackedVector3Array:
 
 
 static func add_vertices_to_surface_arrays(surface_arrays: Array, vertices: PackedVector3Array):
-
-#	var multi_tri := AMultiTri.new()
-#	for i_face in range(len(vertices) / 3):
-#		var offset = i_face * 3
-#		var tri := ATri.new(
-#			# Inverted
-#			vertices[offset+2],
-#			vertices[offset+1],
-#			vertices[offset],
-##			vertices[offset],
-##			vertices[offset+1],
-##			vertices[offset+2],
-#		)
-#		multi_tri.add_tri(tri)
-#	multi_tri.apply_all()
-	
-	# Y-up
 	y_up_vertices(vertices)
 	
-	surface_arrays[ArrayMesh.ARRAY_VERTEX] = vertices
+	var multi_tri := AMultiTri.new()
+	for i_face in range(len(vertices) / 3):
+		var offset = i_face * 3
+		var tri := ATri.new(
+			vertices[offset],
+			vertices[offset+1],
+			vertices[offset+2],
+		)
+		multi_tri.add_tri(tri)
+	multi_tri.apply_all()
+		
+	surface_arrays[ArrayMesh.ARRAY_VERTEX] = multi_tri.get_array_vertex()
 	
 	
 func add_normals_to_surface_arrays(surface_arrays: Array, normals: PackedVector3Array):
