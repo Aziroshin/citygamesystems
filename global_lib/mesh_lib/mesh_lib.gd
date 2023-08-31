@@ -19,7 +19,19 @@ class ASegment:
 			# and nulled Vector3s getting returned even when they shouldn't
 			# be nulled.
 			#return arrays[ArrayMesh.ARRAY_VERTEX] as PackedVector3Array
-		
+			
+	var _array_normal := PackedVector3Array():
+		set(value):
+			_arrays[ArrayMesh.ARRAY_NORMAL] = value
+		get:
+			return _arrays[ArrayMesh.ARRAY_NORMAL]
+			
+	var _array_tex_uv := PackedVector2Array():
+		set(value):
+			_arrays[ArrayMesh.ARRAY_TEX_UV] = value
+		get:
+			return _arrays[ArrayMesh.ARRAY_TEX_UV]
+			
 	func _init(
 		arrays: Array = [],
 		array_vertex: PackedVector3Array = PackedVector3Array()
@@ -29,13 +41,19 @@ class ASegment:
 		
 	func _init_arrays(
 		arrays: Array = [],
-		_array_vertex: PackedVector3Array = PackedVector3Array()
+		_array_vertex: PackedVector3Array = PackedVector3Array(),
+		_array_normal: PackedVector3Array = PackedVector3Array(),
+		_array_tex_uv: PackedVector2Array = PackedVector2Array()
 	):
 		self._arrays = arrays
 		self._arrays.resize(ArrayMesh.ARRAY_MAX)
 		
 		if len(_array_vertex) > 0 or arrays[ArrayMesh.ARRAY_VERTEX] == null:
 			self._arrays[ArrayMesh.ARRAY_VERTEX] = _array_vertex
+		if len(_array_normal) > 0 or arrays[ArrayMesh.ARRAY_NORMAL] == null:
+			self._arrays[ArrayMesh.ARRAY_NORMAL] = _array_normal
+		if len(_array_tex_uv) > 0 or arrays[ArrayMesh.ARRAY_TEX_UV] == null:
+			self._arrays[ArrayMesh.ARRAY_TEX_UV] = _array_tex_uv
 		
 	func get_array_vertex() -> PackedVector3Array:
 		return _array_vertex
@@ -48,7 +66,7 @@ class ASegment:
 		return inverted_array_vertex_copy
 		
 		
-# Proxies a `ASegment` for added transform features.
+# Proxies an `ASegment` for added transform features.
 # Our `_array_vertex` array is transformed according to `transform` whenever
 # it's accessed, unless `apply_transform_on_access` is set to `false`. In that
 #case, `apply_transform` has to be explicitely called for the transform to be
@@ -73,6 +91,10 @@ class ATransformableSegment extends ASegment:
 	func ensure_equal_array_size():
 		# `resize` doesn't work for some reason when using it on `._array_vertex`.
 		_array_vertex.resize(len(untransformed._array_vertex))
+		# Look into the resize issue, because it'd likely also apply to these.
+		# That is, if it's still there.
+		_array_normal.resize(len(untransformed._array_normal))
+		_array_tex_uv.resize(len(untransformed._array_tex_uv))
 		
 	# Applies `.transform` to all arrays.
 	func apply_transform() -> void:
@@ -81,6 +103,7 @@ class ATransformableSegment extends ASegment:
 			var basis_changed: Vector3 = transform.basis * untransformed._array_vertex[idx]
 			_array_vertex[idx] = transform.origin + basis_changed
 		apply_offset()
+		# TODO: Check if the normals have to be transformed as well.
 		
 		# Experiment: Trying to rotate in place.
 #		for idx in range (0, len(_array_vertex)):
