@@ -178,6 +178,19 @@ class Vertex:
 		self.transformed_segment = transformed
 		self.untransformed_segment = untransformed
 		
+		# Make sure the untransformed vertex array is at least as long as
+		# the largest index of our vertex.
+		var highest_index := 0
+		for index in self.array_vertex_indexes:
+			highest_index = max(index, highest_index)
+			
+		if len(untransformed._array_vertex) <= highest_index:
+			untransformed._array_vertex.resize(highest_index + 1)
+		
+		# Set the vertex positions of all the indexes of this vertex in the
+		# untransformed vertex array.
+		for index in self.array_vertex_indexes:
+			untransformed._array_vertex[index] = initial_value
 	func get_translation_to_transformed_position(position: Vector3) -> Vector3:
 		return position - transformed
 		
@@ -215,22 +228,6 @@ class AVertexTrackingSegment extends ATransformableSegment:
 			array_vertex_indexes
 		)
 		vertices.append(vertex)
-		
-		# Make sure the untransformed vertex array is at least as long as
-		# the largest index of our vertex.
-		var highest_index := 0
-		for index in vertex.array_vertex_indexes:
-			if index > highest_index:
-				highest_index = index
-			
-		if len(untransformed._array_vertex) <= highest_index:
-			untransformed._array_vertex.resize(highest_index + 1)
-		
-		# Set the vertex positions of all the indexes of this vertex in the
-		# untransformed vertex array.
-		#TODO: This should probably be refactored into `Vertex`.
-		for index in vertex.array_vertex_indexes:
-			untransformed._array_vertex[index] = initial_value
 		
 		return vertex
 		
