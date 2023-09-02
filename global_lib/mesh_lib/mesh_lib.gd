@@ -11,9 +11,9 @@ class ASegment:
 	var _arrays: Array = []
 	var _array_vertex := PackedVector3Array():
 		set(value):
-			_arrays[ArrayMesh.ARRAY_VERTEX] = value
+			self._arrays[ArrayMesh.ARRAY_VERTEX] = value
 		get:
-			return _arrays[ArrayMesh.ARRAY_VERTEX]
+			return self._arrays[ArrayMesh.ARRAY_VERTEX]
 			
 			# This produces weird results, with `.resize` not working
 			# and nulled Vector3s getting returned even when they shouldn't
@@ -22,15 +22,15 @@ class ASegment:
 			
 	var _array_normal := PackedVector3Array():
 		set(value):
-			_arrays[ArrayMesh.ARRAY_NORMAL] = value
+			self._arrays[ArrayMesh.ARRAY_NORMAL] = value
 		get:
-			return _arrays[ArrayMesh.ARRAY_NORMAL]
+			return self._arrays[ArrayMesh.ARRAY_NORMAL]
 			
 	var _array_tex_uv := PackedVector2Array():
 		set(value):
-			_arrays[ArrayMesh.ARRAY_TEX_UV] = value
+			self._arrays[ArrayMesh.ARRAY_TEX_UV] = value
 		get:
-			return _arrays[ArrayMesh.ARRAY_TEX_UV]
+			return self._arrays[ArrayMesh.ARRAY_TEX_UV]
 			
 	func _init(
 		arrays: Array = [],
@@ -56,20 +56,20 @@ class ASegment:
 			self._arrays[ArrayMesh.ARRAY_TEX_UV] = _array_tex_uv
 		
 	func get_array_vertex() -> PackedVector3Array:
-		return _array_vertex
+		return self._array_vertex
 		
 	func copy_inverted_array_vertex() -> PackedVector3Array:
 		var inverted_array_vertex_copy := PackedVector3Array()
-		inverted_array_vertex_copy.resize(len(_array_vertex))
-		for idx in range(0, len(_array_vertex)):
-			inverted_array_vertex_copy[idx] = _array_vertex[len(_array_vertex) - idx - 1]
+		inverted_array_vertex_copy.resize(len(self._array_vertex))
+		for idx in range(0, len(self._array_vertex)):
+			inverted_array_vertex_copy[idx] = self._array_vertex[len(_array_vertex) - idx - 1]
 		return inverted_array_vertex_copy
 		
 		
 # Proxies an `ASegment` for added transform features.
 # Our `_array_vertex` array is transformed according to `transform` whenever
 # it's accessed, unless `apply_transform_on_access` is set to `false`. In that
-#case, `apply_transform` has to be explicitely called for the transform to be
+# case, `apply_transform` has to be explicitely called for the transform to be
 # applied.
 class ATransformableSegment extends ASegment:
 	var untransformed: ASegment
@@ -90,25 +90,21 @@ class ATransformableSegment extends ASegment:
 		
 	func ensure_equal_array_size():
 		# `resize` doesn't work for some reason when using it on `._array_vertex`.
-		_array_vertex.resize(len(untransformed._array_vertex))
+		self._array_vertex.resize(len(untransformed._array_vertex))
 		# Look into the resize issue, because it'd likely also apply to these.
 		# That is, if it's still there.
-		_array_normal.resize(len(untransformed._array_normal))
-		_array_tex_uv.resize(len(untransformed._array_tex_uv))
+		self._array_normal.resize(len(untransformed._array_normal))
+		self._array_tex_uv.resize(len(untransformed._array_tex_uv))
 		
 	# Applies `.transform` to all arrays.
 	func apply_transform() -> void:
 		ensure_equal_array_size()
-		for idx in range(0, len(untransformed._array_vertex)):
-			var basis_changed: Vector3 = transform.basis * untransformed._array_vertex[idx]
-			_array_vertex[idx] = transform.origin + basis_changed
+		for idx in range(0, len(self.untransformed._array_vertex)):
+			var changed_basis: Vector3 =\
+				self.transform.basis * self.untransformed._array_vertex[idx]
+			self._array_vertex[idx] = self.transform.origin + changed_basis
 		apply_offset()
 		# TODO: Check if the normals have to be transformed as well.
-		
-		# Experiment: Trying to rotate in place.
-#		for idx in range (0, len(_array_vertex)):
-#			var basis_changed: Vector3 = offset.basis * _array_vertex[idx]
-#			_array_vertex[idx] = offset.origin + basis_changed
 		
 	# Integrate this directly into offset? Prepend it with an underscore?
 	# Reason for it being a distinct method: Prototyping clarity.
@@ -119,9 +115,9 @@ class ATransformableSegment extends ASegment:
 	# previously applied to it.
 	func apply_offset() -> void:
 		ensure_equal_array_size()
-		for idx in range (0, len(_array_vertex)):
-			var basis_changed: Vector3 = offset.basis * _array_vertex[idx]
-			_array_vertex[idx] = offset.origin + basis_changed
+		for idx in range (0, len(self._array_vertex)):
+			var changed_basis: Vector3 = self.offset.basis * self._array_vertex[idx]
+			self._array_vertex[idx] = self.offset.origin + changed_basis
 		
 	func apply_all() -> void:
 		apply_transform()
@@ -202,7 +198,7 @@ class Vertex:
 		translate_to_transformed_position(vertex.transformed)
 		return self
 		
-
+		
 # It might be a good idea to make this an array-companion delegate instead
 # of a parent class.
 class AVertexTrackingSegment extends ATransformableSegment:
@@ -216,7 +212,7 @@ class AVertexTrackingSegment extends ATransformableSegment:
 			transform,
 			false
 		)
-	
+		
 	func add_vertex(
 		array_vertex_indexes: PackedInt64Array,
 		initial_value: Vector3 = Vector3()
@@ -227,7 +223,7 @@ class AVertexTrackingSegment extends ATransformableSegment:
 			untransformed,
 			array_vertex_indexes
 		)
-		vertices.append(vertex)
+		self.vertices.append(vertex)
 		
 		return vertex
 		
@@ -242,11 +238,11 @@ class AVertexTrackingSegment extends ATransformableSegment:
 			for idx in vertex.array_vertex_indexes:
 				vertex_objects_by_array_vertex_idx[idx] = vertex
 				
-		for idx in range(0, len(_array_vertex), 3):
+		for idx in range(0, len(self._array_vertex), 3):
 			new_array_vertex_indexes[idx] = idx
 			new_array_vertex_indexes[idx+1] = idx+2
 			new_array_vertex_indexes[idx+2] = idx+1
-
+			
 			var tmp_idx_plus_1_value := untransformed._array_vertex[idx+1]
 			untransformed._array_vertex[idx+1] = untransformed._array_vertex[idx+2]
 			untransformed._array_vertex[idx+2] = tmp_idx_plus_1_value
@@ -259,6 +255,7 @@ class AVertexTrackingSegment extends ATransformableSegment:
 				vertex.vertex_array_primary_index = vertex.array_vertex_indexes[0]
 				old_index_idx += 1
 			vertex_idx += 1
+			
 			
 class APoint extends AVertexTrackingSegment:
 	var vertex: Vertex
@@ -291,8 +288,8 @@ class ALine extends AVertexTrackingSegment:
 			self.start = add_vertex([0], start)
 			self.end = add_vertex([1], end)
 			apply_all()
-		
-		
+			
+			
 	func shear_vertices(
 		shear_factor: float,
 		axis_factors: Vector3
@@ -312,7 +309,7 @@ class ALine extends AVertexTrackingSegment:
 	# The thought model is that the specified amount is the absolute difference
 	# between the `end` vertex of the line and some other xyz relative to it.
 	# The specified amount will be divided by the number of vertices and the
-	# result added to each vertice.
+	# result added to each vertex.
 	func stretch_vertices_by_amount(
 		stretch_amount: Vector3
 	) -> void:
@@ -331,8 +328,8 @@ class ALine extends AVertexTrackingSegment:
 			var vertex = untransformed._array_vertex[idx]
 			untransformed._array_vertex[idx] = vertex + stretch_amount_per_vertex
 			idx += 1
-		
-		
+			
+			
 # A line of two or more vertices.
 # TODO (maybe):
 	# If an array of two or more vertices is specified, it is subdivided according
@@ -390,7 +387,7 @@ class AQuad extends AVertexTrackingSegment:
 #		self.bottom_right = add_vertex([1, 4], bottom_right)
 		
 		self.apply_all()
-
+		
 		
 	func as_ATransformableSegment() -> ATransformableSegment:
 		return self
@@ -413,7 +410,6 @@ class ATri extends AVertexTrackingSegment:
 		self.apply_all()
 		
 		
-# Adding this as modifier to a modifier system might also be an option.
 class AMultiSegment extends AVertexTrackingSegment:
 	# @virtual
 	func get_segments() -> Array[AVertexTrackingSegment]:
@@ -432,27 +428,27 @@ class AMultiSegment extends AVertexTrackingSegment:
 		
 	func apply_segments() -> void:
 		_update_vertices_from_segments()
-	
+		
 	func apply_all() -> void:
 		apply_segments()
 		super()
-	
+		
 	# @virtual
 	func as_AVertexTrackingSegment(apply_all := false) -> AVertexTrackingSegment:
 		# TODO: Proper implementation. :p
 		apply_segments()
 		return self
-	
-	
+		
+		
 class AMultiQuad extends AMultiSegment:
 	var base_quads: Array[AQuad]
 	
 	func add_quad(quad: AQuad):
-		base_quads.append(quad)
+		self.base_quads.append(quad)
 		
 	func get_segments() -> Array[AVertexTrackingSegment]:
 		var segments: Array[AVertexTrackingSegment] = []
-		for quad in base_quads:
+		for quad in self.base_quads:
 			segments.append(quad)
 		return segments
 	
@@ -461,11 +457,11 @@ class AMultiTri extends AMultiSegment:
 	var base_tris: Array[ATri]
 	
 	func add_tri(tri: ATri):
-		base_tris.append(tri)
+		self.base_tris.append(tri)
 		
 	func get_segments() -> Array[AVertexTrackingSegment]:
 		var segments: Array[AVertexTrackingSegment] = []
-		for tri in base_tris:
+		for tri in self.base_tris:
 			segments.append(tri)
 		return segments
 	
@@ -522,10 +518,10 @@ class LineVertexArrayChecker:
 		if len(array1) == len(array1):
 			return ""
 		var error_details :=\
-			" Happened in `%s` (or subclass)." % class_designation\
-			+ " %s size: %s." % [array1_name, len(array1)]\
-			+ " %s size: %s." % [array2_name, len(array2)]
-		if extra_verbose:
+			" Happened in `%s` (or subclass)." % self.class_designation\
+			+ " %s size: %s." % [self.array1_name, len(array1)]\
+			+ " %s size: %s." % [self.array2_name, len(array2)]
+		if self.extra_verbose:
 			error_details = _append_arrays_to_error_message(
 				error_details,
 				array1,
@@ -548,18 +544,18 @@ class AHorizontallyFoldedTriangle extends AMultiSegment:
 	var base_quads: Array[AQuad]
 	var tip_tri: ATri
 	
-	# TODO: Add support for empty left and right side vertice arrays.
+	# TODO: Add support for empty left and right side vertex arrays.
 	func _init(
 		left_side_vertices: PackedVector3Array,
 		right_side_vertices: PackedVector3Array
 	):
-#		_side_arrays_error.error_if_not_same_size(
-#			left_side_vertices,
-#			right_side_vertices
+#		self._side_arrays_error.error_if_not_same_size(
+#			self.left_side_vertices,
+#			self.right_side_vertices
 #		)
-#		assert(_side_arrays_error.is_ok, _side_arrays_error.error_message)
-		left_line = left_side_vertices
-		right_line = right_side_vertices
+#		assert(self._side_arrays_error.is_ok, self._side_arrays_error.error_message)
+		self.left_line = left_side_vertices
+		self.right_line = right_side_vertices
 		
 		super()
 		
@@ -574,24 +570,23 @@ class AHorizontallyFoldedTriangle extends AMultiSegment:
 		var number_of_segments_to_create: int = vertex_count - 1
 		
 		# We have base quads. Let's create them before we create the tip, so we
-		# can construct from the "bottom left" vertice up.
+		# can construct from the "bottom left" vertex up.
 		# If there are only three vertices, skip this.
 		while number_of_segments_to_create - number_of_segments_created > 1:
-			base_quads.append(AQuad.new(
-				left_line[number_of_segments_created], # bottom_left
-				left_line[number_of_segments_created+1], # top_left
-				right_line[number_of_segments_created+1], # top_right
-				right_line[number_of_segments_created] # bottom_right
+			self.base_quads.append(AQuad.new(
+				self.left_line[number_of_segments_created], # bottom_left
+				self.left_line[number_of_segments_created+1], # top_left
+				self.right_line[number_of_segments_created+1], # top_right
+				self.right_line[number_of_segments_created] # bottom_right
 			))
 			number_of_segments_created += 1
-		
+			
 		# Make the triangular tip. If there are only three vertices, this will
 		# be the entire segment.
-
-			tip_tri = ATri.new(
-				left_line[number_of_segments_created], # left
-				left_line[number_of_segments_created+1], # tip
-				right_line[number_of_segments_created] # right
+			self.tip_tri = ATri.new(
+				self.left_line[number_of_segments_created], # left
+				self.left_line[number_of_segments_created+1], # tip
+				self.right_line[number_of_segments_created] # right
 			)
 			number_of_segments_created += 1
 			
@@ -599,9 +594,9 @@ class AHorizontallyFoldedTriangle extends AMultiSegment:
 		# TODO: `base_quads.duplicate` isn't working for some reason. When
 		# subsequently calling .append, the array stays empty.
 		var segments: Array[AVertexTrackingSegment] = []
-		for quad in base_quads:
+		for quad in self.base_quads:
 			segments.append(quad)
-		segments.append(tip_tri)
+		segments.append(self.tip_tri)
 		return segments
 		
 		
@@ -622,16 +617,17 @@ class AHorizontallyFoldedPlane extends AMultiSegment:
 		left_side_vertices: PackedVector3Array,
 		right_side_vertices: PackedVector3Array
 	):
-		_side_arrays_error.error_if_not_same_size(
+		self._side_arrays_error.error_if_not_same_size(
 			left_side_vertices,
 			right_side_vertices
 		)
-		assert(_side_arrays_error.is_ok, _side_arrays_error.error_message)
+		assert(self._side_arrays_error.is_ok, self._side_arrays_error.error_message)
 		
 		super()
+		
 		# TODO: Handle inappropriate number of vertices, e.g. len == 1.
 		for idx in range(0, len(left_side_vertices) - 1):
-			quads.append(AQuad.new(
+			self.quads.append(AQuad.new(
 				left_side_vertices[idx], # bottom_left
 				left_side_vertices[idx+1], # top_left
 				right_side_vertices[idx+1], # top_right
@@ -646,7 +642,7 @@ class AHorizontallyFoldedPlane extends AMultiSegment:
 		
 	func get_segments() -> Array[AVertexTrackingSegment]:
 		var segments: Array[AVertexTrackingSegment] = []
-		for quad in quads:
+		for quad in self.quads:
 			segments.append(quad)
 		return segments
 		
@@ -665,8 +661,6 @@ class AFoldedPlane extends AMultiSegment:
 		
 		var last_idx := len(bottom_outline.get_array_vertex()) - 1
 		for idx in range(0, last_idx):
-			#print("AFoldedPlane translation, idx: ", idx)
-			
 			var outer_bottom_vertex := outer_right_outline.start.transformed
 			var inner_bottom_vertex := bottom_outline.vertices[idx+1].transformed
 			
@@ -697,7 +691,7 @@ class AFoldedPlane extends AMultiSegment:
 			# they should be. If they aren't, it's an error in this here function.
 			# This woud be more of a test/assert level thing, though.
 			
-			strips.append(AHorizontallyFoldedPlane.new(
+			self.strips.append(AHorizontallyFoldedPlane.new(
 				left_outline.get_array_vertex(),
 				right_outline.get_array_vertex()
 			))
@@ -707,10 +701,10 @@ class AFoldedPlane extends AMultiSegment:
 		apply_all()
 			
 #	func get_segments() -> Array[ATransformableSegment]:
-#		return strips as Array[ATransformableSegment]
+#		return self.strips as Array[ATransformableSegment]
 		
 	func get_segments() -> Array[AVertexTrackingSegment]:
 		var segments: Array[AVertexTrackingSegment] = []
-		for strip in strips:
+		for strip in self.strips:
 			segments.append(strip)
 		return segments
