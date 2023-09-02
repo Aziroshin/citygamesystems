@@ -232,116 +232,34 @@ class AVertexTrackingSegment extends ATransformableSegment:
 		return vertex
 		
 	func flip_tris() -> void:
+		# Type: Dictionary[int, Vertex]
 		var vertex_objects_by_array_vertex_idx := Dictionary()
 		
 		var new_array_vertex_indexes := PackedInt64Array()
 		new_array_vertex_indexes.resize(len(untransformed._array_vertex))
 		
-		# Recording the original state to compare to after we're done for
-		# debugging.
-		var debug_vertices_originals_untransformed := PackedVector3Array()
-		var debug_vertices_originals_indexes := []
-		for vertex in vertices:
-			debug_vertices_originals_untransformed.append(Vector3(
-				vertex.untransformed.x,
-				vertex.untransformed.y,
-				vertex.untransformed.z
-			))
-			
-			var indexes := PackedInt64Array()
-			for index in vertex.array_vertex_indexes:
-				indexes.append(index)
-			debug_vertices_originals_indexes.append(indexes)
-		
-		
-		for vertex in vertices:
+		for vertex in self.vertices:
 			for idx in vertex.array_vertex_indexes:
 				vertex_objects_by_array_vertex_idx[idx] = vertex
-			
 				
 		for idx in range(0, len(_array_vertex), 3):
-			# The new array vertex indexes are getting flipped as intended.
-
 			new_array_vertex_indexes[idx] = idx
-#
-#			# Purposfully broken for debugging:
-			#new_array_vertex_indexes[idx+2] = idx
-#			# Unbroken:
 			new_array_vertex_indexes[idx+1] = idx+2
-#
 			new_array_vertex_indexes[idx+2] = idx+1
 
 			var tmp_idx_plus_1_value := untransformed._array_vertex[idx+1]
 			untransformed._array_vertex[idx+1] = untransformed._array_vertex[idx+2]
 			untransformed._array_vertex[idx+2] = tmp_idx_plus_1_value
-
-
-			# Bug: Testing whether this makes the vertices objects have
-			# unchanged references. It does.
-#			new_array_vertex_indexes[idx] = idx
-#			new_array_vertex_indexes[idx+1] = idx+1
-#			new_array_vertex_indexes[idx+2] = idx+2
-#			var tmp_idx_plus_1_value := untransformed._array_vertex[idx+2]
-#			untransformed._array_vertex[idx+1] = untransformed._array_vertex[idx+1]
-#			untransformed._array_vertex[idx+2] = tmp_idx_plus_1_value
-			
 			
 		var vertex_idx := 0
-		for vertex in vertices:
+		for vertex in self.vertices:
 			var old_index_idx := 0
 			for old_index in vertex.array_vertex_indexes:
 				vertex.array_vertex_indexes[old_index_idx] = new_array_vertex_indexes[old_index]
 				vertex.vertex_array_primary_index = vertex.array_vertex_indexes[0]
 				old_index_idx += 1
 			vertex_idx += 1
-				
-		## Commented out to purposefully break `vertices` mapping for debugging.
-		# This doesn't seem to do anything according to the originals comparison.
-#			for array_vertex_indexes_idx in range(0, len(vertex.array_vertex_indexes)):
-#				for new_array_vertex_indexes_idx in range(0, len(new_array_vertex_indexes)):
-#					var old_idx := vertex.array_vertex_indexes[array_vertex_indexes_idx]
-#					var new_idx := new_array_vertex_indexes[new_array_vertex_indexes_idx]
-#					if old_idx == new_array_vertex_indexes_idx:
-#						print("old idx: ", old_idx, " new array vertex indexes idx: ", new_array_vertex_indexes_idx)
-#						vertex.array_vertex_indexes[array_vertex_indexes_idx] = new_array_vertex_indexes[new_array_vertex_indexes_idx]
 			
-		# Bug: The flip is correct here.
-		print(new_array_vertex_indexes)
-		# Bug: It seems [1, 3] stays the same, whilst [2, 5] is correctly
-		# becoming [1, 4]. The "plus" part doesn't seem to be happening.
-		for idx in range(0, len(vertices)):
-			var same_or_not := "Same: "
-			if debug_vertices_originals_untransformed[idx] != vertices[idx].untransformed:
-				same_or_not = "Not same: "
-			print(
-				same_or_not, debug_vertices_originals_untransformed[idx],
-				" After: ", vertices[idx].untransformed,
-				" Orig. indexes: ", debug_vertices_originals_indexes[idx],
-				" New indexes: ", vertices[idx].array_vertex_indexes
-			)
-			#print("Not the same. Before: ", debug_vertices_originals_untransformed[idx], " After: ", vertices[idx].untransformed)
-			
-#			if vertex_objects_by_array_vertex_idx.has(idx+1):
-#				var vertex: Vertex = vertex_objects_by_array_vertex_idx[idx+1]
-#
-#				var stale_idx_index := 0
-#				for stale_idx in vertex.array_vertex_indexes:
-#					if stale_idx == idx+1:
-#						vertex.array_vertex_indexes[stale_idx_index] = idx+1
-#						vertex.vertex_array_primary_index = vertex.array_vertex_indexes[0]
-#					stale_idx_index += 1
-#
-#			if vertex_objects_by_array_vertex_idx.has(idx+2):
-#				var vertex: Vertex = vertex_objects_by_array_vertex_idx[idx+2]
-#
-#				var stale_idx_index := 0
-#				for stale_idx in vertex.array_vertex_indexes:
-#					if stale_idx == idx+2:
-#						vertex.array_vertex_indexes[stale_idx_index] = idx-1
-#						vertex.vertex_array_primary_index = vertex.array_vertex_indexes[0]
-#					stale_idx_index += 1
-						
-						
 class APoint extends AVertexTrackingSegment:
 	var vertex: Vertex
 	
