@@ -434,9 +434,12 @@ class AMultiSegment extends AVertexTrackingSegment:
 		super()
 		
 	# @virtual
-	func as_AVertexTrackingSegment(apply_all := false) -> AVertexTrackingSegment:
+	func as_AVertexTrackingSegment(do_apply_all := false) -> AVertexTrackingSegment:
 		# TODO: Proper implementation. :p
-		apply_segments()
+		if do_apply_all:
+			apply_all()
+		else:
+			apply_segments()
 		return self
 		
 		
