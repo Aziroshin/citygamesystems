@@ -537,7 +537,7 @@ class LineVertexArrayChecker:
 		
 class AHorizontallyFoldedTriangle extends AMultiSegment:
 	var _side_arrays_error := LineVertexArrayChecker.new(
-		"AHorizontallyFoldedTriangularPlane", # Class name.
+		"AHorizontallyFoldedTriangle",  # Class name.
 		"left side vertex array",
 		"right side vertex array"
 	)
