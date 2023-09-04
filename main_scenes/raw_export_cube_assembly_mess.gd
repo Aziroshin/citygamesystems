@@ -41,6 +41,48 @@ static func y_up_vertices(vertices: PackedVector3Array) -> PackedVector3Array:
 	return vertices
 
 
+static func initialize_surface_arrays_via_meshlib(
+	surface_arrays: Array,
+	vertices: PackedVector3Array,
+	normals: PackedVector3Array,
+	uvs: PackedVector2Array
+):
+	y_up_vertices(vertices)
+	
+	var y_flipped_uvs = PackedVector2Array()
+	for i_tri in range(len(uvs) / 3):
+		var uv1 = uvs[3*i_tri]
+		var uv2 = uvs[3*i_tri+1]
+		var uv3 = uvs[3*i_tri+2]
+		
+		y_flipped_uvs.append(Vector2(uv1.x, 1.0 - uv1.y))
+		y_flipped_uvs.append(Vector2(uv2.x, 1.0 - uv2.y))
+		y_flipped_uvs.append(Vector2(uv3.x, 1.0 - uv3.y))
+	
+	var multi_tri := AMultiTri.new()
+	for i_face in range(len(vertices) / 3):
+		var offset = i_face * 3
+		var tri := ATri.new(
+			vertices[offset],
+			vertices[offset+1],
+			vertices[offset+2],
+			
+			normals[offset],
+			normals[offset+1],
+			normals[offset+2],
+			
+			y_flipped_uvs[offset],
+			y_flipped_uvs[offset+1],
+			y_flipped_uvs[offset+2]
+		)
+		multi_tri.add_tri(tri)
+	multi_tri.apply_all()
+	
+	surface_arrays[ArrayMesh.ARRAY_VERTEX] = multi_tri.get_array_vertex()
+	surface_arrays[ArrayMesh.ARRAY_NORMAL] = multi_tri.get_array_normal()
+	surface_arrays[ArrayMesh.ARRAY_TEX_UV] = multi_tri.get_array_tex_uv()
+
+
 static func add_vertices_to_surface_arrays(surface_arrays: Array, vertices: PackedVector3Array):
 	y_up_vertices(vertices)
 	
@@ -261,9 +303,15 @@ func _mess(show_debug_overlay) -> Node3D:
 	var surface_arrays := []
 	var material_indices := object_data.material_indices
 	surface_arrays.resize(ArrayMesh.ARRAY_MAX)
-	add_vertices_to_surface_arrays(surface_arrays, object_data.vertices)
-	add_normals_to_surface_arrays(surface_arrays, object_data.normals)
-	add_uvs_to_surface_arrays(surface_arrays, object_data.uvs)
+	# add_vertices_to_surface_arrays(surface_arrays, object_data.vertices)
+	# add_normals_to_surface_arrays(surface_arrays, object_data.normals)
+	# add_uvs_to_surface_arrays(surface_arrays, object_data.uvs)
+	initialize_surface_arrays_via_meshlib(
+		surface_arrays,
+		object_data.vertices,
+		object_data.normals,
+		object_data.uvs
+	)
 	flip_x(surface_arrays)
 	invert_surface_arrays(surface_arrays)
 	material_indices = get_inverted_material_indices(material_indices)
@@ -282,15 +330,11 @@ func _mess(show_debug_overlay) -> Node3D:
 		array_mesh_node.add_child(ADebugOverlay.new().visualize_array_vertex(
 			surface_arrays[ArrayMesh.ARRAY_VERTEX]
 		))
-	
-	#CONTINUE: I think the problem is on the exporter side.
-	#Check line: 658. When the vertices get ordered by UV, the order of the
-	#material indices might not apply anymore.
+		
 	var materials := get_materials(object_data.materials)
 	for i_material in range(len(materials)):
 		array_mesh_node.mesh.surface_set_material(i_material, materials[i_material])
 	
-	print(array_mesh_node.mesh.get_surface_count())
 	return array_mesh_node
 	
 	

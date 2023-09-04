@@ -55,9 +55,41 @@ class ASegment:
 		if len(_array_tex_uv) > 0 or arrays[ArrayMesh.ARRAY_TEX_UV] == null:
 			self._arrays[ArrayMesh.ARRAY_TEX_UV] = _array_tex_uv
 		
+	func swap_vertex(idx_1: int, idx_2: int) -> void:
+		var tmp_idx_2_vertex := self._array_vertex[idx_2]
+		self._array_vertex[idx_2] = self._array_vertex[idx_1]
+		self._array_vertex[idx_1] = tmp_idx_2_vertex
+		
+	func swap_normal(idx_1: int, idx_2: int) -> void:
+		var tmp_idx_2_normal := self._array_normal[idx_2]
+		self._array_normal[idx_2] = self._array_normal[idx_1]
+		self._array_normal[idx_1] = tmp_idx_2_normal
+		
+	func swap_tex_uv(idx_1: int, idx_2: int) -> void:
+		var tmp_idx_2_tex_uv := self._array_tex_uv[idx_2]
+		self._array_tex_uv[idx_2] = self._array_tex_uv[idx_1]
+		self._array_tex_uv[idx_1] = tmp_idx_2_tex_uv
+		
+	func swap_data(idx_1: int, idx_2: int) -> void:
+		swap_vertex(idx_1, idx_2)
+		swap_normal(idx_1, idx_2)
+		swap_tex_uv(idx_1, idx_2)
+		
+	# TODO: Make resilient when the array isn't divisible by 3.
+	func flip_tris() -> void:
+		for idx in range(0, len(self._array_vertex), 3):
+			swap_data(idx+1, idx+2)
+		
 	func get_array_vertex() -> PackedVector3Array:
 		return self._array_vertex
 		
+	func get_array_normal() -> PackedVector3Array:
+		return self._array_normal
+		
+	func get_array_tex_uv() -> PackedVector2Array:
+		return self._array_tex_uv
+	
+	# TODO [prio:low]: Same for normal and tex_uv.
 	func copy_inverted_array_vertex() -> PackedVector3Array:
 		var inverted_array_vertex_copy := PackedVector3Array()
 		inverted_array_vertex_copy.resize(len(self._array_vertex))
@@ -100,9 +132,11 @@ class ATransformableSegment extends ASegment:
 	func apply_transform() -> void:
 		ensure_equal_array_size()
 		for idx in range(0, len(self.untransformed._array_vertex)):
-			var changed_basis: Vector3 =\
+			var basis_applied: Vector3 =\
 				self.transform.basis * self.untransformed._array_vertex[idx]
-			self._array_vertex[idx] = self.transform.origin + changed_basis
+			self._array_vertex[idx] = self.transform.origin + basis_applied
+			self._array_normal[idx] = self.untransformed._array_normal[idx]
+			self._array_tex_uv[idx] = self.untransformed._array_tex_uv[idx]
 		apply_offset()
 		# TODO: Check if the normals have to be transformed as well.
 		
@@ -126,6 +160,8 @@ class ATransformableSegment extends ASegment:
 		for idx in range(0, len(untransformed._array_vertex) - 1):
 			untransformed._array_vertex[idx] = untransformed._array_vertex[idx] * vector
 		
+	# TODO: Check if the normals also have to be flipped in these 3
+	# methods.
 	func flip_vertices_x() -> void:
 		multiply_vertices_by_vector3(Vector3(-1, 1, 1))
 		
@@ -165,6 +201,8 @@ class Vertex:
 		transformed: ATransformableSegment,
 		untransformed: ASegment,
 		array_vertex_indexes: PackedInt64Array,
+		normals_by_array_vertex_index: PackedVector3Array,
+		uvs_by_array_vertex_index: PackedVector2Array
 	):
 		assert(len(array_vertex_indexes) > 0,\
 			"The array_vertex_indexes array must contain at least one index.")
@@ -182,11 +220,67 @@ class Vertex:
 			
 		if len(untransformed._array_vertex) <= highest_index:
 			untransformed._array_vertex.resize(highest_index + 1)
+			untransformed._array_normal.resize(highest_index + 1)
+			untransformed._array_tex_uv.resize(highest_index + 1)
 		
 		# Set the vertex positions of all the indexes of this vertex in the
 		# untransformed vertex array.
+		var i_array_vertex_indexes := 0
 		for index in self.array_vertex_indexes:
 			untransformed._array_vertex[index] = initial_value
+			untransformed._array_normal[index] =\
+				normals_by_array_vertex_index[i_array_vertex_indexes]
+			untransformed._array_tex_uv[index] =\
+				uvs_by_array_vertex_index[i_array_vertex_indexes]
+				
+			i_array_vertex_indexes += 1
+		
+	### BEGIN: Normals.
+	func get_transformed_normal(array_vertex_index: int) -> Vector3:
+		assert(array_vertex_index in self.array_vertex_indexes)
+		return self.transformed_segment._array_normal[array_vertex_index]
+		
+	func get_untransformed_normal(array_vertex_index: int) -> Vector3:
+		assert(array_vertex_index in self.array_vertex_indexes)
+		return self.untransformed_segment._array_normal[array_vertex_index]
+		
+	func get_untransformed_normals() -> PackedVector3Array:
+		var untransformed_normals := PackedVector3Array()
+		for array_vertex_index in self.array_vertex_indexes:
+			untransformed_normals.append(
+				self.get_untransformed_normal(array_vertex_index)
+			)
+		return untransformed_normals
+		
+	func set_untransformed_normal(array_vertex_index: int) -> Vertex:
+		assert(array_vertex_index in self.array_vertex_indexes)
+		self.untransformed_segment._array_normal[array_vertex_index]
+		return self
+	### END: Normals.
+		
+	### BEGIN: UVs.
+	func get_transformed_tex_uv(array_vertex_index: int) -> Vector2:
+		assert(array_vertex_index in self.array_vertex_indexes)
+		return self.transformed_segment._array_tex_uv[array_vertex_index]
+		
+	func get_untransformed_tex_uv(array_vertex_index: int) -> Vector2:
+		assert(array_vertex_index in self.array_vertex_indexes)
+		return self.untransformed_segment._array_tex_uv[array_vertex_index]
+		
+	func get_untransformed_tex_uvs() -> PackedVector2Array:
+		var untransformed_tex_uvs := PackedVector2Array()
+		for array_vertex_index in self.array_vertex_indexes:
+			untransformed_tex_uvs.append(
+				self.get_untransformed_tex_uv(array_vertex_index)
+			)
+		return untransformed_tex_uvs
+		
+	func set_untransformed_tex_uv(array_vertex_index: int) -> Vertex:
+		assert(array_vertex_index in self.array_vertex_indexes)
+		self.untransformed_segment._array_tex_uv[array_vertex_index]
+		return self
+	### END: UVs.
+		
 	func get_translation_to_transformed_position(position: Vector3) -> Vector3:
 		return position - transformed
 		
@@ -215,37 +309,77 @@ class AVertexTrackingSegment extends ATransformableSegment:
 		
 	func add_vertex(
 		array_vertex_indexes: PackedInt64Array,
-		initial_value: Vector3 = Vector3()
+		initial_value: Vector3 = Vector3(),
+		normals_by_array_vertex_index := PackedVector3Array(),
+		uvs_by_array_vertex_index := PackedVector2Array()
 	) -> Vertex:
+		### BEGIN: Ensure Sanity
+		var missing_normals_count := len(array_vertex_indexes) - len(normals_by_array_vertex_index)
+		if missing_normals_count > 0:
+			var default_normal := Vector3()
+			push_error(
+				"Missing normals when adding Vertex. Initializing with "
+				+ "%s" % default_normal
+				)
+			for i_missing_normal in range(missing_normals_count):
+				normals_by_array_vertex_index.append(default_normal)
+			
+		var missing_uvs_count := len(array_vertex_indexes) - len(uvs_by_array_vertex_index)
+		if missing_uvs_count > 0:
+			var default_uv := Vector2()
+			push_error(
+				"Missing UVs when adding Vertex. Initializing with "
+				+ "%s." % default_uv
+			)
+			for i_missing_uv in range(missing_uvs_count):
+				uvs_by_array_vertex_index.append(default_uv)
+		### END: Ensure Sanity
+			
 		var vertex := Vertex.new(
 			initial_value,
 			self,
 			untransformed,
-			array_vertex_indexes
+			array_vertex_indexes,
+			normals_by_array_vertex_index,
+			uvs_by_array_vertex_index
 		)
 		self.vertices.append(vertex)
 		
 		return vertex
 		
-	func flip_tris() -> void:
-		# Type: Dictionary[int, Vertex]
-		var vertex_objects_by_array_vertex_idx := Dictionary()
+	# NOTE: In general, it would be good to make sure changes to the segment
+	# always go through overridable methods on the segment. That would be
+	# useful for something like `AFaceTrackingSegment`, etc. Then, changes to
+	# Vertex or Edge tracking parts of the inheritance chain can be intercepted
+	# by sub-classes to do what they need to do to accommodate the change.
 		
+	func add_vertex_from_vertex_with_new_indexes(
+		new_indexes,
+		source_vertex: Vertex,
+		take_initial_value_from_transformed := false
+	) -> Vertex:
+		var initial_value := source_vertex.untransformed
+		if take_initial_value_from_transformed:
+			initial_value = source_vertex.transformed
+		
+		return add_vertex(
+			new_indexes,
+			initial_value,
+			source_vertex.get_untransformed_normals(),
+			source_vertex.get_untransformed_tex_uvs()
+		)
+		
+	func flip_tris() -> void:
 		var new_array_vertex_indexes := PackedInt64Array()
 		new_array_vertex_indexes.resize(len(untransformed._array_vertex))
+		untransformed.flip_tris()
+		# NOTE: The bug in AHorizontallyFoldedTriangle could be the
+		# same phenomenon we get when commenting out the above line.
 		
-		for vertex in self.vertices:
-			for idx in vertex.array_vertex_indexes:
-				vertex_objects_by_array_vertex_idx[idx] = vertex
-				
 		for idx in range(0, len(self._array_vertex), 3):
 			new_array_vertex_indexes[idx] = idx
 			new_array_vertex_indexes[idx+1] = idx+2
 			new_array_vertex_indexes[idx+2] = idx+1
-			
-			var tmp_idx_plus_1_value := untransformed._array_vertex[idx+1]
-			untransformed._array_vertex[idx+1] = untransformed._array_vertex[idx+2]
-			untransformed._array_vertex[idx+2] = tmp_idx_plus_1_value
 			
 		var vertex_idx := 0
 		for vertex in self.vertices:
@@ -261,9 +395,11 @@ class APoint extends AVertexTrackingSegment:
 	var vertex: Vertex
 	
 	func _init(
-		vertex: Vector3
+		vertex: Vector3,
+		normal := Vector3(),
+		uv := Vector2()
 	):
-		self.vertex = add_vertex([0], vertex)
+		self.vertex = add_vertex([0], vertex, [normal], [uv])
 		
 # Idea:
 # One way to have AVertexTrackingSegments with edges and faces is to create further
@@ -281,12 +417,16 @@ class ALine extends AVertexTrackingSegment:
 		# Intended for subclassing use. This enables subclasses to start
 		# initializing their geometry on a clean object; `start` and `end` will
 		# be Nil.
-		_no_vertex_init := false
+		_no_vertex_init := false,
+		start_normal := Vector3(),
+		end_normal := Vector3(),
+		start_uv := Vector2(),
+		end_uv := Vector2(),
 	):
 		super()
 		if not _no_vertex_init:
-			self.start = add_vertex([0], start)
-			self.end = add_vertex([1], end)
+			self.start = add_vertex([0], start, [start_normal], [start_uv])
+			self.end = add_vertex([1], end, [end_normal], [end_uv])
 			apply_all()
 			
 			
@@ -297,6 +437,7 @@ class ALine extends AVertexTrackingSegment:
 		# TODO: A version of shear_line that makes it so we can operate on
 		#  the array directly without the superfluous loop.
 		var idx := 0
+		# TODO: Normals might have to be adjusted too. Evaluate.
 		for vertex in CityGeoFuncs.shear_line(
 			untransformed._array_vertex,
 			shear_factor,
@@ -341,6 +482,8 @@ class ASubdividedLine extends ALine:
 		
 	func _init(
 		array_vertex: PackedVector3Array,
+		array_normal := PackedVector3Array(),
+		array_tex_uv := PackedVector2Array()
 		# subdivisions := 0
 	):
 		assert(len(array_vertex) > 1)
@@ -348,7 +491,7 @@ class ASubdividedLine extends ALine:
 		super(Vector3(), Vector3(), true)
 		
 		for idx in range(0, len(array_vertex)):
-			add_vertex([idx], array_vertex[idx])
+			add_vertex([idx], array_vertex[idx], array_normal, array_tex_uv)
 		self.start = vertices[0]
 		self.end = vertices[len(vertices)-1]
 		
@@ -371,21 +514,42 @@ class AQuad extends AVertexTrackingSegment:
 		top_left: Vector3,
 		top_right: Vector3,
 		bottom_right: Vector3,
+		
+		bottom_left_normal := Vector3(),
+		top_left_normal := Vector3(),
+		top_right_normal := Vector3(),
+		bottom_right_normal := Vector3(),
+		
+		bottom_left_uv := Vector2(),
+		top_left_uv := Vector2(),
+		top_right_uv := Vector2(),
+		bottom_right_uv := Vector2(),
 	):
 		super()
-		
-		# Working:
-		self.bottom_left = add_vertex([0], bottom_left)
-		self.top_left = add_vertex([1, 3], top_left)
-		self.top_right = add_vertex([4], top_right)
-		self.bottom_right = add_vertex([2, 5], bottom_right)
-		
-		# Flipping experiment:
-#		self.bottom_left = add_vertex([0], bottom_left)
-#		self.top_left = add_vertex([2, 3], top_left)
-#		self.top_right = acdd_vertex([5], top_right)
-#		self.bottom_right = add_vertex([1, 4], bottom_right)
-		
+		self.bottom_left = add_vertex(
+			[0],
+			bottom_left,
+			[bottom_left_normal],
+			[bottom_left_uv]
+		)
+		self.top_left = add_vertex(
+			[1, 3],
+			top_left,
+			[top_left_normal, top_left_normal],
+			[top_left_uv, top_left_uv]
+		)
+		self.top_right = add_vertex(
+			[4],
+			top_right,
+			[top_right_normal],
+			[top_right_uv]
+		)
+		self.bottom_right = add_vertex(
+			[2, 5],
+			bottom_right,
+			[bottom_right_normal, bottom_right_normal],
+			[bottom_right_uv, bottom_right_uv]
+		)
 		self.apply_all()
 		
 		
@@ -402,11 +566,34 @@ class ATri extends AVertexTrackingSegment:
 		bottom_left: Vector3,
 		top: Vector3,
 		bottom_right: Vector3,
+		
+		bottom_left_normal := Vector3(),
+		top_normal := Vector3(),
+		bottom_right_normal := Vector3(),
+		
+		bottom_left_uv := Vector2(),
+		top_uv := Vector2(),
+		bottom_right_uv := Vector2()
 	):
 		super()
-		self.bottom_left = add_vertex([0], bottom_left)
-		self.top = add_vertex([1], top)
-		self.bottom_right = add_vertex([2], bottom_right)
+		self.bottom_left = add_vertex(
+			[0],
+			bottom_left,
+			PackedVector3Array([bottom_left_normal]),
+			PackedVector2Array([bottom_left_uv])
+		)
+		self.top = add_vertex(
+			[1],
+			top,
+			PackedVector3Array([top_normal]),
+			PackedVector2Array([top_uv])
+		)
+		self.bottom_right = add_vertex(
+			[2],
+			bottom_right,
+			PackedVector3Array([bottom_right_normal]),
+			PackedVector2Array([bottom_right_uv])
+		)
 		self.apply_all()
 		
 		
@@ -422,7 +609,7 @@ class AMultiSegment extends AVertexTrackingSegment:
 				var updated_indexes := PackedInt64Array()
 				for array_vertex_index in vertex.array_vertex_indexes:
 					updated_indexes.append(array_vertex_index_offset + array_vertex_index)
-				add_vertex(updated_indexes, vertex.untransformed)
+				var v := add_vertex_from_vertex_with_new_indexes(updated_indexes, vertex)
 			array_vertex_index_offset += len(segment.untransformed.get_array_vertex())
 		return
 		
