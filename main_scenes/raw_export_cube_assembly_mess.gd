@@ -5,6 +5,10 @@ const test_cube_path: StringName = "res://assets/parts/raw_export_test_cube.json
 ### "Imports": MeshLib
 const ATri := MeshLib.ATri
 const AMultiTri := MeshLib.AMultiTri
+const MFlipVerticesX := MeshLib.MFlipVerticesX
+const MInvertSurfaceArrays := MeshLib.MInvertSurfaceArrays
+const MYUp := MeshLib.MYUp
+const MYFlipUVs := MeshLib.MYFlipUVs
 ### "imports": MeshDebugLib
 const ADebugOverlay := MeshDebugLib.ADebugOverlay
 ### "Imports": RawExport
@@ -28,37 +32,12 @@ func add_indices_to_surface_arrays(surface_arrays: Array, indices: PackedInt32Ar
 	surface_arrays[ArrayMesh.ARRAY_INDEX] = indices
 
 
-static func get_y_upped(vertex: Vector3) -> Vector3:
-	var y := vertex.y
-	vertex.y = vertex.z
-	vertex.z = y
-	return vertex
-
-
-static func y_up_vertices(vertices: PackedVector3Array) -> PackedVector3Array:
-	for i_vert in range(len(vertices)):
-		vertices[i_vert] = get_y_upped(vertices[i_vert])
-	return vertices
-
-
 static func initialize_surface_arrays_via_meshlib(
 	surface_arrays: Array,
 	vertices: PackedVector3Array,
 	normals: PackedVector3Array,
 	uvs: PackedVector2Array
 ):
-	y_up_vertices(vertices)
-	
-	var y_flipped_uvs = PackedVector2Array()
-	for i_tri in range(len(uvs) / 3):
-		var uv1 = uvs[3*i_tri]
-		var uv2 = uvs[3*i_tri+1]
-		var uv3 = uvs[3*i_tri+2]
-		
-		y_flipped_uvs.append(Vector2(uv1.x, 1.0 - uv1.y))
-		y_flipped_uvs.append(Vector2(uv2.x, 1.0 - uv2.y))
-		y_flipped_uvs.append(Vector2(uv3.x, 1.0 - uv3.y))
-	
 	var multi_tri := AMultiTri.new()
 	for i_face in range(len(vertices) / 3):
 		var offset = i_face * 3
@@ -71,125 +50,20 @@ static func initialize_surface_arrays_via_meshlib(
 			normals[offset+1],
 			normals[offset+2],
 			
-			y_flipped_uvs[offset],
-			y_flipped_uvs[offset+1],
-			y_flipped_uvs[offset+2]
+			uvs[offset],
+			uvs[offset+1],
+			uvs[offset+2]
 		)
 		multi_tri.add_tri(tri)
+	multi_tri.add_modifier(MYFlipUVs.new())
+	multi_tri.add_modifier(MYUp.new())
+	multi_tri.add_modifier(MFlipVerticesX.new())
+	multi_tri.add_modifier(MInvertSurfaceArrays.new())
 	multi_tri.apply_all()
 	
 	surface_arrays[ArrayMesh.ARRAY_VERTEX] = multi_tri.get_array_vertex()
 	surface_arrays[ArrayMesh.ARRAY_NORMAL] = multi_tri.get_array_normal()
 	surface_arrays[ArrayMesh.ARRAY_TEX_UV] = multi_tri.get_array_tex_uv()
-
-
-static func add_vertices_to_surface_arrays(surface_arrays: Array, vertices: PackedVector3Array):
-	y_up_vertices(vertices)
-	
-	var multi_tri := AMultiTri.new()
-	for i_face in range(len(vertices) / 3):
-		var offset = i_face * 3
-		var tri := ATri.new(
-			vertices[offset],
-			vertices[offset+1],
-			vertices[offset+2],
-		)
-		multi_tri.add_tri(tri)
-	multi_tri.apply_all()
-		
-	surface_arrays[ArrayMesh.ARRAY_VERTEX] = multi_tri.get_array_vertex()
-	
-	
-func add_normals_to_surface_arrays(surface_arrays: Array, normals: PackedVector3Array):
-	surface_arrays[ArrayMesh.ARRAY_NORMAL] = normals
-	
-	
-func add_uvs_to_surface_arrays(surface_arrays: Array, uvs: PackedVector2Array):
-	# We Y-flip the UVs, since in Blender Y-zero is at the bottom and in Godot
-	# it's at the top. The exporter should probably have a flag for this.
-	var y_flipped_uvs = PackedVector2Array()
-	for i_tri in range(len(uvs) / 3):
-		var uv1 = uvs[3*i_tri]
-		var uv2 = uvs[3*i_tri+1]
-		var uv3 = uvs[3*i_tri+2]
-		
-		y_flipped_uvs.append(Vector2(uv1.x, 1.0 - uv1.y))
-		y_flipped_uvs.append(Vector2(uv2.x, 1.0 - uv2.y))
-		y_flipped_uvs.append(Vector2(uv3.x, 1.0 - uv3.y))
-		
-	surface_arrays[ArrayMesh.ARRAY_TEX_UV] = y_flipped_uvs
-	
-	
-static func swap_array_values(
-	array,  # Needs to be able to take any of the surface_arrays "array" types.
-	old_indices: PackedInt64Array,
-	new_indices: PackedInt64Array
-):
-	assert(len(old_indices) == len(new_indices))
-	
-	var i_indices := 0
-	for old_index in old_indices:
-		var new_index := new_indices[i_indices]
-		var old_item = array[old_index]
-		var new_item = array[new_index]
-
-		array[old_index] = new_item
-		array[new_index] = old_item
-		
-		i_indices += 1
-	return array
-	
-	
-static func swap_values_of_arrays(
-	arrays: Array,
-	old_indices: PackedInt64Array,
-	new_indices: PackedInt64Array
-) -> Array:
-	var i_array := 0
-	for array in arrays:
-		swap_array_values(array, old_indices, new_indices)
-		
-	return arrays
-	
-	
-static func invert_surface_arrays_tris(surface_arrays: Array):
-	for i_face in int(len(surface_arrays[ArrayMesh.ARRAY_VERTEX]) / 3):
-		var i_first_vert := i_face * 3
-		swap_values_of_arrays(
-			[
-				surface_arrays[ArrayMesh.ARRAY_VERTEX],
-				surface_arrays[ArrayMesh.ARRAY_TEX_UV],
-				surface_arrays[ArrayMesh.ARRAY_NORMAL]
-			],
-			[i_first_vert],
-			[i_first_vert+2]
-		)
-		
-		
-static func flip_x(surface_arrays: Array):
-	for i_vert in len(surface_arrays[ArrayMesh.ARRAY_VERTEX]):
-		surface_arrays[ArrayMesh.ARRAY_VERTEX][i_vert].x = -surface_arrays[\
-			ArrayMesh.ARRAY_VERTEX][i_vert].x
-		
-		
-static func invert_surface_arrays(surface_arrays: Array):
-	var array_vertex: PackedVector3Array = surface_arrays[ArrayMesh.ARRAY_VERTEX]
-	var array_tex_uv: PackedVector2Array = surface_arrays[ArrayMesh.ARRAY_TEX_UV]
-	var array_normal: PackedVector3Array = surface_arrays[ArrayMesh.ARRAY_NORMAL]
-	var inverted_array_vertex := PackedVector3Array()
-	var inverted_array_tex_uv := PackedVector2Array()
-	var inverted_array_normal := PackedVector3Array()
-	var length := len(surface_arrays[ArrayMesh.ARRAY_VERTEX])
-	
-	for i_vert in range(length):
-		var i_vert_inverted := length - i_vert - 1
-		inverted_array_vertex.append(array_vertex[i_vert_inverted])
-		inverted_array_tex_uv.append(array_tex_uv[i_vert_inverted])
-		inverted_array_normal.append(array_normal[i_vert_inverted])
-		
-	surface_arrays[ArrayMesh.ARRAY_VERTEX] = inverted_array_vertex
-	surface_arrays[ArrayMesh.ARRAY_TEX_UV] = inverted_array_tex_uv
-	surface_arrays[ArrayMesh.ARRAY_NORMAL] = inverted_array_normal
 	
 	
 func get_grouped_surfaces_by_material_index(
@@ -303,17 +177,12 @@ func _mess(show_debug_overlay) -> Node3D:
 	var surface_arrays := []
 	var material_indices := object_data.material_indices
 	surface_arrays.resize(ArrayMesh.ARRAY_MAX)
-	# add_vertices_to_surface_arrays(surface_arrays, object_data.vertices)
-	# add_normals_to_surface_arrays(surface_arrays, object_data.normals)
-	# add_uvs_to_surface_arrays(surface_arrays, object_data.uvs)
 	initialize_surface_arrays_via_meshlib(
 		surface_arrays,
 		object_data.vertices,
 		object_data.normals,
 		object_data.uvs
 	)
-	flip_x(surface_arrays)
-	invert_surface_arrays(surface_arrays)
 	material_indices = get_inverted_material_indices(material_indices)
 	
 	var grouped_surface_arrays := get_grouped_surfaces_by_material_index(

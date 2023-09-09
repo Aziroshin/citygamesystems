@@ -153,7 +153,7 @@ class SegmentMutator:
 		self.segment = segment_to_mutate
 	
 	func multiply_vertices_by_vector3(vector: Vector3):
-		for idx in range(0, len(segment._array_vertex) - 1):
+		for idx in range(0, len(segment._array_vertex)):
 			segment._array_vertex[idx] = segment._array_vertex[idx] * vector
 			
 	# TODO: Check if the normals also have to be flipped in these 3
@@ -925,6 +925,34 @@ class MStretchVerticesByAmount extends Modifier:
 			var vertex := array_vertex[idx]
 			array_vertex[idx] = vertex + stretch_amount_per_vertex
 			idx += 1
+			
+			
+class MInvertSurfaceArrays extends Modifier:
+	func modify(mutator: IndexChangeTrackingSegmentMutator) -> void:
+		mutator.segment.get_array_vertex().reverse()
+		mutator.segment.get_array_normal().reverse()
+		mutator.segment.get_array_tex_uv().reverse()
+			
+			
+class MYUp extends Modifier:
+	func modify(mutator: IndexChangeTrackingSegmentMutator) -> void:
+		var array_vertex := mutator.segment.get_array_vertex()
+		for i_vert in range(len(array_vertex)):
+			var vertex := array_vertex[i_vert]
+			var y := vertex.y
+			vertex.y = vertex.z
+			vertex.z = y
+			array_vertex[i_vert] = vertex
+			
+			
+class MYFlipUVs extends Modifier:
+	func modify(mutator: IndexChangeTrackingSegmentMutator) -> void:
+		var array_tex_uv := mutator.segment.get_array_tex_uv()
+		var y_flipped_uvs = PackedVector2Array()
+		for i_tri in range(len(array_tex_uv) / 3):
+			array_tex_uv[3*i_tri].y = 1.0 - array_tex_uv[3*i_tri].y
+			array_tex_uv[3*i_tri+1].y = 1.0 - array_tex_uv[3*i_tri+1].y
+			array_tex_uv[3*i_tri+2].y = 1.0 - array_tex_uv[3*i_tri+2].y
 			
 			
 ###########################################################################
