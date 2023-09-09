@@ -4,6 +4,9 @@ extends Node3D
 ### "Imports": MeshLib
 const AHorizontallyFoldedTriangle := MeshLib.AHorizontallyFoldedTriangle
 const ASubdividedLine := MeshLib.ASubdividedLine
+const MFlipVerticesX := MeshLib.MFlipVerticesX
+const MTranslateVertices := MeshLib.MTranslateVertices
+const MShearVertices := MeshLib.MShearVertices
 
 ### "Imports": MeshDebugLib
 const ADebugOverlay := MeshDebugLib.ADebugOverlay
@@ -14,18 +17,45 @@ const ADebugOverlay := MeshDebugLib.ADebugOverlay
 @onready var FacadeB: Resource = load("res://assets/parts/facade_b.gltf")
 
 
+func get_kinked_roof_line_arrays() -> Array:
+	var vertices := CityGeoFuncs.create_kinked_roof_line(
+		Vector3(),
+		Vector3(0, 1, -1),
+		4
+	)
+	var normals := PackedVector3Array()
+	var tex_uv := PackedVector2Array()
+	var last_vertex := vertices[len(vertices)-1]
+	for idx in len(vertices):
+		# Normals pointing up - can be recalculated to roof slope later.
+		normals.append(Vector3(0, 1, 0))
+		
+		var u: float = last_vertex.x / vertices[idx].x
+		var v: float = 1.0
+		tex_uv.append(Vector2(u,v))
+		
+	var arrays := Array([])
+	arrays.resize(ArrayMesh.ARRAY_MAX)
+	arrays[ArrayMesh.ARRAY_VERTEX] = vertices
+	arrays[ArrayMesh.ARRAY_NORMAL] = normals
+	arrays[ArrayMesh.ARRAY_TEX_UV] = tex_uv
+	return arrays
+
 func _mess_AHorizontallyFoldedTriangle(show_debug_overlay := false) -> Node3D:
 	var mess_node := Node3D.new()
-	
+		
+	var kinked_roof_line := get_kinked_roof_line_arrays()
 	var tri_left_side := ASubdividedLine.new(
-		CityGeoFuncs.create_kinked_roof_line(Vector3(), Vector3(0, 1, -1), 4)
+		kinked_roof_line[ArrayMesh.ARRAY_VERTEX],
+		kinked_roof_line[ArrayMesh.ARRAY_NORMAL],
+		kinked_roof_line[ArrayMesh.ARRAY_TEX_UV]
 	)
-	tri_left_side.shear_vertices(0.5, Vector3(1, 0, 0))
+	tri_left_side.add_modifier(MShearVertices.new(0.5, Vector3(1, 0, 0)))
 	tri_left_side.apply_all()
 	
 	var tri_right_side := tri_left_side.copy_as_ASubdividedLine()
-	tri_right_side.flip_vertices_x()
-	tri_right_side.translate_vertices(Vector3(1, 0, 0))
+	tri_right_side.add_modifier(MFlipVerticesX.new())
+	tri_right_side.add_modifier(MTranslateVertices.new(Vector3(1, 0, 0)))
 	tri_right_side.apply_all()
 		
 	var folded_triangle := AHorizontallyFoldedTriangle.new(
