@@ -168,8 +168,9 @@ class SegmentMutator:
 		multiply_vertices_by_vector3(Vector3(1, 1, -1))
 		
 	func translate_vertices(vector: Vector3) -> void:
-		for idx in range(0, len(segment._array_vertex)):
-			segment._array_vertex[idx] = segment._array_vertex[idx] + vector
+		var array_vertex := self.segment.get_array_vertex()
+		for idx in range(0, len(array_vertex)):
+			array_vertex[idx] = array_vertex[idx] + vector
 			
 	func swap_vertex(idx_1: int, idx_2: int) -> void:
 		var array_vertex := self.segment.get_array_vertex()
@@ -196,7 +197,8 @@ class SegmentMutator:
 		
 	# TODO: Make resilient when the array isn't divisible by 3.
 	func flip_tris() -> void:
-		for idx in range(0, len(self.segment._array_vertex), 3):
+		var array_vertex := self.segment.get_array_vertex()
+		for idx in range(0, len(array_vertex), 3):
 			swap_all(idx+1, idx+2)
 			
 			
@@ -1148,43 +1150,29 @@ class AFoldedPlane extends AMultiSegment:
 		top_outline: ASubdividedLine
 	):
 		super()
-		# TODO: This should probably go at the start, removing the
-		# other call at the end.
-		var left_outline := outer_left_outline.copy_as_ASubdividedLine()
-		
 		var last_idx := len(bottom_outline.get_array_vertex()) - 1
+		var left_outline := outer_left_outline.copy_as_ASubdividedLine()
 		for idx in range(0, last_idx):
 			var outer_bottom_vertex := outer_right_outline.start.transformed
 			var inner_bottom_vertex := bottom_outline.vertices[idx+1].transformed
 			
-			# Bug: Here, right_outline is initialized as: [(1, 0, 0), (1 ,1, -0.5)]
 			var right_outline := outer_right_outline.copy_as_ASubdividedLine()
-			print("=> right_outline:", right_outline.get_array_vertex())
-			# For the back plane we'll have to transform this before
-			# passing it here, so the start is at the bottom... but that
-			# might mess with UV Maps later... perhaps?
-			# That might not be an issue, though, if the texture is
-			# supposed to be mapped from the bottom left for each side.
-			var right_outline_translation: Vector3\
-				= (outer_bottom_vertex - inner_bottom_vertex) * -1
-			right_outline.add_modifier(
-				MTranslateVertices.new(right_outline_translation)
-			)
-			# Bug: With this, the below Bug applies. Without it, it's a very
-			# narrow version of this bug, but it's a triangle instead.
-			# Bug: Here, right_outline becomes: [(0.25, 0, 0), (0.25, 1, -0.5)]
-			right_outline.apply_all()
-			print("right_outline:", right_outline.get_array_vertex())
-			# Bug: This causes the (wrong) stretch to be partially downwards.
-			var stretch_amount\
-				:= top_outline.vertices[idx+1].transformed\
-				- right_outline.end.transformed
-			right_outline.add_modifier(MStretchVerticesByAmount.new(
-				stretch_amount
+			right_outline.add_modifier(MTranslateVertices.new(
+				-(outer_bottom_vertex - inner_bottom_vertex)
 			))
-			# Bug: Here, right_outline becomes: [(-0.5, 0, 0), (-0.417, 0.667, -0.5)]
+			
+			# TODO [bug]: Without this, weird results happen. However, the
+			#	modifier pipeline should provide the same result without it.
+			#	.apply_all produces the same (bugged) result, so the problem is
+			#	probably somewhere in the modifier system or the modifiers
+			#	involved.
+			right_outline.apply_modifiers()
+			
+			right_outline.add_modifier(MStretchVerticesByAmount.new(
+				top_outline.vertices[idx+1].transformed\
+				- right_outline.end.transformed
+			))
 			right_outline.apply_all()
-			print("right_outline:", right_outline.get_array_vertex())
 			
 			# NOTE: It might be wise to check whether the right outline and
 			# the outer right line are identical when it's the last pass, since
@@ -1195,10 +1183,6 @@ class AFoldedPlane extends AMultiSegment:
 				left_outline.get_array_vertex(),
 				right_outline.get_array_vertex()
 			))
-			
-			left_outline = right_outline.copy_as_ASubdividedLine()
-			
-		print("strip size: ", len(self.strips))
 		apply_all()
 			
 #	func get_segments() -> Array[ATransformableSegment]:
