@@ -212,7 +212,7 @@ supporting mouse clicks for testing things.
 The project files for this can be found [here](https://projectfiles.aziroshin.com/citygamesystems/dev/parts/facades/facade_d/). They're CC0.
 
 The 3D model itself, (\*)`facade_b.gltf`, is used in
-`main_scenes/blender_house_aassembly_mess.*`.
+`main_scenes/blender_house_assembly_mess.*`.
 
 This is a first stab at a workflow for building parts (using `part_lib`)
 that can be used for procedural generation. In this case, it's a whole
