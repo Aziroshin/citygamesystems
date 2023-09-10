@@ -4,11 +4,12 @@ class_name CityMeshLib
 # Dependencies:
 # - MeshLib
 
-
 ### "Imports": MeshLib
 const AMultiSegment := MeshLib.AMultiSegment
 const ASubdividedLine := MeshLib.ASubdividedLine
 const AFoldedPlane := MeshLib.AFoldedPlane
+const MFlipTris := MeshLib.MFlipTris
+const MTranslateVertices := MeshLib.MTranslateVertices
 
 
 class ATwoSidedRoof extends AMultiSegment:
@@ -91,7 +92,9 @@ class ATwoSidedRoof extends AMultiSegment:
 				#assert(false, warning_message)
 			
 			self.bottom_back_outline = self.bottom_front_outline.copy_as_ASubdividedLine()
-			self.bottom_back_outline.translate_vertices(self.left_outline.end.transformed)
+			self.bottom_back_outline.add_modifier(MTranslateVertices.new(
+				self.left_outline.end.transformed
+			))
 			self.bottom_back_outline.apply_all()
 			
 		assert(self.left_outline.start.transformed == self.bottom_front_outline.start.transformed)
@@ -157,6 +160,7 @@ class ATwoSidedRoof extends AMultiSegment:
 					left_outline_ridge_vertex.z + outline_ridge_vertex_difference.z * ridge_change_rate_per_vertice * idx
 				)
 			)
+			print(ridge_vertices)
 		var ridge := ASubdividedLine.new(ridge_vertices)
 		
 		# Debug ridge.
@@ -195,11 +199,36 @@ class ATwoSidedRoof extends AMultiSegment:
 #			ASubdividedLine.new(PackedVector3Array([Vector3(0, 0, -1), Vector3(1, 0, -1)])),
 #			ASubdividedLine.new(PackedVector3Array([Vector3(0, 0.5, -0.5), Vector3(1, 0.5, -0.5)]))
 #		)
+		back.add_modifier(MFlipTris.new())
+		back.apply_all()
+		apply_all()
 		
-		apply_all()
-		back.flip_tris()
-		apply_all()
+		# Bug: There is a small errant polygon on the inside, per plane.
+		# CONTINUE: Debug AFoldedPlane next. The problem is probably there.
+		var vector_arrays := {
+			# Contains Vector3(0, 0.5, -0.5)
+			"left_outline": left_outline,
+			"left_front_outline": left_front_outline.get_array_vertex(),
+			"left_back_outline": left_back_outline.get_array_vertex(),
+			"ridge_vertices": ridge_vertices,
+			"front": front.get_array_vertex(),
+			"back": back.get_array_vertex(),
+			
+			# Does NOT contain it.
+			"right_outline": right_outline,
+			"bottom_front_outline": bottom_front_outline,
+			"bottom_back_outline": bottom_back_outline,
+			"right_front_outline": right_front_outline.get_array_vertex(),
+			"right_back_outline": right_back_outline.get_array_vertex(),
+			"ridge": ridge.get_array_vertex(),
+		}
+		for key in vector_arrays:
+			var vertices: PackedVector3Array = vector_arrays[key]
+			if Vector3(0, 0.5, -0.5) in vertices:
+				print("found in:", key)
+			else:
+				print("not found in:", key)
 		
 	func get_segments() -> Array[AVertexTrackingSegment]:
-		#return [front, back]
+		#return [front]
 		return [front, back]

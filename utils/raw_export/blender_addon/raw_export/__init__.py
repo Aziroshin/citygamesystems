@@ -2,21 +2,18 @@
 # Copyright (C) 2023 Aziroshin (Christian Knuchel)
 import json
 import pprint
-from abc import abstractproperty, abstractmethod, ABC
+from abc import abstractmethod, ABC
 from json import JSONEncoder
+from math import floor
 from pathlib import Path
-from typing import List, Union, Tuple, Dict, TypeVar, OrderedDict, Type, Literal, TypeAlias, Iterable
+from typing import List, Dict, TypeVar, Type, Literal, TypeAlias, Iterable, TypedDict, \
+    NamedTuple, Any, Tuple
 # Blender
 import bpy
 import bpy.types
-import bpy_types
 import bmesh
-from bmesh.types import BMesh, BMVert, BMEdge, BMElemSeq, BMFace, BMLayerItem, BMLoopUV
-from mathutils import Vector, Matrix
-# numpy
-import numpy
-from numpy import ndarray
-import itertools
+from bmesh.types import BMesh, BMVert, BMFace, BMLayerItem, BMLoopUV
+from mathutils import Vector
 
 bl_info = {
     "name": "raw_export",
@@ -37,13 +34,6 @@ T = TypeVar("T")
 ###########################################################################
 DEVFIXTURE_output_path = "../../../../assets/parts/raw_export_test_cube.json"
 ###########################################################################
-
-
-###########################################################################
-# Types
-# Reference: numpy typing: https://numpy.org/devdocs/reference/typing.html
-###########################################################################
-ndarray_vector_dtype: numpy.dtype = numpy.dtype([("x", float), ("y", float), ("z", float)])
 
 
 ###########################################################################
@@ -75,6 +65,11 @@ def get_all_uv_coords() -> List[Vector]:
     all_uv_coords: list[Vector] = [uv_coord.vector for uv_coord in uv_map.uv]
 
     return all_uv_coords
+
+
+def get_all_uv_coords_grouped_by_face(face_vertex_count: int) -> list[list[Vector]]:
+    all_uv_coords: list[Vector] = get_all_uv_coords()  # They already come sorted by face.
+    return get_equally_split_list(all_uv_coords, face_vertex_count)
 
 
 class MeshVertex:
@@ -124,22 +119,22 @@ class MeshFace:
 #     return obj.to_mesh(preserve_all_data_layers=True)
 
 
+class FractionalListSplitError(Exception):
+    pass
+
+
 def get_equally_split_list(unsplit_list: list[T], part_len: int) -> list[list[T]]:
-    split_list = []
-
-    current_set = []
-    split_list.append(current_set)
-    i_split_list = 0
-    for item in unsplit_list:
-        current_set.append(item)
-        if i_split_list < part_len:
-            i_split_list += 1
-        else:
-            i_split_list = 0
-            current_set = []
-            split_list.append(current_set)
-
-    return split_list
+    part_count = len(unsplit_list)
+    if not part_count % part_len == 0:
+        raise FractionalListSplitError(
+            f"part_len(%s) is not a multiple of the number of items\
+            in unsplit_list (%s)." % part_len, part_count
+        )
+    part_group_count = int(part_count / part_len)
+    return [
+        unsplit_list[part_len*g:part_len*g+part_len]
+        for g in range(part_group_count)
+    ]
 
 
 def get_frozen_vector_copy(vector: Vector) -> Vector:
@@ -307,6 +302,7 @@ MaterialDataTypeStr: TypeAlias = Literal[
 ]
 
 
+# TODO: Add a __repr__.
 class MaterialData(ABC, JSONSerializable):
     type: MaterialDataTypeStr
     index: int
@@ -367,6 +363,339 @@ class ImageTextureMaterialData(MaterialData):
         }
 
 
+class DebugCubeTriDict(TypedDict):
+    axis: Literal["x", "y", "z"]
+    axis_sign: Literal["+", "-"]
+    vertices: List[Vector]
+    uvs: List[Vector]
+    material_index: int
+
+
+class DebugCubeFaceDict(TypedDict):
+    tris: List[DebugCubeTriDict]
+
+
+class DebugCubeSideDict(TypedDict):
+    faces_match: bool
+    faces: List[DebugCubeFaceDict]
+
+
+class AxisSignInfo(NamedTuple):
+    axis: Literal["x", "y", "z"]
+    sign: Literal["+", "-"]
+
+
+def get_cube_same_sign_axis_info(vectors: List[Vector]) -> AxisSignInfo:
+    """Determines axis and sign of a test cube side by a list of vectors.
+    This strictly assumes a cube centered on the world origin with each side
+    being made up of two triangles. Behaviour outside these parameters is
+    undefined."""
+
+    axes: List[Literal["x"], Literal["y"], Literal["z"]] = ["x", "y", "z"]
+    columns: List[List[float]] = [
+        [vectors[0].x, vectors[1].x, vectors[2].x],
+        [vectors[0].y, vectors[1].y, vectors[2].y],
+        [vectors[0].z, vectors[1].z, vectors[2].z]
+    ]
+
+    i_axes = 0
+    for column in columns:
+        if all(map(lambda component: component > 0, column)):
+            return AxisSignInfo(axes[i_axes], "+")
+        elif all(map(lambda component: component < 0, column)):
+            return AxisSignInfo(axes[i_axes], "-")
+        i_axes += 1
+
+
+def generate_cube_debug_side_list(pre_json: Dict) -> List[DebugCubeSideDict]:
+    sides: List[DebugCubeSideDict] = []
+    pre_json_vertices: List[Vector] = pre_json["vertices"]
+    pre_json_uvs: List[Vector] = pre_json["uvs"]
+    pre_json_material_indices: List[int] = pre_json["material_indices"]
+    vertex_count = len(pre_json_vertices)
+
+    if not vertex_count % 6 == 0:
+        raise TypeError(
+            "Number of vertices must be divisible by 6, "
+            "as one side consists of two tris (with two overlapping)."
+        )
+
+    side_count = int(vertex_count / 6)
+    for i_side in range(side_count):
+        verts: List[Vector] = [pre_json_vertices[6*i_side+i] for i in range(6)]
+        uvs: List[Vector] = [pre_json_uvs[6*i_side+i] for i in range(6)]
+        material_indices = [pre_json_material_indices[2*i_side+i] for i in range(2)]
+        print(i_side)
+        tri1_axis_sign_info: AxisSignInfo =\
+            get_cube_same_sign_axis_info(verts[:3])
+        tri2_axis_sign_info: AxisSignInfo =\
+            get_cube_same_sign_axis_info(verts[3:])
+
+        sides.append({
+                "faces_match": tri1_axis_sign_info == tri1_axis_sign_info,
+                "faces": [
+                    {
+                        "axis": tri1_axis_sign_info.axis,
+                        "axis_sign": tri1_axis_sign_info.sign,
+                        "vertices": verts[:3],
+                        "uvs": uvs[:3],
+                        "material_index": material_indices[0]
+                    },
+                    {
+                        "axis": tri2_axis_sign_info.axis,
+                        "axis_sign": tri2_axis_sign_info.sign,
+                        "vertices": verts[3:],
+                        "uvs": uvs[3:],
+                        "material_index": material_indices[1]
+                    },
+                ]
+        })
+
+    return sides
+
+
+def pop_and_push_in_list(index_to_pop: int, index_to_push_to: int, list_: List):
+    if index_to_pop >= len(list_):
+        raise TypeError("index to pop out of bounds.")
+    if index_to_push_to >= len(list_):
+        raise TypeError("index to push to out of bounds.")
+
+    popped_item: Any = list_.pop()
+    list_.insert(index_to_push_to, popped_item)
+
+
+class ObjectDataError(Exception):
+    pass
+
+
+class ObjectData:
+    vertices: List[Vector]
+    normals: List[Vector]
+    uvs: List[Vector]
+    indices: List[int]
+    material_indices: List[int]
+    poly_size: int
+
+    def __init__(
+            self,
+            *,
+            vertices: List[Vector] = [],
+            normals: List[Vector] = [],
+            uvs: List[Vector] = [],
+            indices: List[int] = [],
+            material_indices: List[int] = [],
+            poly_size: int = -1
+    ):
+        self.vertices = vertices
+        self.normals = normals
+        self.uvs = uvs
+        # TODO: Pretty sure indices are broken right now, since the vertices are
+        #  ordered differently. See what's going on, and if required, fix.
+        self.indices = indices
+        self.material_indices = material_indices
+        self.poly_size = poly_size
+
+    def pop_vertex_index_and_push_to(
+            self,
+            index_to_pop: int,
+            index_to_push_to: int,
+            omit_indices: bool = False
+    ):
+        """Pops an item from the vertex-related lists and re-inserts it
+        at a different index."""
+        if not omit_indices:
+            NotImplementedError("Dealing with indices isn't implemented yet.")
+
+        for list_ in [self.vertices, self.normals, self.uvs]:
+            pop_and_push_in_list(index_to_pop, index_to_push_to, list_)
+
+    def get_face_index(
+            self,
+            prospective_face_vertices: List[Vector],
+    ) -> int | None:
+        """Returns the starting index of a face's vertex block.
+        The face is identified and will be looked for based on
+        the vectors in `face_vertices`.
+        Returns None if there's no match."""
+        poly_size = self.poly_size
+
+        if poly_size == -1:
+            raise NotImplementedError(
+                "Getting the starting index of a face's vertices when "
+                "poly_size is -1 (which means variable size) isn't "
+                "implemented. Hint: If your object is made up of polys which "
+                "are all the same size, make sure poly_size is set before "
+                "calling get_face_index, e.g. by instantiating ObjectData "
+                "with poly_size=3 if all polygons have a size of 3."
+            )
+
+        if not len(prospective_face_vertices) == poly_size:
+            raise TypeError(
+                "The number of vectors in face_vertices needs to be equal to "
+                "poly_size."
+            )
+
+        # Won't properly support mesh faces that are perfectly overlapping.
+        for i_face in range(int(len(self.vertices) / poly_size)):
+            i_face_first_vert = i_face * poly_size
+            #print(i_face, ", ", poly_size, ", ", i_face*poly_size)
+            face_vertices = self.vertices[
+                            i_face_first_vert:i_face_first_vert+poly_size]
+            # print(
+            #     "===",
+            #     prospective_face_vertices,
+            #     "",
+            #     face_vertices,
+            #     "/==="
+            # )
+            if all(map(
+                    lambda prospective_vert: prospective_vert in face_vertices,
+                    prospective_face_vertices
+            )):
+                return i_face_first_vert  # match!
+
+        return None  # No match.
+
+    def get_face_vertices_by_unordered(
+            self,
+            unordered_vertices: List[Vector],
+    ) -> List[Vector] | None:
+        face_index = self.get_face_index(
+            unordered_vertices,
+        )
+
+        if face_index is None:
+            return None
+
+        return self.vertices[face_index:face_index+self.poly_size]
+
+
+def debug_print_mesh_faces(mesh: BMesh, object_data: ObjectData):
+    i_face = 0
+    i_vert = 0
+    for face in mesh.faces:
+        print("Face:", i_face)
+
+        for bmvert in face.verts:
+            vert_face = bmvert_location_as_vector(bmvert)
+            vert_object_data = object_data.vertices[i_vert]
+            are_identical = vert_face == vert_object_data
+            print("\t", vert_face, "\t|||", vert_object_data, "\t|||", "identical:", are_identical)
+            i_vert += 1
+
+        i_face += 1
+
+
+class FaceCoordsBuildError(Exception):
+    pass
+
+
+class FaceCoords:
+    uvs: Tuple[Vector]
+    xyzs: Tuple[Vector]
+
+    def __init__(self, uvs: Iterable[Vector], xyzs: Iterable[Vector]):
+        self.uvs = tuple(get_frozen_vector_copy(uv) for uv in uvs)
+        self.xyzs = tuple(get_frozen_vector_copy(xyz) for xyz in xyzs)
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, self.__class__):
+            if self.uvs == other.uvs and self.xyzs == other.xyzs:
+                return True
+        return False
+
+    def __hash__(self) -> int:
+        return hash(self.uvs + self.xyzs)
+
+
+class FaceCoordsBuilder:
+    poly_count: int
+    _uvs: List[Vector]
+    _xyzs: List[Vector]
+    
+    def __init__(self, poly_count = 3):
+        self.poly_count = poly_count
+        self._uvs = []
+        self._xyzs = []
+        
+    def add_uv(self, uv: Vector) -> "FaceCoordsBuilder":
+        if len(self._uvs) >= self.poly_count:
+            raise FaceCoordsBuildError(
+                f"Attempted to add a UV coord (%s) beyond .poly_count (%s)." % (uv, self.poly_count),
+                f"Currently held UV coords: %s." % self._uvs,
+                f"Currently held XYZ coords: %s." % self._uvs
+
+            )
+        self._uvs.append(uv)
+        return self
+    
+    def add_xyz(self, xyz: Vector) -> "FaceCoordsBuilder":
+        if len(self._xyzs) >= self.poly_count:
+            raise FaceCoordsBuildError(
+                f"Attempted to add a UV coord (%s) beyond .poly_count (%s)." % (xyz, self.poly_count),
+                f"Currently held UV coords: %s." % self._uvs,
+                f"Currently held XYZ coords: %s." % self._uvs
+
+            )
+        self._xyzs.append(xyz)
+        return self
+
+    def add_uvs(self, uvs: Iterable[Vector]) -> "FaceCoordsBuilder":
+        for uv in uvs:
+            self.add_uv(uv)
+        return self
+
+    def add_xyzs(self, xyzs: Iterable[Vector]) -> "FaceCoordsBuilder":
+        for xyz in xyzs:
+            self.add_xyz(xyz)
+        return self
+
+    def get(self) -> FaceCoords:
+        return FaceCoords(self._uvs, self._xyzs)
+
+
+class UVToVertMapKey(NamedTuple):
+    uv: Vector
+    xyz: Vector
+
+
+def items_in_list(list_a, list_b) -> bool:
+    items_found = 0
+    lower_len = min(len(list_a), len(list_b))
+
+    for item in list_a:
+        if item in list_b:
+            items_found += 1
+
+    if items_found == lower_len:
+        return True
+
+    return False
+
+
+class Face:
+    vertices: List[Vector]
+    uvs: List[Vector]
+    normals: List[Vector]
+    material_index: int
+
+    def __init__(
+            self,
+            vertices: List[Vector],
+            uvs: List[Vector],
+            normals: List[Vector],
+            material_index: int
+    ):
+        self.vertices = vertices
+        self.uvs = uvs
+        self.normals = normals
+        self.material_index = material_index
+
+
+class RawExportError(Exception):
+    pass
+
+
 class RawExport(bpy.types.Operator):
     bl_idname = "object.raw_export"
     bl_label = "raw_export"
@@ -386,19 +715,14 @@ class RawExport(bpy.types.Operator):
         make_y_up = True
 
         # Input - prototypal, might come from somewhere else eventually.
-        face_count = 4
+        face_vertex_count = 3
 
         mesh: BMesh = bmesh.new()
         obj: bpy.types.ObjectBase = bpy.context.active_object
         mesh.from_mesh(obj.data)
         uv_layer: BMLayerItem = mesh.loops.layers.uv.active
 
-        vertices_pre_json: List[Vector] = []
-        normals_pre_json: List[Vector] = []
-        uvs_pre_json: List[Vector] = []
-        indices_pre_json = []
-        material_indices_pre_json = []
-        material_data_pre_json: Dict[int, Dict] = {}
+        object_data = ObjectData(poly_size=face_vertex_count)
 
         # === The Action ===
 
@@ -438,51 +762,56 @@ class RawExport(bpy.types.Operator):
 
             material_index += 1
 
-        # Create a lookup table where you can put in a uv coord (2D) and get
-        # out the corresponding vertex position (3D).
-        #
-        # NOTE: Potential problem: For example, a cube where every 3D face maps
-        # to the same uv coordinates would get mapped in the order of uv
-        # "faces". This might mess with the order/grouping the vertices have on
-        # the 3D side.
-        vert_by_uv: Dict[Vector, BMVert] = {}
-        for face in mesh.faces:
-            face: BMFace = face
-            material_indices_pre_json.append(face.material_index)
-            for vert in face.verts:
-                for loop in vert.link_loops:
-                    loop_uv_layer_data: BMLoopUV = loop[uv_layer]
-                    uv_coord: Vector = loop_uv_layer_data.uv
-                    vert_by_uv[get_frozen_vector_copy(uv_coord)] = vert
         all_uv_coords: list[Vector] = get_all_uv_coords()  # They already come sorted by face.
-        uv_coords_grouped_by_face: list[list[Vector]] = get_equally_split_list(all_uv_coords, face_count)
+        uv_coords_grouped_by_face: list[list[Vector]] =\
+            get_equally_split_list(all_uv_coords, face_vertex_count)
 
-        for face_uv_coords in uv_coords_grouped_by_face:
-            for vert_uv_coord in face_uv_coords:
-                vert = vert_by_uv[get_frozen_vector_copy(vert_uv_coord)]
+        faces: List[Face] = []
+        for face in mesh.faces:
+            face: BMVert = face
+            verts: List[Vector] = []
+            uvs: List[Vector] = []
+            normals: List[Vector] = []
+            _vert_by_uvs: Dict[Vector, Vector] = {}
 
-                vertices_pre_json.append(bmvert_location_as_vector(vert))
-                normals_pre_json.append(vert.normal)
-                uvs_pre_json.append(vert_uv_coord)
-                indices_pre_json.append(vert.index)
+            for vert in face.verts:
+                verts.append(bmvert_location_as_vector(vert))
+                normals.append(vert.normal)
 
-                # print("UV:", vert_uv_coord, "Vert:", vert_by_uv[get_frozen_vector_copy(vert_uv_coord)])
+                for loop in vert.link_loops:
+                    if loop.face == face:
+                        uvs.append(loop[uv_layer].uv)
+
+            faces.append(Face(verts, uvs, normals, face.material_index))
+
+        for _face in faces:
+            print("FACE:")
+            print(_face.vertices)
+            print(_face.uvs)
+            print(_face.material_index)
+
+        for face in faces:
+            face: Face = face
+            object_data.vertices = object_data.vertices + face.vertices
+            object_data.normals = object_data.normals + face.normals
+            object_data.uvs = object_data.uvs + face.uvs
+            object_data.indices = []
+            object_data.material_indices.append(face.material_index)
 
         mesh_pre_json = {
-            "vertices": vertices_pre_json,
-            "normals": normals_pre_json,
-            "uvs": uvs_pre_json,
-            "indices": indices_pre_json,
-            "material_indices": material_indices_pre_json,
+            "vertices": object_data.vertices,
+            "normals": object_data.normals,
+            "uvs": object_data.uvs,
+            "indices": object_data.indices,
+            "material_indices": object_data.material_indices,
             # List version of `materials`.
             "materials": [
                 materials_pre_json[index] for index in range(material_index)
             ]
-            # Dict version of `materials`.
-            # "materials": {
-            #     index: materials_pre_json[index] for index in range(material_index)
-            # }
         }
+
+        pprint.pprint(generate_cube_debug_side_list(mesh_pre_json), indent=4)
+        print(mesh_pre_json["material_indices"])
 
         with open(DEVFIXTURE_output_path, "w") as output_file:
             output_file.write(json.dumps(mesh_pre_json, cls=AllJSONEncoders, indent=4))

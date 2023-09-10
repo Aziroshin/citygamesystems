@@ -123,17 +123,17 @@ class RawObjectData extends JsonSerializable:
 	var vertices: PackedVector3Array
 	var normals: PackedVector3Array
 	var uvs: PackedVector2Array
-	var indices: PackedInt64Array
+	var indices: PackedInt32Array
 	var material_indices: PackedInt64Array
-	var materials: Array
+	var materials: Array[MaterialData]
 	
 	func _init(
 		vertices := PackedVector3Array(),
 		normals := PackedVector3Array(),
 		uvs := PackedVector2Array(),
-		indices := PackedInt64Array(),
+		indices := PackedInt32Array(),
 		material_indices := PackedInt64Array(),
-		materials := Array()
+		materials: Array[MaterialData] = Array()
 	):
 		self.vertices = RawExport.convert_array_to_packed_vector3_array(vertices)
 		self.normals = RawExport.convert_array_to_packed_vector3_array(normals)
@@ -146,7 +146,7 @@ class RawObjectData extends JsonSerializable:
 		return JSON.stringify(self.to_dict())
 		
 	func to_dict() -> Dictionary:
-		var materials := Array()
+		var materials: Array[MaterialData] = []
 		for material in self.materials:
 			materials.append(material.to_dict())
 		return {
@@ -161,7 +161,7 @@ class RawObjectData extends JsonSerializable:
 static func RawObjectData_from_json(json_string: String) -> RawObjectData:
 	var obj: Dictionary = JSON.parse_string(json_string)
 	
-	var materials = Array()
+	var materials: Array[MaterialData] = []
 	for material in obj.materials:
 		if material.type == DEFAULT_MATERIAL_TYPE:
 			materials.append(DefaultMaterialData_from_dict(material))
