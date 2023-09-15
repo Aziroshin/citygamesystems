@@ -544,27 +544,6 @@ class AModifiableSegment extends AVertexTrackingSegment:
 	# It's probably just better to pop the modifier and keep
 	# debugging-relevant information around in an appropriate manner.
 	var modifier_cursor: int
-	
-	func add_vertex(
-		array_vertex_indexes: PackedInt64Array,
-		initial_value: Vector3 = Vector3(),
-		normals_by_array_vertex_index := PackedVector3Array(),
-		uvs_by_array_vertex_index := PackedVector2Array()
-	) -> Vertex:
-		var vertex := super(
-			array_vertex_indexes,
-			initial_value,
-			normals_by_array_vertex_index,
-			uvs_by_array_vertex_index
-		)
-		# Probably won't need this.
-#		self.vertices_by_arrax_index.resize(
-#			PackedInt64ArrayFuncs.get_max(array_vertex_indexes)
-#		)
-#		for array_vertex_index in array_vertex_indexes:
-#			self.vertices_by_arrax_index[array_vertex_index] = vertex
-			
-		return vertex
 		
 	func add_modifier(modifier: Modifier) -> void:
 		self.modifiers.append(modifier)
@@ -581,7 +560,6 @@ class AModifiableSegment extends AVertexTrackingSegment:
 		self.change_tracked_array_vertex_indexes(
 			mutator.index_changes_by_array_vertex_index
 		)
-		
 		
 	func apply_all() -> void:
 		# TODO: See if there isn't a better way to make sure the array is
@@ -655,30 +633,6 @@ class ALine extends AModifiableSegment:
 			self.start = add_vertex([0], start, [start_normal], [start_uv])
 			self.end = add_vertex([1], end, [end_normal], [end_uv])
 			apply_all()
-			
-class MShearVertices extends Modifier:
-	var shear_factor: float
-	var axis_factors: Vector3
-	
-	func _init(
-		shear_factor: float,
-		axis_factors: Vector3
-	):
-		self.shear_factor = shear_factor
-		self.axis_factors = axis_factors
-		
-	func modify(mutator: IndexChangeTrackingSegmentMutator) -> void:
-		# TODO: A version of shear_line that makes it so we can operate on
-		#  the array directly without the superfluous loop.
-		var idx := 0
-		# TODO: Normals might have to be adjusted too. Evaluate.
-		for vertex in CityGeoFuncs.shear_line(
-			mutator.segment.get_array_vertex(),
-			self.shear_factor,
-			self.axis_factors
-		):
-			mutator.segment.get_array_vertex()[idx] = vertex
-			idx += 1
 			
 			
 # A line of two or more vertices.
@@ -924,6 +878,31 @@ class MStretchVerticesByAmount extends Modifier:
 		for idx in range(1, len(array_vertex)):
 			var vertex := array_vertex[idx]
 			array_vertex[idx] = vertex + stretch_amount_per_vertex
+			idx += 1
+			
+			
+class MShearVertices extends Modifier:
+	var shear_factor: float
+	var axis_factors: Vector3
+	
+	func _init(
+		shear_factor: float,
+		axis_factors: Vector3
+	):
+		self.shear_factor = shear_factor
+		self.axis_factors = axis_factors
+		
+	func modify(mutator: IndexChangeTrackingSegmentMutator) -> void:
+		# TODO: A version of shear_line that makes it so we can operate on
+		#  the array directly without the superfluous loop.
+		var idx := 0
+		# TODO: Normals might have to be adjusted too. Evaluate.
+		for vertex in CityGeoFuncs.shear_line(
+			mutator.segment.get_array_vertex(),
+			self.shear_factor,
+			self.axis_factors
+		):
+			mutator.segment.get_array_vertex()[idx] = vertex
 			idx += 1
 			
 			
