@@ -36,7 +36,6 @@ class ASegment:
 		array_vertex: PackedVector3Array = PackedVector3Array()
 	):
 		_init_arrays(arrays, array_vertex)
-		# self._array_vertex = array_vertex
 		
 	func _init_arrays(
 		arrays: Array = [],
@@ -105,6 +104,7 @@ class ASegment:
 			
 	# TODO
 	func _update_metadata():
+		push_error("Unimplemented called.")
 		pass
 		
 	func _update_from_ASegment(segment: ASegment):
@@ -117,6 +117,7 @@ class ASegment:
 		
 	# TODO
 	func _get_metadata():
+		push_error("Unimplemented called.")
 		pass
 			
 	func get_array_vertex() -> PackedVector3Array:
@@ -171,6 +172,8 @@ class SegmentMutator:
 		var array_vertex := self.segment.get_array_vertex()
 		for idx in range(0, len(array_vertex)):
 			array_vertex[idx] = array_vertex[idx] + vector
+			
+	# TODO: In-place swapping.
 			
 	func swap_vertex(idx_1: int, idx_2: int) -> void:
 		var array_vertex := self.segment.get_array_vertex()
@@ -245,18 +248,16 @@ class ATransformableSegment extends ASegment:
 			self.apply_all()
 		
 	func ensure_equal_array_size():
-		# `resize` doesn't work for some reason when using it on `._array_vertex`.
-		self._array_vertex.resize(len(untransformed._array_vertex))
-		# Look into the resize issue, because it'd likely also apply to these.
-		# That is, if it's still there.
-		self._array_normal.resize(len(untransformed._array_normal))
-		self._array_tex_uv.resize(len(untransformed._array_tex_uv))
+		self._array_vertex.resize(len(self.untransformed._array_vertex))
+		self._array_normal.resize(len(self.untransformed._array_normal))
+		self._array_tex_uv.resize(len(self.untransformed._array_tex_uv))
 		
 	func apply_untransformed() -> void:
 		ensure_equal_array_size()
 		_update_from_ASegment(self.untransformed)
 		
-	# Applies `.transform` to all arrays.
+	# Sets recalculated vertices based on `.untransformed` using `.transform`.
+	# Normals and UVs are simply copied over.
 	func apply_transform() -> void:
 		ensure_equal_array_size()
 		for idx in range(0, len(self.untransformed._array_vertex)):
@@ -268,13 +269,6 @@ class ATransformableSegment extends ASegment:
 		apply_offset()
 		# TODO: Check if the normals have to be transformed as well.
 		
-	# Integrate this directly into offset? Prepend it with an underscore?
-	# Reason for it being a distinct method: Prototyping clarity.
-	# However, it might also be confusing if there is an "offset", but no
-	# apply method for it. The offset is mostly a feature of "transform",
-	# though, but broken out into its own thing so the transform can be
-	# changed without having to mess with any offset that might have been
-	# previously applied to it.
 	func apply_offset() -> void:
 		ensure_equal_array_size()
 		for idx in range (0, len(self._array_vertex)):
@@ -589,6 +583,7 @@ class APoint extends AVertexTrackingSegment:
 # One way to have AVertexTrackingSegments with edges and faces is to create further
 # subclasses of it that feature these things, which will then be parent classes
 # to AQuad and so on.
+# Note: Godot's MeshDataTool features edges and faces.
 		
 		
 class ALine extends AModifiableSegment:
@@ -976,7 +971,7 @@ class LineVertexArrayChecker:
 	var error_messages := PackedStringArray()
 	var error_message:
 		set(value):
-			# Ready-only.
+			# Read-only.
 			push_warning("Attempt to set read-only value for `error_message` in"
 				+ " `%s` class (or subclass)." % CLASS_NAME)
 		get:
@@ -986,7 +981,7 @@ class LineVertexArrayChecker:
 	var arrays_set := false
 	var is_ok: bool:
 		set(value):
-			# Ready-only.
+			# Read-only.
 			push_warning("Attempt to set read-only value for `has_error` in"
 				+ " `%s` class (or subclass)." % CLASS_NAME) 
 		get:
