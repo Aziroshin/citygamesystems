@@ -67,7 +67,7 @@ be obtained by calling `.get_array_vertex` (which, in this case, returns
 Any class that builds on `ASegment` can override that method and do what's
 necessary there for its functionality.
 
-`ATransformableSegment` is a particularly notable sub-class, as it introduces
+`ATransformableSegment` is a particularly notable subclass, as it introduces
 transformability using `Transform3D`, making it easier to build segments out of
 other segments. Notably it keeps an untransformed `ASegment` as a member, 
 `.untransformed`, which it references whenever its values are (re-)calculated.
@@ -89,12 +89,23 @@ explicitly permitted to make direct alterations to `._array_vertex` of both
 segments.
 
 This enables the convenient reference and alteration of vertices that overlap
-on the same position, but are, for all higher-level purposes, the same vertex.
+on the same position, but are, for some higher-level purposes, the same vertex.
 
-Then come the segment classes for primitives which are sub-classes of
-`AVertexTrackingSegment`, such as `AQuad` or `ALine`.
+Built on that is `AModifiableSegment` which features a modifier stack. Modifiers
+are subclasses of `Modifier` (coming with `M`-prefixed names), which implement the
+`.modify` method to define their behaviour. The method gets called in the
+`apply_all` pipeline, specifically by `apply_modifiers`, which passes an
+`IndexChangeTrackingSegmentMutator` to`.modify` exposing the segment the pipeline
+is going over as `.segment`, as well as various methods to alter the segment
+whilst making sure that all the vertex tracking stuff introduced by
+`AVertexTrackingSegment` is still being kept in order. The `.segment` there
+corresponds to `.untransformed` as far as an`AModifiableSegment` object is
+concerned. A good example of what this looks like is `MShearVertices`.
 
-Also a sub-class of it is `AMultiSegment`, which serves as a base class for
+Then come the segment classes for primitives which are subclasses of
+`AModifiableSegment`, such as `AQuad` or `ALine`.
+
+Also a subclass of it is `AMultiSegment`, which serves as a base class for
 segment classes designed to combine segment objects into more complex segments,
 such as `AHorizontallyFoldedTriangle`.
 
@@ -118,12 +129,12 @@ should be there if the object (in Blender) is parented to an armature (assuming
 gltf/glb export)).
 
 `PartControl` is designed as a base class which is either fully usable out of
-the box for simple scenarios with no more than two bones or to be sub-classed
+the box for simple scenarios with no more than two bones or to be subclassed
 to support other use cases. Importantly, it provides
 `default_receiving_connector` and `default_docking_connector`. If the fallback
-skeleton is used they references the same connector.
+skeleton is used they reference the same connector.
 
-For sub-classing, there are `._init_...` methods which can be overriden without
+For subclassing, there are `._init_...` methods which can be overriden without
 having to re-noodle `._init`.
 
 Notably, connector bones are modeled by `Node3DTailedBone`, which means the
@@ -133,12 +144,12 @@ it is facing, with the tail supposed to be the "away" point, as in the point
 the vector is pointing towards.
 
 ### city_part_lib & city_parts
-`BasicBuildingPartControl` is a sub-class of `PartControl` from part_lib, and
+`BasicBuildingPartControl` is a subclass of `PartControl` from part_lib, and
 introduces two connectors that could serve as a basis for every city part
 expected to work with the part system: A bottom left front and bottom right
 front connector - based on matching bones, of course.
 
-A sub-class of this is `BasicFacadePartControl`, which introduces a top left
+A subclass of this is `BasicFacadePartControl`, which introduces a top left
 front connector, of course with the expectation of a matching (tailed) bone on
 the skeleton.
 
@@ -154,6 +165,86 @@ grid, for example. Currently, the function `respan_3_columns` makes use of it.
 
 A very basic, experimental example of this can be looked at in
 (\*)`blender_house_assembly_mess.gd`.
+
+## RawExport
+Currently in its early experimental stages and subject to wild changes, it
+enables the JSON-export of meshes from Blender and runtime-import into Godot.
+
+The Blender exporter addon lives in `res://utils/raw_export/blender_addon`,
+in the sub-dir `raw_export`. The sub-dir `dev` contains the files needed
+to develop the addon, such as a blend-file with a test cube, a coordinate
+texture for it (which has been copied into `res://assets/parts/textures/`,
+since the `dev`-dir has a .gdignore file) and
+[start.sh](utils/raw_export/blender_addon/dev/start.sh), which creates a
+`blender_user_config` dir in `dev`, configures it with the addon, and then
+starts Blender with the addon loaded. You can then run it by executing
+the `raw_export_runner.py` script in the "Scripting"-tab whilst having
+the test cube selected. Currently, the exported JSON will be written to
+the path referenced by the `DEVFIXTURE_output_path` variable in
+[\_\_init__.py](utils/raw_export/blender_addon/raw_export/__init__.py).
+**IMPORTANT**: This will happen every time the script runs, overwriting the
+file. This is just a temporary stop-gap measure for addon development
+purposes, unfit for productive use.
+
+**!!! WARNING !!!**: `start.sh` still has had little testing, and there were
+(now fixed) issues where the system user's hotkeys ended up getting
+overwritten. Considering untested constellations and future changes in
+Blender this might not account for in time, it's probably best to take
+a backup of your Blender settings and hotkeys before using it.
+
+Besides that, `start.sh` is highly configurable and written so that it could
+be used for Blender addon development in general. Unlike the addon itself,
+which is licensed as [GPL-3.0-or-later](utils/raw_export/blender_addon/raw_export/LICENSE.md), `start.sh` is licensed 
+under the terms of the [MIT](LICENSE-MIT).
+
+The (runtime) importer code is currently in `res://global_lib/raw_export`, and
+`res://main_scenes/raw_export_cube_assembly_mess.*` is the "mess" where the
+development of raw_export, as well as adjacent developments (such as relevant
+improvements of mesh_lib) are coming together.
+
+As of commit 310b3e214a1731f09121a142e00e6bc44970f36f, the mess is
+rendering vertices and UVs as expected. It also *looks* like the normals
+are correct, but the cube might not be the best model to tell.
+Some more work might have to be done to accommodate normals regarding
+transforms, too.
+
+Also, note that the coordinates on the texture refer to Blender, and aren't
+the same in Godot. What matters here is that an object's side is the same
+in Blender and Godot - e.g. the right, front or top side are the same in
+both, and that there is an out-of-the-box-no-further-ado way for that to be
+the case.
+
+As such, Blender coordinates shouldn't be literally referenced in Godot to
+associate things with vertices. That should be the realm of the metadata
+feature, which isn't implemented yet.
+
+### How does this tie into city games?
+Once the model-combination feature is implemented, it'll enable procedural
+mesh generation based on Blender modeled mesh pieces. The idea is that, for
+example, one would be able to model and texture windows, doors, facade
+decorations and other architectural pieces that belong to facades in Blender,
+and then, in the game, at runtime, combine those JSON-exported pieces into
+one single `MeshInstance`, including UV maps, normals and texture mappings.
+
+### Why is the Blender exporter not a "proper" export plugin?
+This leaves room for the idea to run the JSON-exporter in a constantly
+running Blender process serving as a standing asset generator whilst the game is running.
+
+However, at least as of the time of this writing, citygamesystems isn't
+particularly committed to relying on that kind of"Blender server" (if you
+want to call it that), but its development is mindful of the option.
+
+There's currently (a not yet published) experiment called "Noodleplosion"
+which contains a working proof-of-concept TCP/IP server in Blender. That
+could be built upon in order to tap into Blender's power, such as geometry
+nodes, in order for a city game to request JSON-meshes from a running
+Blender process according to basic frame-meshes and/or curves (e.g. roads,
+adjacent building frames, etc).
+
+This architecture could also be useful for other types of generators, e.g.
+AI based ones, or entirely different workflows, such as players using Blender
+to create ingame-objects on the fly, or for modders to have a much faster
+feedback loop during the asset creation process.
 
 ## PlayerWorldInterface
 Basically a camera, focused on an RTS-style view and with development features
@@ -189,7 +280,7 @@ set up in a (line-broken) "one-liner" wrapped in an `assert` statement.
 This enables debugging indicators that are only included in debug builds.
 
 Be wary of the clunkiness of the builder-pattern-esque typing of the
-chainable methods and how it interacts with sub-classing, though.
+chainable methods and how it interacts with subclassing, though.
 	
 ### Cavedig
 For quick visual debugging, simple CSG-based indicators constructed in
@@ -260,12 +351,12 @@ stacks then fit together horizontally.
 	
 #### The Texture - Exploring an AI-Based Workflow
 Originally this was centered around the official Stable Diffusion model
-(1.4), which showed promising results even without any fine tuning. With
+(1.4), which showed promising results even without any fine-tuning. With
 the advent of the [Mitsua](https://huggingface.co/Mitsua/mitsua-diffusion-one)
 model, which is trained on CC0 data and some additional datasets with
 permission, the process was switched to Mitsua. As the original process,
 which involved generating a whole facade with one door and 9 windows in
-one go, didn't work very well with Mitsua (no fine tuning), the process
+one go, didn't work very well with Mitsua (no fine-tuning), the process
 now involves various masks to inpaint the windows and the door into a
 (generated) facade.
 
@@ -274,8 +365,8 @@ The base facade image for this was generated using img2img, using a
 guides that help in placing the windows and the door, whereas the overall
 canvas is to be thought as corresponding to the grid in the Blender file (
 the `QuarterGrid_Middle` object in Blender when viewed from the front (the
-`1` view if you use the default shortcuts)). Mind you that the windows and
-door here serve as a basis for Mitsua to generate window and door shaped
+`1` (numpad) view if you use the default shortcuts)). Mind you that the windows
+and door here serve as a basis for Mitsua to generate window and door shaped
 approximations that serve as a base for inpainting.
 
 The template idea could be expanded into fully automated facade generation
