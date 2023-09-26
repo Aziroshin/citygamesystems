@@ -673,7 +673,7 @@ class ASubdividedLine extends ALine:
 		)
 		
 		
-class AQuad extends AVertexTrackingSegment:
+class AQuad extends AModifiableSegment:
 	var bottom_left: Vertex
 	var top_left: Vertex
 	var top_right: Vertex
@@ -727,7 +727,7 @@ class AQuad extends AVertexTrackingSegment:
 		return self
 		
 		
-class ATri extends AVertexTrackingSegment:
+class ATri extends AModifiableSegment:
 	var bottom_left: Vertex
 	var top: Vertex
 	var bottom_right: Vertex
@@ -769,7 +769,7 @@ class ATri extends AVertexTrackingSegment:
 		
 class AMultiSegment extends AModifiableSegment:
 	# @virtual
-	func get_segments() -> Array[AVertexTrackingSegment]:
+	func get_segments() -> Array[AModifiableSegment]:
 		return []
 	
 	func _update_vertices_from_segments() -> void:
@@ -940,8 +940,8 @@ class AMultiQuad extends AMultiSegment:
 	func add_quad(quad: AQuad):
 		self.base_quads.append(quad)
 		
-	func get_segments() -> Array[AVertexTrackingSegment]:
-		var segments: Array[AVertexTrackingSegment] = []
+	func get_segments() -> Array[AModifiableSegment]:
+		var segments := super()
 		for quad in self.base_quads:
 			segments.append(quad)
 		return segments
@@ -953,8 +953,8 @@ class AMultiTri extends AMultiSegment:
 	func add_tri(tri: ATri):
 		self.base_tris.append(tri)
 		
-	func get_segments() -> Array[AVertexTrackingSegment]:
-		var segments: Array[AVertexTrackingSegment] = []
+	func get_segments() -> Array[AModifiableSegment]:
+		var segments := super()
 		for tri in self.base_tris:
 			segments.append(tri)
 		return segments
@@ -1085,10 +1085,10 @@ class AHorizontallyFoldedTriangle extends AMultiSegment:
 			number_of_segments_created += 1
 			
 			
-	func get_segments() -> Array[AVertexTrackingSegment]:
+	func get_segments() -> Array[AModifiableSegment]:
 		# TODO: `base_quads.duplicate` isn't working for some reason. When
 		# subsequently calling .append, the array stays empty.
-		var segments: Array[AVertexTrackingSegment] = []
+		var segments := super()
 		for quad in self.base_quads:
 			segments.append(quad)
 		segments.append(self.tip_tri)
@@ -1135,8 +1135,8 @@ class AHorizontallyFoldedPlane extends AMultiSegment:
 		
 		apply_all()
 		
-	func get_segments() -> Array[AVertexTrackingSegment]:
-		var segments: Array[AVertexTrackingSegment] = []
+	func get_segments() -> Array[AModifiableSegment]:
+		var segments := super()
 		for quad in self.quads:
 			segments.append(quad)
 		return segments
@@ -1190,8 +1190,8 @@ class AFoldedPlane extends AMultiSegment:
 #	func get_segments() -> Array[ATransformableSegment]:
 #		return self.strips as Array[ATransformableSegment]
 		
-	func get_segments() -> Array[AVertexTrackingSegment]:
-		var segments: Array[AVertexTrackingSegment] = []
+	func get_segments() -> Array[AModifiableSegment]:
+		var segments := super()
 		for strip in self.strips:
 			segments.append(strip)
 		return segments
