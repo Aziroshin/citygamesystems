@@ -1,10 +1,9 @@
 extends RefCounted
 class_name RawExport
 
-
-const DEFAULT_MATERIAL_TYPE = "DEFAULT"
-const BASIC_MATERIAL_TYPE = "BASIC"
-const IMAGE_FILES_MATERIAL_TYPE = "IMAGE_FILES"
+const DEFAULT_MATERIAL_TYPE := "DEFAULT"
+const BASIC_MATERIAL_TYPE := "BASIC"
+const IMAGE_FILES_MATERIAL_TYPE := "IMAGE_FILES"
 
 
 static func convert_array_to_color(array: Array) -> Color:
@@ -125,7 +124,7 @@ class RawObjectData extends JsonSerializable:
 	var uvs: PackedVector2Array
 	var indices: PackedInt32Array
 	var material_indices: PackedInt64Array
-	var materials: Array[MaterialData]
+	var material_data: Array[MaterialData]
 	
 	func _init(
 		vertices := PackedVector3Array(),
@@ -133,42 +132,43 @@ class RawObjectData extends JsonSerializable:
 		uvs := PackedVector2Array(),
 		indices := PackedInt32Array(),
 		material_indices := PackedInt64Array(),
-		materials: Array[MaterialData] = Array()
+		material_data: Array[MaterialData] = Array()
 	):
 		self.vertices = RawExport.convert_array_to_packed_vector3_array(vertices)
 		self.normals = RawExport.convert_array_to_packed_vector3_array(normals)
 		self.uvs = RawExport.convert_array_to_packed_vector2_array(uvs)
 		self.indices = indices
 		self.material_indices = material_indices
-		self.materials = materials
+		self.material_data = material_data
 		
 	func to_json() -> String:
 		return JSON.stringify(self.to_dict())
 		
 	func to_dict() -> Dictionary:
-		var materials: Array[MaterialData] = []
-		for material in self.materials:
-			materials.append(material.to_dict())
+		var material_data: Array[MaterialData] = []
+		for material in self.material_data:
+			material_data.append(material.to_dict())
 		return {
 			"vertices": self.vertices,
 			"normals": self.normals,
 			"uvs": self.uvs,
 			"indices": self.indices,
 			"material_indices": self.material_indices,
-			"materials": materials
+			"material_data": material_data
 		}
+
 
 static func RawObjectData_from_json(json_string: String) -> RawObjectData:
 	var obj: Dictionary = JSON.parse_string(json_string)
 	
-	var materials: Array[MaterialData] = []
+	var material_data: Array[MaterialData] = []
 	for material in obj.materials:
 		if material.type == DEFAULT_MATERIAL_TYPE:
-			materials.append(DefaultMaterialData_from_dict(material))
+			material_data.append(DefaultMaterialData_from_dict(material))
 		elif material.type == BASIC_MATERIAL_TYPE:
-			materials.append(BasicMaterialData_from_dict(material))
+			material_data.append(BasicMaterialData_from_dict(material))
 		elif material.type == IMAGE_FILES_MATERIAL_TYPE:
-			materials.append(ImageTextureMaterialData_from_dict(material))
+			material_data.append(ImageTextureMaterialData_from_dict(material))
 	
 	return RawObjectData.new(
 		RawExport.convert_array_to_packed_vector3_array(obj.vertices),
@@ -176,5 +176,46 @@ static func RawObjectData_from_json(json_string: String) -> RawObjectData:
 		RawExport.convert_array_to_packed_vector2_array(obj.uvs),
 		obj.indices,
 		obj.material_indices,
-		materials
+		material_data
 	)
+
+
+class MaterialResolver:
+	# @virtual
+	func get_materials() -> Array[Material]:
+		return []
+	
+	
+class BasicMaterialResolver extends MaterialResolver:
+	var material_data_array: Array[RawExport.MaterialData]
+	
+	func _init(material_data_array: Array[RawExport.MaterialData]):
+		self.material_data_array = material_data_array
+	
+	func get_materials() -> Array[Material]:
+		var materials: Array[Material] = []
+		
+		for basetype_material_data in self.material_data_array:
+			if basetype_material_data.type == DEFAULT_MATERIAL_TYPE:
+				var material_data: DefaultMaterialData = basetype_material_data
+				var material := StandardMaterial3D.new()
+				material.albedo_color = Color(0.2, 0, 1)  # Blue
+				materials.append(material)
+				
+			if basetype_material_data.type == BASIC_MATERIAL_TYPE:
+				var material_data: BasicMaterialData = basetype_material_data
+				var material := StandardMaterial3D.new()
+				material.albedo_color = Color(0, 1, 0.2)  # Green
+				materials.append(material)
+				
+			if basetype_material_data.type == IMAGE_FILES_MATERIAL_TYPE:
+				var material_data: ImageTextureMaterialData = basetype_material_data
+				var material := StandardMaterial3D.new()
+				material.albedo_texture = load(
+					# TODO: Of course, we'll need some proper path resolution
+					# using .filenames.
+					"res://assets/parts/textures/coord_texture.png"
+				)
+				materials.append(material)
+				
+		return materials

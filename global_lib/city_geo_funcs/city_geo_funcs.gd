@@ -103,6 +103,7 @@ static func get_array_mesh_node(surface_arrays: Array) -> MeshInstance3D:
 	mesh_instance.material_override = material
 	return mesh_instance
 	
+	
 static func get_multi_surface_array_mesh_node(
 	surface_arrays_array: Array[Array],
 	primitive := Mesh.PRIMITIVE_TRIANGLES
@@ -114,10 +115,11 @@ static func get_multi_surface_array_mesh_node(
 		array_mesh.add_surface_from_arrays(
 			primitive,
 			surface_arrays
-			)
+		)
 	mesh_instance.mesh = array_mesh
 	
 	return mesh_instance
+	
 	
 static func get_array_mesh_node_from_vertices(
 	array_vertex: PackedVector3Array
@@ -126,3 +128,59 @@ static func get_array_mesh_node_from_vertices(
 	surface_arrays.resize(ArrayMesh.ARRAY_MAX)
 	surface_arrays[ArrayMesh.ARRAY_VERTEX] = array_vertex
 	return get_array_mesh_node(surface_arrays)
+	
+	
+static func get_grouped_surfaces_by_material_index(
+	material_indices: PackedInt64Array,
+	surface_arrays: Array,
+	primitive_n := 3
+) -> Array[Array]:
+	var array_vertex: PackedVector3Array = surface_arrays[ArrayMesh.ARRAY_VERTEX]
+	var array_tex_uv: PackedVector2Array = surface_arrays[ArrayMesh.ARRAY_TEX_UV]
+	var array_normal: PackedVector3Array = surface_arrays[ArrayMesh.ARRAY_NORMAL]
+	var face_count := len(array_vertex) / 3
+	var grouped: Array[Array] = []
+	
+	### Initialize our array of surface arrays.
+	var highest_material_index := 0
+	for material_index in material_indices:
+		highest_material_index = max(highest_material_index, material_index)
+	grouped.resize(highest_material_index + 1)
+	for i_material in range(highest_material_index + 1):
+		var group_surface_arrays := []
+		group_surface_arrays.resize(ArrayMesh.ARRAY_MAX)
+		group_surface_arrays[ArrayMesh.ARRAY_VERTEX] = PackedVector3Array()
+		group_surface_arrays[ArrayMesh.ARRAY_TEX_UV] = PackedVector2Array()
+		group_surface_arrays[ArrayMesh.ARRAY_NORMAL] = PackedVector3Array()
+		grouped[i_material] = group_surface_arrays
+	
+	var i_face := 0
+	for material_index in material_indices:
+		var group_surface_arrays := grouped[material_index]
+		var group_array_vertex: PackedVector3Array\
+			= group_surface_arrays[ArrayMesh.ARRAY_VERTEX]
+		var group_array_tex_uv: PackedVector2Array\
+			= group_surface_arrays[ArrayMesh.ARRAY_TEX_UV]
+		var group_array_normal: PackedVector3Array\
+			= group_surface_arrays[ArrayMesh.ARRAY_NORMAL]
+		
+		group_array_vertex.append(array_vertex[primitive_n * i_face])
+		group_array_vertex.append(array_vertex[primitive_n * i_face + 1])
+		group_array_vertex.append(array_vertex[primitive_n * i_face + 2])
+		
+		group_array_tex_uv.append(array_tex_uv[primitive_n * i_face])
+		group_array_tex_uv.append(array_tex_uv[primitive_n * i_face + 1])
+		group_array_tex_uv.append(array_tex_uv[primitive_n * i_face + 2])
+		
+		group_array_normal.append(array_normal[primitive_n * i_face])
+		group_array_normal.append(array_normal[primitive_n * i_face + 1])
+		group_array_normal.append(array_normal[primitive_n * i_face + 2])
+		
+		group_surface_arrays[ArrayMesh.ARRAY_VERTEX] = group_array_vertex
+		group_surface_arrays[ArrayMesh.ARRAY_TEX_UV] = group_array_tex_uv
+		group_surface_arrays[ArrayMesh.ARRAY_NORMAL] = group_array_normal
+		grouped[material_index] = group_surface_arrays
+		
+		i_face += 1
+	
+	return grouped

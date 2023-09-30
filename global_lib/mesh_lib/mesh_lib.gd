@@ -1,9 +1,10 @@
 extends RefCounted
 class_name MeshLib
 
-# Dependencies:
-# - CityGeoFuncs
-# - PackedArrayFuncs
+### Dependencies:
+# - CityGeoFuncs.shear_line
+# - CityGeoFuncs.get_multi_surface_array_mesh_node
+# - CityGeoFuncs.get_grouped_surfaces_by_material_index
 	
 	
 # Base class for ArrayMesh array classes for arrays of any number of array_vertex.
@@ -146,6 +147,16 @@ class ASegment:
 	func copy_as_ASegment() -> ASegment:
 		return ASegment.new_from_ASegment(self)
 		
+		
+### Idea:
+# class SegmentMutatorBase
+# class SegmentMutator extends SegmentMutatorBase
+# class SegmentMutatorCompanion extends SegmentMutatorBase
+# With this, segment mutators would always have the same base interface,
+# so SegmentMutator could "hook" into its registered companions and call
+# the same methods with the same arguments, with the companions doing whatever
+# with that. This could be useful to implement material data or metadata
+# mutations without concern-creeping `ASegment`.
 		
 class SegmentMutator:
 	var segment: ASegment
@@ -859,7 +870,6 @@ class MStretchVerticesByAmount extends Modifier:
 	func modify(mutator: IndexChangeTrackingSegmentMutator) -> void:
 		var array_vertex := mutator.segment.get_array_vertex()
 		var vertex_count := float(len(array_vertex))
-		print("StretchVerticesBy... (array_vertex):", array_vertex)
 		
 		if vertex_count < 2.0:
 			push_error(\
@@ -1197,3 +1207,46 @@ class AFoldedPlane extends AMultiSegment:
 		return segments
 		
 		
+class Surface:
+	# @virtual
+	func get_mesh_instance3d() -> MeshInstance3D:
+		return MeshInstance3D.new()
+		
+		
+class STris extends Surface:
+	var tris: AMultiTri
+	var material_indices: PackedInt64Array
+	var materials: Array[Material]
+	
+	func _init(
+		tris: AMultiTri,
+		material_indices: PackedInt64Array,
+		materials: Array[Material] = []
+	):
+		self.tris = tris
+		self.materials = materials
+		self.material_indices = get_inverted_material_indices(material_indices)
+		
+	func get_mesh_instance_3d() -> MeshInstance3D:
+		var grouped_surface_arrays := CityGeoFuncs.get_grouped_surfaces_by_material_index(
+			material_indices,
+			self.tris.get_arrays()
+		)
+		var instance_3d := CityGeoFuncs.get_multi_surface_array_mesh_node(
+			grouped_surface_arrays
+		)
+		for i_material in range(len(materials)):
+			instance_3d.mesh.surface_set_material(i_material, materials[i_material])
+		
+		return instance_3d
+		
+		
+	static func get_inverted_material_indices(
+		material_indices: PackedInt64Array
+	):
+		var inverted_material_indices := PackedInt64Array()
+		var length := len(material_indices)
+		for i_index in range(length):
+			var i_index_inverted := length - i_index - 1
+			inverted_material_indices.append(material_indices[i_index_inverted])
+		return inverted_material_indices
