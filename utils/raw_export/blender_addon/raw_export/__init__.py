@@ -4,15 +4,14 @@ import json
 import pprint
 from abc import abstractmethod, ABC
 from json import JSONEncoder
-from math import floor
 from pathlib import Path
 from typing import List, Dict, TypeVar, Type, Literal, TypeAlias, Iterable, TypedDict, \
     NamedTuple, Any, Tuple
+
 # Blender
 import bpy
-import bpy.types
 import bmesh
-from bmesh.types import BMesh, BMVert, BMFace, BMLayerItem, BMLoopUV
+from bmesh.types import BMesh, BMVert, BMFace, BMLayerItem
 from mathutils import Vector
 
 bl_info = {
@@ -60,7 +59,7 @@ def get_all_uv_coords() -> List[Vector]:
     bpy.ops.object.mode_set(mode='OBJECT')
     bpy.context.object.update_from_editmode()
 
-    mesh: BMesh = bpy.context.object.data
+    mesh: bpy.types.Mesh = bpy.context.object.data
     uv_map: bpy.types.MeshUVLoopLayer = mesh.uv_layers.active
     all_uv_coords: list[Vector] = [uv_coord.vector for uv_coord in uv_map.uv]
 
@@ -111,12 +110,6 @@ class MeshFace:
             return True
         else:
             return False
-
-
-# def do_we_get_tessface_obj_with_this():
-#     """No, apparently this doesn't have such attributes. :["""
-#     obj = bpy.context.active_object
-#     return obj.to_mesh(preserve_all_data_layers=True)
 
 
 class FractionalListSplitError(Exception):
