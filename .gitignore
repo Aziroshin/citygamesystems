@@ -22,3 +22,6 @@ __pycache__
 ### Project-specific ignores
 utils/raw_export/blender_addon/dev/.env
 utils/raw_export/blender_addon/dev/blender_user_config
+# This is just there to see if the custom properties for the export
+# work.
+/assets/parts/raw_export_test_cube_2.gitignored.json
