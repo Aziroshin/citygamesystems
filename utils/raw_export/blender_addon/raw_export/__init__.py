@@ -33,12 +33,30 @@ T = TypeVar("T")
 ###########################################################################
 DEVFIXTURE_output_path = "../../../../assets/parts/raw_export_test_cube.json"
 ###########################################################################
-
+DOC_PATH_EXPLAINER =\
+    "\n\nConfigured "\
+    + "sub-directories of all parenting collections as well as the "\
+    + "directory configured in the settings will be prepended to form "\
+    + "the final file path"
 
 ###########################################################################
 
 
 ###########################################################################
+
+# According to:
+# https://docs.blender.org/api/current/bpy_types_enum_items/wm_report_items.html#rna-enum-wm-report-items
+# To be used with `self.report` on classes that feature it.
+class ReportTypes:
+    DEBUG = "DEBUG"
+    INFO = "INFO"
+    OPERATOR = "OPERATOR"
+    PROPERTY = "PROPERTY"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+    ERROR_INVALID_INPUT = "ERROR_INVALID_INPUT"
+    ERROR_INVALID_CONTEXT = "ERROR_INVALID_CONTEXT"
+    ERROR_OUT_OF_MEMORY = "ERROR_OUT_OF_MEMORY"
 
 
 def bmvert_location_as_vector(vert: BMVert) -> Vector:
@@ -685,11 +703,149 @@ class Face:
         self.material_index = material_index
 
 
+class RawExportPersistentStore(bpy.types.PropertyGroup):
+    directory: bpy.props.StringProperty()
+
+
+class ObjectPointer(bpy.types.PropertyGroup):
+    obj: bpy.props.PointerProperty(type=bpy.types.Object)
+
+
+class RawExportEphemeralStore(bpy.types.PropertyGroup):
+    export_queue: bpy.props.CollectionProperty(type=ObjectPointer)
+
+
+def get_ephemeral_store(context: bpy.types.Context) -> RawExportEphemeralStore:
+    return context.window_manager.ephemeral_store
+
+
 class RawExportError(Exception):
     pass
 
 
-class RawExport(bpy.types.Operator):
+class OBJECT_PT_raw_export_file_export_panel(bpy.types.Panel):
+    bl_label = "File Export"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_category = "RawExport"
+
+    def draw(self, context):
+        col = self.layout.column(align=True)
+        row = col.row(align=True)
+        row.operator("object.raw_export_export_object", text="Object")
+        row.operator("object.raw_export_export_collection", text="Collection")
+        col.operator("object.raw_export_export_all", text="All")
+
+
+class OBJECT_PT_raw_export_settings_panel(bpy.types.Panel):
+    bl_label = "Settings"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_category = "RawExport"
+
+    def draw(self, context):
+        self.layout.prop(context.scene, "directory")
+
+
+class OBJECT_PT_raw_export_collection_panel(bpy.types.Panel):
+    bl_label = "Collection"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_category = "RawExport"
+
+    @classmethod
+    def poll(cls, context):
+        if context.collection is not None:
+            return True
+
+    def draw(self, context):
+        self.layout.prop(context.collection, "rxm_sub_dir_path")
+
+
+class OBJECT_PT_raw_export_panel(bpy.types.Panel):
+    bl_label = "Object"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_category = "RawExport"
+
+    @classmethod
+    def poll(cls, context):
+        if context.object is not None:
+            if context.object.type == "MESH":
+                return True
+
+    def draw(self, context):
+        self.layout.prop(context.object, "rxm_file_name")
+
+
+# Some interesting info: https://b3d.interplanety.org/en/parent-collection/
+def get_collection_parent_collections(
+        prospective_collection: bpy.types.Collection,
+        available_collections,
+        found_collections: List[bpy.types.Collection]
+) -> List[bpy.types.Collection]:
+    for collection in available_collections:
+        if prospective_collection.name in collection.children.keys():
+            found_collections.append(collection)
+            available_collections.remove(collection)
+            get_collection_parent_collections(
+                collection,
+                available_collections,
+                found_collections
+            )
+    return found_collections
+
+
+def get_object_parent_collections(obj) -> List[bpy.types.Collection]:
+    return get_collection_parent_collections(
+        obj.users_collection[0],
+        [bpy.context.scene.collection] + [c for c in bpy.data.collections],
+        [obj.users_collection[0]]
+    )
+
+
+def object_is_export_eligible(obj: bpy.types.Object) -> bool:
+    if obj.rxm_file_name == "":
+        return False
+    if not obj.visible_get():
+        return False
+    return True
+
+
+# blender_path isn't `False` by default because non-Blender
+# paths are only needed when directly dealing with files.
+# For all other cases, `True` by default is probably more
+# straight forward.
+def get_obj_file_path(context, obj, blender_path=True) -> Path:
+    base_path: str = context.scene.directory
+    if base_path.startswith("//") and not blender_path:
+        base_path = base_path[2:]
+
+    path_elements: List[str] = [
+        c.rxm_sub_dir_path for c in get_object_parent_collections(obj)
+    ]
+    path_elements.reverse()
+    path_elements.append(obj.rxm_file_name)
+    path_elements.insert(0, base_path)
+    return Path(*path_elements)
+
+
+def debug_print_test_cube(mesh_pre_json: dict):
+    pprint.pprint(generate_cube_debug_side_list(mesh_pre_json), indent=4)
+    print(mesh_pre_json["material_indices"])
+
+
+def debug_print_export_object_paths(
+        context: bpy.types.Context,
+        objects: List[bpy.types.Object]
+):
+    for obj in objects:
+        print("Paths for objects in export queue:", Path(
+            obj.rxm_file_name), get_obj_file_path(context, obj, False)
+              )
+
+
+class OBJECT_OP_raw_export(bpy.types.Operator):
     bl_idname = "object.raw_export"
     bl_label = "raw_export"
 
@@ -710,111 +866,212 @@ class RawExport(bpy.types.Operator):
         # Input - prototypal, might come from somewhere else eventually.
         face_vertex_count = 3
 
-        mesh: BMesh = bmesh.new()
-        obj: bpy.types.ObjectBase = bpy.context.active_object
-        mesh.from_mesh(obj.data)
-        uv_layer: BMLayerItem = mesh.loops.layers.uv.active
+        found_active = context.active_object
+        export_queue = get_ephemeral_store(context).export_queue
+        objects_to_export: List[bpy.types.Object] = [
+            pointer.obj for pointer in export_queue
+        ]
 
-        object_data = ObjectData(poly_size=face_vertex_count)
+        try:
+            for obj in objects_to_export:
+                # Make object active for `get_all_uv_coords` to work right.
+                bpy.context.view_layer.objects.active = obj
 
-        # === The Action ===
+                mesh: BMesh = bmesh.new()
+                mesh.from_mesh(obj.to_mesh())
+                uv_layer: BMLayerItem = mesh.loops.layers.uv.active
 
-        material_index = 0
-        materials_pre_json: List[MaterialData] = []
+                object_data = ObjectData(poly_size=face_vertex_count)
 
-        # material: bpy.types.Material
-        # material_slots: List[MaterialSlot]
-        for material in [slot.material for slot in obj.material_slots]:
-            if material:
-                # The "use_nodes"-case is currently solely focused on getting image paths.
-                if material.use_nodes:
-                    for node in material.node_tree.nodes:  # node:  bpy.types.Node
-                        if type(node) == bpy.types.ShaderNodeTexImage:
-                            # Make sure it's not some disconnected node (like one for normal baking),
-                            # but one that ultimately feeds into a "Material Output" node.
-                            image_filenames = []
-                            for end_node in get_end_nodes(node):
-                                if type(end_node) == bpy.types.ShaderNodeOutputMaterial:
-                                    image_filenames.append(Path(node.image.filepath).name)
+                # === The Action ===
 
-                            materials_pre_json.append(ImageTextureMaterialData(
+                material_index = 0
+                materials_pre_json: List[MaterialData] = []
+
+                # material: bpy.types.Material
+                # material_slots: List[MaterialSlot]
+                for material in [slot.material for slot in obj.material_slots]:
+                    if material:
+                        # The "use_nodes"-case is currently solely focused on getting image paths.
+                        if material.use_nodes:
+                            for node in material.node_tree.nodes:  # node:  bpy.types.Node
+                                if type(node) == bpy.types.ShaderNodeTexImage:
+                                    # Make sure it's not some disconnected node (like one for normal baking),
+                                    # but one that ultimately feeds into a "Material Output" node.
+                                    image_filenames = []
+                                    for end_node in get_end_nodes(node):
+                                        if type(end_node) == bpy.types.ShaderNodeOutputMaterial:
+                                            image_filenames.append(Path(node.image.filepath).name)
+
+                                    materials_pre_json.append(ImageTextureMaterialData(
+                                        index=material_index,
+                                        name=material.name,
+                                        filenames=image_filenames
+                                    ))
+                        else:
+                            materials_pre_json.append(BasicMaterialData(
                                 index=material_index,
                                 name=material.name,
-                                filenames=image_filenames
+                                color=iterable4_to_vector(material.diffuse_color)
                             ))
-                else:
-                    materials_pre_json.append(BasicMaterialData(
-                        index=material_index,
-                        name=material.name,
-                        color=iterable4_to_vector(material.diffuse_color)
-                    ))
-            else:
-                materials_pre_json.append(DefaultMaterialData(
-                    index=material_index
-                ))
+                    else:
+                        materials_pre_json.append(DefaultMaterialData(
+                            index=material_index
+                        ))
 
-            material_index += 1
+                    material_index += 1
 
-        all_uv_coords: list[Vector] = get_all_uv_coords()  # They already come sorted by face.
-        uv_coords_grouped_by_face: list[list[Vector]] =\
-            get_equally_split_list(all_uv_coords, face_vertex_count)
+                all_uv_coords: list[Vector] = get_all_uv_coords()  # They already come sorted by face.
 
-        faces: List[Face] = []
-        for face in mesh.faces:
-            face: BMVert = face
-            verts: List[Vector] = []
-            uvs: List[Vector] = []
-            normals: List[Vector] = []
-            _vert_by_uvs: Dict[Vector, Vector] = {}
+                faces: List[Face] = []
+                for bmface in mesh.faces:
+                    bmface: BMFace = bmface
+                    verts: List[Vector] = []
+                    uvs: List[Vector] = []
+                    normals: List[Vector] = []
 
-            for vert in face.verts:
-                verts.append(bmvert_location_as_vector(vert))
-                normals.append(vert.normal)
+                    for vert in bmface.verts:
+                        verts.append(bmvert_location_as_vector(vert))
+                        normals.append(vert.normal)
 
-                for loop in vert.link_loops:
-                    if loop.face == face:
-                        uvs.append(loop[uv_layer].uv)
+                        for loop in vert.link_loops:
+                            if loop.face == bmface:
+                                uvs.append(loop[uv_layer].uv)
 
-            faces.append(Face(verts, uvs, normals, face.material_index))
 
-        for _face in faces:
-            print("FACE:")
-            print(_face.vertices)
-            print(_face.uvs)
-            print(_face.material_index)
+                    faces.append(Face(verts, uvs, normals, bmface.material_index))
 
-        for face in faces:
-            face: Face = face
-            object_data.vertices = object_data.vertices + face.vertices
-            object_data.normals = object_data.normals + face.normals
-            object_data.uvs = object_data.uvs + face.uvs
-            object_data.indices = []
-            object_data.material_indices.append(face.material_index)
+                for face in faces:
+                    face: Face = face
+                    object_data.vertices = object_data.vertices + face.vertices
+                    object_data.normals = object_data.normals + face.normals
+                    object_data.uvs = object_data.uvs + face.uvs
+                    object_data.indices = []
+                    object_data.material_indices.append(face.material_index)
 
-        mesh_pre_json = {
-            "vertices": object_data.vertices,
-            "normals": object_data.normals,
-            "uvs": object_data.uvs,
-            "indices": object_data.indices,
-            "material_indices": object_data.material_indices,
-            # List version of `materials`.
-            "materials": [
-                materials_pre_json[index] for index in range(material_index)
-            ]
-        }
+                mesh_pre_json = {
+                    "vertices": object_data.vertices,
+                    "normals": object_data.normals,
+                    "uvs": object_data.uvs,
+                    "indices": object_data.indices,
+                    "material_indices": object_data.material_indices,
+                    # List version of `materials`.
+                    "materials": [
+                        materials_pre_json[index] for index in range(material_index)
+                    ]
+                }
 
-        pprint.pprint(generate_cube_debug_side_list(mesh_pre_json), indent=4)
-        print(mesh_pre_json["material_indices"])
+                debug_print_test_cube(mesh_pre_json)
 
-        with open(DEVFIXTURE_output_path, "w") as output_file:
-            output_file.write(json.dumps(mesh_pre_json, cls=AllJSONEncoders, indent=4))
+                with open(get_obj_file_path(context, obj, False), "w") as output_file:
+                    output_file.write(json.dumps(mesh_pre_json, cls=AllJSONEncoders, indent=4))
+        finally:
+            export_queue.clear()
+            bpy.context.view_layer.objects.active = found_active
+            debug_print_export_object_paths(context, objects_to_export)
+        return {"FINISHED"}
 
+
+class OBJECT_OP_raw_export_export_object(bpy.types.Operator):
+    bl_idname = "object.raw_export_export_object"
+    bl_label = "raw_export"
+    bl_description =(
+            "Export the selected object if it has a filename. "
+            + DOC_PATH_EXPLAINER)
+
+    def execute(self, context):
+        store = get_ephemeral_store(context)
+        obj = context.active_object
+
+        if object_is_export_eligible(obj):
+            item: ObjectPointer = store.export_queue.add()
+            item.obj = context.active_object
+        else:
+            print("REPORT")
+            self.report(
+                {ReportTypes.ERROR_INVALID_INPUT},
+                "Export failed: Non-mesh object selected: {0}. ".format(
+                    obj.name
+                )
+                + "When exporting a single object, the object you want to "
+                + "export has to be selected, and it has to be a mesh."
+            )
+
+        bpy.ops.object.raw_export()
+        return {"FINISHED"}
+
+
+class OBJECT_OP_raw_export_export_collection(bpy.types.Operator):
+    bl_idname = "object.raw_export_export_collection"
+    bl_label = "raw_export"
+    bl_description = (
+            "Export all objects with a filename in the selected collection "
+            + "and all sub-collections. "
+            + DOC_PATH_EXPLAINER)
+
+    def execute(self, context):
+        store = get_ephemeral_store(context)
+        collections =\
+            [context.collection]\
+            + [child for child in context.collection.children_recursive]
+
+        for collection in collections:
+            for obj in collection.objects:
+                if object_is_export_eligible(obj):
+                    obj_pointer: ObjectPointer = store.export_queue.add()
+                    obj_pointer.obj = obj
+
+        bpy.ops.object.raw_export()
+        return {"FINISHED"}
+
+
+class OBJECT_OP_raw_export_export_all(bpy.types.Operator):
+    bl_idname = "object.raw_export_export_all"
+    bl_label = "raw_export"
+    bl_description = (
+            "Export all objects with a filename. "
+            + DOC_PATH_EXPLAINER)
+
+    def execute(self, context):
+        store = get_ephemeral_store(context)
+
+        for obj in bpy.data.objects:
+            if object_is_export_eligible(obj):
+                obj_pointer: ObjectPointer = store.export_queue.add()
+                obj_pointer.obj = obj
+
+        bpy.ops.object.raw_export()
         return {"FINISHED"}
 
 
 def register():
-    bpy.utils.register_class(RawExport)
+    bpy.types.Object.rxm_file_name = bpy.props.StringProperty(name="File Name")
+    bpy.types.Object.rxm_export = bpy.props.BoolProperty(name="Export")
+    bpy.types.Collection.rxm_sub_dir_path = bpy.props.StringProperty(name="Sub-Dir Path")
+    bpy.types.Collection.rxm_export = bpy.props.BoolProperty(name="Export")
+    bpy.types.Scene.directory = bpy.props.StringProperty(name="Directory", subtype="DIR_PATH")
+    bpy.utils.register_class(ObjectPointer)
+    bpy.utils.register_class(RawExportEphemeralStore)
+    bpy.types.WindowManager.ephemeral_store = bpy.props.PointerProperty(type=RawExportEphemeralStore)
+    bpy.utils.register_class(OBJECT_OP_raw_export)
+    bpy.utils.register_class(OBJECT_OP_raw_export_export_object)
+    bpy.utils.register_class(OBJECT_OP_raw_export_export_collection)
+    bpy.utils.register_class(OBJECT_OP_raw_export_export_all)
+    bpy.utils.register_class(OBJECT_PT_raw_export_panel)
+    bpy.utils.register_class(OBJECT_PT_raw_export_collection_panel)
+    bpy.utils.register_class(OBJECT_PT_raw_export_file_export_panel)
+    bpy.utils.register_class(OBJECT_PT_raw_export_settings_panel)
 
 
 def unregister():
-    bpy.utils.unregister_class(RawExport)
+    bpy.utils.unregister_class(OBJECT_PT_raw_export_settings_panel)
+    bpy.utils.unregister_class(OBJECT_PT_raw_export_file_export_panel)
+    bpy.utils.unregister_class(OBJECT_PT_raw_export_collection_panel)
+    bpy.utils.unregister_class(OBJECT_PT_raw_export_panel)
+    bpy.utils.unregister_class(OBJECT_OP_raw_export_export_all)
+    bpy.utils.unregister_class(OBJECT_OP_raw_export_export_collection)
+    bpy.utils.unregister_class(OBJECT_OP_raw_export_export_object)
+    bpy.utils.unregister_class(OBJECT_OP_raw_export)
+    bpy.utils.unregister_class(RawExportEphemeralStore)
+    bpy.utils.unregister_class(ObjectPointer)
+
