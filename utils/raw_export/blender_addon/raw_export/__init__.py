@@ -68,7 +68,6 @@ def bmvert_location_as_vector(vert: BMVert) -> Vector:
 #  (which is `bpy_prop_array`).
 def iterable4_to_vector(iterable: Iterable) -> Vector:
     return Vector((item for item in iterable))
-    # return Vector((iterable4[0], iterable4[1], iterable4[2], iterable4[3]))
 
 
 def get_all_uv_coords() -> List[Vector]:
@@ -82,52 +81,6 @@ def get_all_uv_coords() -> List[Vector]:
     all_uv_coords: list[Vector] = [uv_coord.vector for uv_coord in uv_map.uv]
 
     return all_uv_coords
-
-
-def get_all_uv_coords_grouped_by_face(face_vertex_count: int) -> list[list[Vector]]:
-    all_uv_coords: list[Vector] = get_all_uv_coords()  # They already come sorted by face.
-    return get_equally_split_list(all_uv_coords, face_vertex_count)
-
-
-class MeshVertex:
-    vector: Vector
-    uv_coords: List[Vector]
-
-    def __init__(self, vector: Vector, uv_coords: List[Vector]):
-        self.vector = vector
-        self.uv_coords = uv_coords
-
-    def has_uv_coord(self, prospective_uv_coord) -> bool:
-        for uv_coord in self.uv_coords:
-            if prospective_uv_coord == uv_coord:
-                return True
-        return False
-
-
-class MeshFace:
-    vertex_count: int
-    mesh_vertices: List[MeshVertex]
-
-    def add_vertex(self, vector, uv_coords) -> None:
-        self.mesh_vertices.append(MeshVertex(vector, uv_coords))
-        self.vertex_count += 1
-
-    def has_uv_coords(self, uv_coords: List[Vector]) -> bool:
-        """Will also return False if either .mesh_vertices or
-        uv_coords are empty."""
-        if len(self.mesh_vertices) == 0 or len(uv_coords) == 0:
-            return False
-
-        uv_coord_matches = 0
-        for mesh_vertex in self.mesh_vertices:
-            for uv_coord in uv_coords:
-                if mesh_vertex.has_uv_coord(uv_coord):
-                    uv_coord_matches += 1
-
-        if uv_coord_matches == len(uv_coords) - 1:
-            return True
-        else:
-            return False
 
 
 class FractionalListSplitError(Exception):
@@ -465,20 +418,6 @@ def generate_cube_debug_side_list(pre_json: Dict) -> List[DebugCubeSideDict]:
     return sides
 
 
-def pop_and_push_in_list(index_to_pop: int, index_to_push_to: int, list_: List):
-    if index_to_pop >= len(list_):
-        raise TypeError("index to pop out of bounds.")
-    if index_to_push_to >= len(list_):
-        raise TypeError("index to push to out of bounds.")
-
-    popped_item: Any = list_.pop()
-    list_.insert(index_to_push_to, popped_item)
-
-
-class ObjectDataError(Exception):
-    pass
-
-
 class ObjectData:
     vertices: List[Vector]
     normals: List[Vector]
@@ -506,80 +445,6 @@ class ObjectData:
         self.material_indices = [] if material_indices is None else material_indices
         self.poly_size = poly_size
 
-    def pop_vertex_index_and_push_to(
-            self,
-            index_to_pop: int,
-            index_to_push_to: int,
-            omit_indices: bool = False
-    ):
-        """Pops an item from the vertex-related lists and re-inserts it
-        at a different index."""
-        if not omit_indices:
-            NotImplementedError("Dealing with indices isn't implemented yet.")
-
-        for list_ in [self.vertices, self.normals, self.uvs]:
-            pop_and_push_in_list(index_to_pop, index_to_push_to, list_)
-
-    def get_face_index(
-            self,
-            prospective_face_vertices: List[Vector],
-    ) -> int | None:
-        """Returns the starting index of a face's vertex block.
-        The face is identified and will be looked for based on
-        the vectors in `face_vertices`.
-        Returns None if there's no match."""
-        poly_size = self.poly_size
-
-        if poly_size == -1:
-            raise NotImplementedError(
-                "Getting the starting index of a face's vertices when "
-                "poly_size is -1 (which means variable size) isn't "
-                "implemented. Hint: If your object is made up of polys which "
-                "are all the same size, make sure poly_size is set before "
-                "calling get_face_index, e.g. by instantiating ObjectData "
-                "with poly_size=3 if all polygons have a size of 3."
-            )
-
-        if not len(prospective_face_vertices) == poly_size:
-            raise TypeError(
-                "The number of vectors in face_vertices needs to be equal to "
-                "poly_size."
-            )
-
-        # Won't properly support mesh faces that are perfectly overlapping.
-        for i_face in range(int(len(self.vertices) / poly_size)):
-            i_face_first_vert = i_face * poly_size
-            #print(i_face, ", ", poly_size, ", ", i_face*poly_size)
-            face_vertices = self.vertices[
-                            i_face_first_vert:i_face_first_vert+poly_size]
-            # print(
-            #     "===",
-            #     prospective_face_vertices,
-            #     "",
-            #     face_vertices,
-            #     "/==="
-            # )
-            if all(map(
-                    lambda prospective_vert: prospective_vert in face_vertices,
-                    prospective_face_vertices
-            )):
-                return i_face_first_vert  # match!
-
-        return None  # No match.
-
-    def get_face_vertices_by_unordered(
-            self,
-            unordered_vertices: List[Vector],
-    ) -> List[Vector] | None:
-        face_index = self.get_face_index(
-            unordered_vertices,
-        )
-
-        if face_index is None:
-            return None
-
-        return self.vertices[face_index:face_index+self.poly_size]
-
 
 def debug_print_mesh_faces(mesh: BMesh, object_data: ObjectData):
     i_face = 0
@@ -595,93 +460,6 @@ def debug_print_mesh_faces(mesh: BMesh, object_data: ObjectData):
             i_vert += 1
 
         i_face += 1
-
-
-class FaceCoordsBuildError(Exception):
-    pass
-
-
-class FaceCoords:
-    uvs: Tuple[Vector]
-    xyzs: Tuple[Vector]
-
-    def __init__(self, uvs: Iterable[Vector], xyzs: Iterable[Vector]):
-        self.uvs = tuple(get_frozen_vector_copy(uv) for uv in uvs)
-        self.xyzs = tuple(get_frozen_vector_copy(xyz) for xyz in xyzs)
-
-    def __eq__(self, other) -> bool:
-        if isinstance(other, self.__class__):
-            if self.uvs == other.uvs and self.xyzs == other.xyzs:
-                return True
-        return False
-
-    def __hash__(self) -> int:
-        return hash(self.uvs + self.xyzs)
-
-
-class FaceCoordsBuilder:
-    poly_count: int
-    _uvs: List[Vector]
-    _xyzs: List[Vector]
-    
-    def __init__(self, poly_count = 3):
-        self.poly_count = poly_count
-        self._uvs = []
-        self._xyzs = []
-        
-    def add_uv(self, uv: Vector) -> "FaceCoordsBuilder":
-        if len(self._uvs) >= self.poly_count:
-            raise FaceCoordsBuildError(
-                f"Attempted to add a UV coord (%s) beyond .poly_count (%s)." % (uv, self.poly_count),
-                f"Currently held UV coords: %s." % self._uvs,
-                f"Currently held XYZ coords: %s." % self._uvs
-
-            )
-        self._uvs.append(uv)
-        return self
-    
-    def add_xyz(self, xyz: Vector) -> "FaceCoordsBuilder":
-        if len(self._xyzs) >= self.poly_count:
-            raise FaceCoordsBuildError(
-                f"Attempted to add a UV coord (%s) beyond .poly_count (%s)." % (xyz, self.poly_count),
-                f"Currently held UV coords: %s." % self._uvs,
-                f"Currently held XYZ coords: %s." % self._uvs
-
-            )
-        self._xyzs.append(xyz)
-        return self
-
-    def add_uvs(self, uvs: Iterable[Vector]) -> "FaceCoordsBuilder":
-        for uv in uvs:
-            self.add_uv(uv)
-        return self
-
-    def add_xyzs(self, xyzs: Iterable[Vector]) -> "FaceCoordsBuilder":
-        for xyz in xyzs:
-            self.add_xyz(xyz)
-        return self
-
-    def get(self) -> FaceCoords:
-        return FaceCoords(self._uvs, self._xyzs)
-
-
-class UVToVertMapKey(NamedTuple):
-    uv: Vector
-    xyz: Vector
-
-
-def items_in_list(list_a, list_b) -> bool:
-    items_found = 0
-    lower_len = min(len(list_a), len(list_b))
-
-    for item in list_a:
-        if item in list_b:
-            items_found += 1
-
-    if items_found == lower_len:
-        return True
-
-    return False
 
 
 class Face:
