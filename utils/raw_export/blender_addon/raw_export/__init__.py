@@ -472,20 +472,20 @@ class ObjectData:
     def __init__(
             self,
             *,
-            vertices: List[Vector] = [],
-            normals: List[Vector] = [],
-            uvs: List[Vector] = [],
-            indices: List[int] = [],
-            material_indices: List[int] = [],
-            poly_size: int = -1
+            vertices: List[Vector] | None = None,
+            normals: List[Vector] | None = None,
+            uvs: List[Vector] | None = None,
+            indices: List[int] | None = None,
+            material_indices: List[int] | None = None,
+            poly_size: int = -1,
     ):
-        self.vertices = vertices
-        self.normals = normals
-        self.uvs = uvs
+        self.vertices = [] if vertices is None else vertices
+        self.normals = [] if normals is None else normals
+        self.uvs = [] if uvs is None else uvs
         # TODO: Pretty sure indices are broken right now, since the vertices are
         #  ordered differently. See what's going on, and if required, fix.
-        self.indices = indices
-        self.material_indices = material_indices
+        self.indices = [] if indices is None else indices
+        self.material_indices = [] if material_indices is None else material_indices
         self.poly_size = poly_size
 
     def pop_vertex_index_and_push_to(
