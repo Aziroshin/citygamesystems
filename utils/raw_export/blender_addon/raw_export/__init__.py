@@ -822,34 +822,31 @@ class OBJECT_OP_raw_export_export_all(bpy.types.Operator):
         return {"FINISHED"}
 
 
+CLASSES_FOR_REGISTRATION = [
+    ObjectPointer,
+    RawExportEphemeralStore,
+    OBJECT_OP_raw_export,
+    OBJECT_OP_raw_export_export_object,
+    OBJECT_OP_raw_export_export_collection,
+    OBJECT_OP_raw_export_export_all,
+    OBJECT_PT_raw_export_panel,
+    OBJECT_PT_raw_export_collection_panel,
+    OBJECT_PT_raw_export_file_export_panel,
+    OBJECT_PT_raw_export_settings_panel
+]
+
+
 def register():
+    for cls in CLASSES_FOR_REGISTRATION:
+        bpy.utils.register_class(cls)
     bpy.types.Object.rxm_file_name = bpy.props.StringProperty(name="File Name")
     bpy.types.Object.rxm_export = bpy.props.BoolProperty(name="Export")
     bpy.types.Collection.rxm_sub_dir_path = bpy.props.StringProperty(name="Sub-Dir Path")
     bpy.types.Collection.rxm_export = bpy.props.BoolProperty(name="Export")
     bpy.types.Scene.directory = bpy.props.StringProperty(name="Directory", subtype="DIR_PATH")
-    bpy.utils.register_class(ObjectPointer)
-    bpy.utils.register_class(RawExportEphemeralStore)
     bpy.types.WindowManager.ephemeral_store = bpy.props.PointerProperty(type=RawExportEphemeralStore)
-    bpy.utils.register_class(OBJECT_OP_raw_export)
-    bpy.utils.register_class(OBJECT_OP_raw_export_export_object)
-    bpy.utils.register_class(OBJECT_OP_raw_export_export_collection)
-    bpy.utils.register_class(OBJECT_OP_raw_export_export_all)
-    bpy.utils.register_class(OBJECT_PT_raw_export_panel)
-    bpy.utils.register_class(OBJECT_PT_raw_export_collection_panel)
-    bpy.utils.register_class(OBJECT_PT_raw_export_file_export_panel)
-    bpy.utils.register_class(OBJECT_PT_raw_export_settings_panel)
 
 
 def unregister():
-    bpy.utils.unregister_class(OBJECT_PT_raw_export_settings_panel)
-    bpy.utils.unregister_class(OBJECT_PT_raw_export_file_export_panel)
-    bpy.utils.unregister_class(OBJECT_PT_raw_export_collection_panel)
-    bpy.utils.unregister_class(OBJECT_PT_raw_export_panel)
-    bpy.utils.unregister_class(OBJECT_OP_raw_export_export_all)
-    bpy.utils.unregister_class(OBJECT_OP_raw_export_export_collection)
-    bpy.utils.unregister_class(OBJECT_OP_raw_export_export_object)
-    bpy.utils.unregister_class(OBJECT_OP_raw_export)
-    bpy.utils.unregister_class(RawExportEphemeralStore)
-    bpy.utils.unregister_class(ObjectPointer)
-
+    for cls in CLASSES_FOR_REGISTRATION:
+        bpy.utils.unregister_class(cls)
