@@ -99,5 +99,5 @@ fi
 if [ "$OVERRIDE_BLENDER_USER_SCRIPTS" = "yes" ]; then
   export BLENDER_USER_SCRIPTS="$BLENDER_VERSION_SCRIPTS_DIR"
 fi
-"${BLENDER_BIN}" "$BLEND_FILE_PATH"
+"$BLENDER_BIN" "$BLEND_FILE_PATH"
 ### END: Action! ##############################################################
