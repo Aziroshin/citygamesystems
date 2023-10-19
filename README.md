@@ -12,11 +12,11 @@ To see which license applies to which parts, see [Licensing](#licensing).
 ## Reading Guide:
 
 - Paths or file names pefixed by "(\*)" indicate that they are *somewhere*
-in the code base. This is useful if they're they're somewhat likely to
+in the code base. This is useful if they're somewhat likely to
 change location and unlikely to be mixed up with other files when using
 some tool to search the code base (so, maybe not (\*)`facade.tscn` or
 something. :p).
-- When referencing object oriented code, method and member names are
+- When referencing object-oriented code, method and member names are
 prefixed by `.`.
 - Is `*` used in a path directly, it's to be read like a wildcard,
 referring to all files that would match. Example: `main_scenes/root*`
@@ -57,14 +57,16 @@ y-axis getting special treatment.
 
 ### mesh_lib
 Mostly classes helpful for building meshes based on godot's ArrayMesh.
-They're organized in a class hierarchy which builds on a common base class
-`ASegment`, which is a wrapper around an ArrayMesh.ARRAY_VERTEX array, which can
-be obtained by calling `.get_array_vertex` (which, in this case, returns
-`._array_vertex`). The `A` prefix in these classes stands for "Array", as in
-"ArrayMesh", as opposed to hypothetical `AM` classes, which would stand for
-"ArrayMesh".
+The core of them are organized in a class hierarchy which builds on a common
+base class `ASegment`, which is a wrapper around three kinds of arrays:
+ArrayMesh.ARRAY_VERTEX, ArrayMesh.ARRAY_NORMAL and ArrayMesh.ARRAY_TEX_UV,
+which can each be obtained by calling `.get_array_vertex`, `.get_array_normal`
+and `.get_array_tex_uv` respectively (which, in the base implementation,
+return their underscore-prefixed counterparts (e.g. `._array_vertex`)). The
+`A` prefix in these classes stands for "Array", as in"ArrayMesh", as opposed
+to hypothetical `AM` classes, which would stand for"ArrayMesh".
 
-Any class that builds on `ASegment` can override that method and do what's
+Any class that builds on `ASegment` can override these methods and do what's
 necessary there for its functionality.
 
 `ATransformableSegment` is a particularly notable subclass, as it introduces
@@ -73,7 +75,7 @@ other segments. Notably it keeps an untransformed `ASegment` as a member,
 `.untransformed`, which it references whenever its values are (re-)calculated.
 It also introduces an important method into the class hierarchy, `.apply_all`,
 which re-calculates the internal state of the object, in this case
-`._array_vertex`. It may be overriden by sub-clasess as needed.
+`._array_vertex`. It may be overriden by subclasses as needed.
 
 This also introduces the concept of explicitly calling `.apply_...` methods
 after making alterations to segment objects, which makes it possible to have
@@ -176,15 +178,13 @@ to develop the addon, such as a blend-file with a test cube, a coordinate
 texture for it (which has been copied into `res://assets/parts/textures/`,
 since the `dev`-dir has a .gdignore file) and
 [start.sh](utils/raw_export/blender_addon/dev/start.sh), which creates a
-`blender_user_config` dir in `dev`, configures it with the addon, and then
-starts Blender with the addon loaded. You can then run it by executing
-the `raw_export_runner.py` script in the "Scripting"-tab whilst having
-the test cube selected. Currently, the exported JSON will be written to
-the path referenced by the `DEVFIXTURE_output_path` variable in
-[\_\_init__.py](utils/raw_export/blender_addon/raw_export/__init__.py).
-**IMPORTANT**: This will happen every time the script runs, overwriting the
-file. This is just a temporary stop-gap measure for addon development
-purposes, unfit for productive use.
+`blender_user_config` dir in `dev`, links the addon into it, and then
+starts Blender with the addon available.
+
+Mind you that the current default config of the script is to link the user's
+Blender config into it as well, which means activating the addon in Preferences
+is still required, and will enable it for your Blender install in general.
+That will probably change, though.
 
 **!!! WARNING !!!**: `start.sh` still has had little testing, and there were
 (now fixed) issues where the system user's hotkeys ended up getting
@@ -228,10 +228,11 @@ one single `MeshInstance`, including UV maps, normals and texture mappings.
 
 ### Why is the Blender exporter not a "proper" export plugin?
 This leaves room for the idea to run the JSON-exporter in a constantly
-running Blender process serving as a standing asset generator whilst the game is running.
+running Blender process serving as a standing asset generator whilst the
+game is running.
 
 However, at least as of the time of this writing, citygamesystems isn't
-particularly committed to relying on that kind of"Blender server" (if you
+particularly committed to relying on that kind of "Blender server" (if you
 want to call it that), but its development is mindful of the option.
 
 There's currently (a not yet published) experiment called "Noodleplosion"
@@ -239,7 +240,7 @@ which contains a working proof-of-concept TCP/IP server in Blender. That
 could be built upon in order to tap into Blender's power, such as geometry
 nodes, in order for a city game to request JSON-meshes from a running
 Blender process according to basic frame-meshes and/or curves (e.g. roads,
-adjacent building frames, etc).
+adjacent building frames, etc.).
 
 This architecture could also be useful for other types of generators, e.g.
 AI based ones, or entirely different workflows, such as players using Blender
@@ -346,7 +347,7 @@ of a roof assembly (or a whole roof part if it was procedurally
 generated as a whole mesh).
 	
 This would also enable slightly different facade assembly algorithms, e.g.
-one where facade parts are stacked ontop of each other, with the resulting
+one where facade parts are stacked on top of each other, with the resulting
 stacks then fit together horizontally.
 	
 #### The Texture - Exploring an AI-Based Workflow
@@ -361,25 +362,29 @@ now involves various masks to inpaint the windows and the door into a
 (generated) facade.
 
 The base facade image for this was generated using img2img, using a
-"template" image (see the `facade_d_1.*_grid_fixed.xcf` files). The files contain
-guides that help in placing the windows and the door, whereas the overall
-canvas is to be thought as corresponding to the grid in the Blender file (
-the `QuarterGrid_Middle` object in Blender when viewed from the front (the
-`1` (numpad) view if you use the default shortcuts)). Mind you that the windows
-and door here serve as a basis for Mitsua to generate window and door shaped
+"template" image (see the `facade_d_1.*_grid_fixed.xcf` files). The files
+contain guides that help in placing the windows and the door, whereas the
+overall canvas is to be thought of as corresponding to the grid in the
+Blender file (the `QuarterGrid_Middle` object in Blender when viewed from
+the front (the`1` (numpad) view if you use the default shortcuts)). However,
+as the grid in the file is offset by two of its quads on Blender's z axis,
+it doesn't correspond precisely here, as the texture doesn't come with a 
+sous-de-terre bit. Also, mind you that the windows and the door here only
+serve as a basis for Mitsua to generate window and door shaped
 approximations that serve as a base for inpainting.
 
 The template idea could be expanded into fully automated facade generation
 at runtime, albeit it would either have to be exact enough to map to a 3D
 facade model, or such a model would have to be generated based on the
-generated facade texture (basically what's been done by hand in this case).
+generated facade texture (basically what's been done by hand here).
 
 ## Licensing
 The default license for the project is MIT (refer to [LICENSE-MIT](LICENSE-MIT)).
 The license of the blender addon [raw_export](utils/raw_export/blender_addon/raw_export)
-is [GPL-3.0-or-later](utils/raw_export/blender_addon/raw_export/LICENSE.md) (the [LICENSE-GPL](LICENSE-GPL) file in the repository's root is included for
-the sole purpose of github picking it up (via [licensee](https://github.com/licensee/licensee)),
-so that it's clear that not everything is licensed under the MIT).
+is [GPL-3.0-or-later](utils/raw_export/blender_addon/raw_export/LICENSE.md) (the [LICENSE-GPL](LICENSE-GPL) file in the repository's
+root is included for the sole purpose of GitHub picking it up
+(via [licensee](https://github.com/licensee/licensee)), so that it's clear
+that not everything is licensed under the MIT).
 
 #### Some files are also released according to the CC0:
 
