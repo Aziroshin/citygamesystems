@@ -32,6 +32,7 @@ T = TypeVar("T")
 # Config
 ###########################################################################
 DEVFIXTURE_output_path = "../../../../assets/parts/raw_export_test_cube.json"
+DEVFIXTURE_debugging_cube = False
 ###########################################################################
 DOC_PATH_EXPLAINER =\
     "\n\nConfigured "\
@@ -590,14 +591,8 @@ def object_is_export_eligible(obj: bpy.types.Object) -> bool:
     return True
 
 
-# blender_path isn't `False` by default because non-Blender
-# paths are only needed when directly dealing with files.
-# For all other cases, `True` by default is probably more
-# straight forward.
-def get_obj_file_path(context, obj, blender_path=True) -> Path:
+def get_obj_file_path(context, obj) -> str:
     base_path: str = context.scene.directory
-    if base_path.startswith("//") and not blender_path:
-        base_path = base_path[2:]
 
     path_elements: List[str] = [
         c.rxm_sub_dir_path for c in get_object_parent_collections(obj)
@@ -605,7 +600,7 @@ def get_obj_file_path(context, obj, blender_path=True) -> Path:
     path_elements.reverse()
     path_elements.append(obj.rxm_file_name)
     path_elements.insert(0, base_path)
-    return Path(*path_elements)
+    return str(Path(*path_elements))
 
 
 def debug_print_test_cube(mesh_pre_json: dict):
@@ -619,7 +614,7 @@ def debug_print_export_object_paths(
 ):
     for obj in objects:
         print("Paths for objects in export queue:", Path(
-            obj.rxm_file_name), get_obj_file_path(context, obj, False)
+            obj.rxm_file_name), get_obj_file_path(context, obj)
               )
 
 
@@ -739,9 +734,12 @@ class OBJECT_OP_raw_export(bpy.types.Operator):
                     ]
                 }
 
-                debug_print_test_cube(mesh_pre_json)
+                if DEVFIXTURE_debugging_cube:
+                    debug_print_test_cube(mesh_pre_json)
 
-                with open(get_obj_file_path(context, obj, False), "w") as output_file:
+                import os
+                print("CURRENT WORKING DIRECTORY:", os.getcwd())
+                with open(bpy.path.abspath(get_obj_file_path(context, obj)), "w+") as output_file:
                     output_file.write(json.dumps(mesh_pre_json, cls=AllJSONEncoders, indent=4))
         finally:
             export_queue.clear()
