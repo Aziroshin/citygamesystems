@@ -1209,7 +1209,7 @@ class AFoldedPlane extends AMultiSegment:
 		
 class Surface:
 	# @virtual
-	func get_mesh_instance3d() -> MeshInstance3D:
+	func get_mesh_instance_3d() -> MeshInstance3D:
 		return MeshInstance3D.new()
 		
 		
