@@ -777,7 +777,9 @@ class ATri extends AModifiableSegment:
 		)
 		self.apply_all()
 		
-		
+# NOTE: AMultiSegment and sub-classes shouldn't alter .untransformed
+# directly. Instead, they should get their segments through .get_segments.
+# How .get_segments gets their segments is entirely up to the sub-class.
 class AMultiSegment extends AModifiableSegment:
 	# @virtual
 	func get_segments() -> Array[AModifiableSegment]:
@@ -800,6 +802,13 @@ class AMultiSegment extends AModifiableSegment:
 	func apply_all() -> void:
 		apply_segments()
 		super()
+		# Since multi-segment classes are supposed to be initialized from
+		# segments, which will be re-applied each time, we will also want to
+		# re-run our modifiers each time.
+		# NOTE: This won't mesh well with multi-segments that directly alter
+		# their .untransformed without going through the apply_segments
+		# pipeline.
+		self.modifier_cursor = 0
 		
 	# @virtual
 	func as_AVertexTrackingSegment(do_apply_all := false) -> AVertexTrackingSegment:
