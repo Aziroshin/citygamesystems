@@ -3,9 +3,19 @@ class_name MeshDebugLib
 
 class ADebugOverlay extends Node3D:
 	var default_font_size := 8
+	var _show_vertices := true
+	var _show_normals := true
 	
 	func set_default_font_size(new_default_font_size: int) -> ADebugOverlay:
 		default_font_size = new_default_font_size
+		return self
+		
+	func show_vertices(flag: bool) -> ADebugOverlay:
+		self._show_vertices = flag
+		return self
+	
+	func show_normals(flag: bool) -> ADebugOverlay:
+		self._show_normals = flag
 		return self
 	
 	func add_label(
@@ -28,9 +38,11 @@ class ADebugOverlay extends Node3D:
 		
 	func visualize_arrays(arrays: Array) -> ADebugOverlay:
 		var idx := 0
-		for xyz in arrays[ArrayMesh.ARRAY_VERTEX]:
-			add_label("%s" % idx, xyz)
-			idx += idx
+		for vert_xyz in arrays[ArrayMesh.ARRAY_VERTEX]:
+			if self._show_vertices:
+				add_label("%s" % idx, vert_xyz)
+				
+			idx += 1
 		return self
 		
 	func visualize_array_vertex(
