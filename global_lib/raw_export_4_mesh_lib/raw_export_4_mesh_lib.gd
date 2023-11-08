@@ -12,28 +12,38 @@ const MInvertSurfaceArrays := MeshLib.MInvertSurfaceArrays
 ### "Imports": RawExport
 const RawObjectData := RawExport.RawObjectData
 const BasicMaterialResolver := RawExport.BasicMaterialResolver
+const MaterialResolver := RawExport.MaterialResolver
 # Used: RawExport.RawObjectData_from_json
 
 
 static func new_STris_from_file(
-	path: String
+	path: String,
+	_dbg_apply_fixes = true
 ) -> STris:
 	return new_STris_from_JSON(
-		FileAccess.get_file_as_string(path)
+		FileAccess.get_file_as_string(path),
+		_dbg_apply_fixes
 	)
-
-
+	
+	
 static func new_STris_from_JSON(
-	json: String
+	json: String,
+	_dbg_apply_fixes = true
 ) -> STris:
 	return new_STris_from_RawObjectData(
-		RawExport.RawObjectData_from_json(json)
+		RawExport.RawObjectData_from_json(json),
+		_dbg_apply_fixes
 	)
-
-
+	
+	
 static func new_STris_from_RawObjectData(
-	raw_object_data: RawObjectData
+	raw_object_data: RawObjectData,
+	_dbg_apply_fixes = true,
+	# TODO: Better typing once it's possible.
+	# TODO: This actually doesn't work - passing the class causes a type error.
+	ResolverClass := BasicMaterialResolver,
 ) -> STris:
+	
 	var vertices := raw_object_data.vertices
 	var normals := raw_object_data.normals
 	var uvs := raw_object_data.uvs
@@ -55,14 +65,20 @@ static func new_STris_from_RawObjectData(
 			uvs[offset+2]
 		)
 		multi_tri.add_tri(tri)
-	multi_tri.add_modifier(MYFlipUVs.new())
-	multi_tri.add_modifier(MYUp.new())
-	multi_tri.add_modifier(MFlipVerticesX.new())
-	multi_tri.add_modifier(MInvertSurfaceArrays.new())
+	if _dbg_apply_fixes:
+		multi_tri.add_modifier(MYFlipUVs.new())
+		multi_tri.add_modifier(MYUp.new())
+		multi_tri.add_modifier(MFlipVerticesX.new())
+		multi_tri.add_modifier(MInvertSurfaceArrays.new())
 	multi_tri.apply_all()
 	
+	var resolver := ResolverClass.new(raw_object_data.material_data)
+	if not resolver is MaterialResolver:
+		var err_msg := "TypeError: 'ResolverClass' does not extend 'MaterialResolver'."
+		push_error(err_msg)
+		assert(false, err_msg)
 	return STris.new(
 		multi_tri,
 		raw_object_data.material_indices,
-		BasicMaterialResolver.new(raw_object_data.material_data).get_materials()
+		resolver.get_materials()
 	)
