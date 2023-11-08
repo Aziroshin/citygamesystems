@@ -196,26 +196,26 @@ class BasicMaterialResolver extends MaterialResolver:
 		var materials: Array[Material] = []
 		
 		for basetype_material_data in self.material_data_array:
-			if basetype_material_data.type == DEFAULT_MATERIAL_TYPE:
-				var material_data: DefaultMaterialData = basetype_material_data
-				var material := StandardMaterial3D.new()
-				material.albedo_color = Color(0.2, 0, 1)  # Blue
-				materials.append(material)
-				
 			if basetype_material_data.type == BASIC_MATERIAL_TYPE:
-				var material_data: BasicMaterialData = basetype_material_data
+				var material_data := basetype_material_data as BasicMaterialData
 				var material := StandardMaterial3D.new()
 				material.albedo_color = Color(0, 1, 0.2)  # Green
 				materials.append(material)
 				
-			if basetype_material_data.type == IMAGE_FILES_MATERIAL_TYPE:
-				var material_data: ImageTextureMaterialData = basetype_material_data
+			elif basetype_material_data.type == IMAGE_FILES_MATERIAL_TYPE:
+				var material_data := basetype_material_data as ImageTextureMaterialData
 				var material := StandardMaterial3D.new()
 				material.albedo_texture = load(
-					# TODO: Of course, we'll need some proper path resolution
-					# using .filenames.
-					"res://assets/parts/textures/coord_texture.png"
+					# TODO: Evaluate whether we need to deal with multiple filenames
+					#  and do it if we do need to do so.
+					"res://assets/parts/textures/%s" % material_data.filenames[0]
 				)
+				materials.append(material)
+				
+			else:
+				var material_data := basetype_material_data as DefaultMaterialData
+				var material := StandardMaterial3D.new()
+				material.albedo_color = Color(0.2, 0, 1)  # Blue
 				materials.append(material)
 				
 		return materials
