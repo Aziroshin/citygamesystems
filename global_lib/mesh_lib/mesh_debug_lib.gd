@@ -6,6 +6,12 @@ class ADebugOverlay extends Node3D:
 	var _show_vertices := true
 	var _show_normals := true
 	
+	static func create_single_color_material(color: Color) -> StandardMaterial3D:
+		var material := StandardMaterial3D.new()
+		material.albedo_color = color
+		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		return material
+	
 	func set_default_font_size(new_default_font_size: int) -> ADebugOverlay:
 		default_font_size = new_default_font_size
 		return self
@@ -36,11 +42,76 @@ class ADebugOverlay extends Node3D:
 		add_child(label)
 		return self
 		
+	func add_normal_indicator(
+		vert_xyz: Vector3,
+		normal_xyz: Vector3
+	) -> ADebugOverlay:
+		var shaft_color := Color(0.2, 0.2, 1.0)  # Blue
+		var nock_color := Color(1.0, 0.2, 0.2)  # Red
+		var tip_color := Color(0.3, 0.9, 1.0)  # Lighter, cyan-ish blue
+		var shaft_length := 0.1
+		var shaft_radius := shaft_length / 100.0
+		var nock_size := shaft_length / 10.0
+		var tip_length := nock_size * 2.0
+		var tip_radius := shaft_radius * 2.0
+		var superior_length := shaft_length * 0.9
+		var inferior_length := shaft_length - superior_length
+		
+		var indicator = Node3D.new()
+		var shaft := CSGCylinder3D.new()
+		var nock := CSGBox3D.new()
+		var tip := CSGCylinder3D.new()
+		indicator.add_child(shaft)
+		indicator.add_child(nock)
+		indicator.add_child(tip)
+		
+		# Shapes
+		shaft.height = shaft_length
+		shaft.radius = shaft_radius
+		nock.size = Vector3(nock_size, nock_size, nock_size)
+		tip.height = tip_length
+		tip.radius = tip_radius
+		
+		# Materials
+		shaft.material_override = create_single_color_material(shaft_color)
+		nock.material_override = create_single_color_material(nock_color)
+		tip.material_override = create_single_color_material(tip_color)
+		
+		
+		# Positions
+		shaft.translate(Vector3(0.0, (shaft_length / 2.0) - inferior_length, 0.0))
+		nock.translate(Vector3(0.0, -(inferior_length + nock_size / 2.0), 0.0))
+		tip.translate(Vector3(0.0, superior_length + tip_length / 2.0, 0.0))
+		
+		indicator.translate(vert_xyz)
+		var basis_z = (normal_xyz * -1).normalized()
+		var basis_x = Vector3(0.0, 0.0, 1.0).cross(basis_z).normalized()
+		var basis_y = basis_z.cross(basis_x).normalized()
+		indicator.transform.basis = Basis(
+			basis_x,
+			basis_y,
+			basis_z,
+		)
+		
+		var dbg_normal_point := CSGBox3D.new()
+		dbg_normal_point.size = Vector3(nock_size, nock_size, nock_size)
+		dbg_normal_point.material_override = create_single_color_material(Color(0.2, 1.0, 0.2))
+		#dbg_normal_point.translate(Vector3(0.0, superior_length + tip_length / 2.0, 0.0))
+		dbg_normal_point.translate(vert_xyz + (normal_xyz * 0.05))
+		add_child(dbg_normal_point)
+		
+		add_child(indicator)
+		return self
+		
 	func visualize_arrays(arrays: Array) -> ADebugOverlay:
 		var idx := 0
 		for vert_xyz in arrays[ArrayMesh.ARRAY_VERTEX]:
 			if self._show_vertices:
 				add_label("%s" % idx, vert_xyz)
+			
+			if self._show_normals:
+				var normal_xyz: Vector3 = arrays[ArrayMesh.ARRAY_NORMAL][idx]
+				add_normal_indicator(vert_xyz, normal_xyz)
 				
 			idx += 1
 		return self
