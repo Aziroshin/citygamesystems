@@ -792,7 +792,7 @@ class AMultiSegment extends AModifiableSegment:
 				var updated_indexes := PackedInt64Array()
 				for array_vertex_index in vertex.array_vertex_indexes:
 					updated_indexes.append(array_vertex_index_offset + array_vertex_index)
-				var v := add_vertex_from_vertex_with_new_indexes(updated_indexes, vertex)
+				add_vertex_from_vertex_with_new_indexes(updated_indexes, vertex)
 			array_vertex_index_offset += len(segment.untransformed.get_array_vertex())
 		return
 		
