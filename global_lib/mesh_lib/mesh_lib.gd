@@ -554,17 +554,21 @@ class AModifiableSegment extends AVertexTrackingSegment:
 		self.modifiers.append(modifier)
 		
 	func apply_modifiers() -> void:
-		var mutator := IndexChangeTrackingSegmentMutator.new(
-			self.untransformed,
-			len(self.untransformed.get_array_vertex())
-		)
-		for i_modifier in range(self.modifier_cursor, len(modifiers)):
-			modifiers[i_modifier].modify(mutator)
-			self.modifier_cursor += 1
-		self._update_from_ASegment(mutator.segment)
-		self.change_tracked_array_vertex_indexes(
-			mutator.index_changes_by_array_vertex_index
-		)
+		if not self.modifier_cursor == len(self.modifiers):
+			var mutator := IndexChangeTrackingSegmentMutator.new(
+				self.untransformed,
+				len(self.untransformed.get_array_vertex())
+			)
+			for i_modifier in range(self.modifier_cursor, len(self.modifiers)):
+				self.modifiers[i_modifier].modify(mutator)
+				self.modifier_cursor += 1
+			print(self.modifier_cursor, " ", len(self.modifiers))
+			
+			self._update_from_ASegment(mutator.segment)
+			self.change_tracked_array_vertex_indexes(
+				mutator.index_changes_by_array_vertex_index
+			)
+		
 		
 	func apply_all() -> void:
 		# TODO: See if there isn't a better way to make sure the array is
@@ -1249,7 +1253,14 @@ class STris extends Surface:
 		
 		return instance_3d
 		
-		
+	func add(addee: STris) -> void:
+		for tri in addee.tris.get_segments():
+			self.tris.add_tri(tri)
+		for addee_material in addee.materials:
+			self.materials.append(addee_material)
+		for addee_material_index in addee.material_indices:
+			self.material_indices.append(addee_material_index)
+			
 	static func get_inverted_material_indices(
 		material_indices: PackedInt64Array
 	):
