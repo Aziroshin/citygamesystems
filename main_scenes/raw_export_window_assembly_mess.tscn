@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://e1d4uxeyog88"]
+
+[ext_resource type="Script" path="res://main_scenes/raw_export_window_assembly_mess.gd" id="1_0aewg"]
+[ext_resource type="PackedScene" uid="uid://t6fjyxuaed8g" path="res://world_objects/player_world_interface/player_world_interface.tscn" id="2_16h52"]
+
+[node name="raw_export_cube_assembly_mess" type="Node3D"]
+script = ExtResource("1_0aewg")
+
+[node name="PlayerWorldInterface" parent="." instance=ExtResource("2_16h52")]
+override_existing_actions = true
+
+[node name="OmniLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.22485, 0)
+light_color = Color(0.964706, 0.929412, 0.745098, 1)
+light_energy = 0.8
+omni_range = 12.1831
+omni_attenuation = 0.0743256
