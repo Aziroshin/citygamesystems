@@ -104,7 +104,7 @@ class ImageTextureMaterialData extends MaterialData:
 		self.name = name
 		self.filenames = filenames
 		
-	func add_file_name(filename: String) -> void:
+	func add_filename(filename: String) -> void:
 		self.filenames.append(filename)
 		
 	func to_dict() -> Dictionary:
