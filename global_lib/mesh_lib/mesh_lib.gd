@@ -160,6 +160,29 @@ class ASegment:
 		
 class SegmentMutator:
 	var segment: ASegment
+	enum VectorComponentIndex {
+		X,
+		Y,
+		Z
+	}
+	
+	static func _swap_vector3_components(
+		array: PackedVector3Array,
+		comp_idx_a,
+		comp_idx_b
+	) -> void:
+		var comp_idx_c = [0, 1, 2].filter(func(a): return a != comp_idx_a and a != comp_idx_b)[0]
+		
+		for idx in range(0, len(array)):
+			var new_vector := Vector3()
+			var unswapped := array[idx]
+			
+			new_vector[comp_idx_a] = unswapped[comp_idx_b]
+			new_vector[comp_idx_b] = unswapped[comp_idx_a]
+			new_vector[comp_idx_c] = unswapped[comp_idx_c]
+			
+			array[idx] = new_vector
+		
 	
 	func _init(segment_to_mutate: ASegment):
 		self.segment = segment_to_mutate
@@ -168,16 +191,21 @@ class SegmentMutator:
 		for idx in range(0, len(segment._array_vertex)):
 			segment._array_vertex[idx] = segment._array_vertex[idx] * vector
 			
-	# TODO: Check if the normals also have to be flipped in these 3
-	# methods.
+	func _multiply_normals_by_vector3(vector: Vector3):
+		for idx in range(0, len(segment.array_normal)):
+			segment._array_normal[idx] = segment._array_normal[idx] * vector
+
 	func flip_vertices_x() -> void:
 		multiply_vertices_by_vector3(Vector3(-1, 1, 1))
+		_multiply_normals_by_vector3(Vector3(-1, 1, 1))
 		
 	func flip_vertices_y() -> void:
 		multiply_vertices_by_vector3(Vector3(1, -1, 1))
+		_multiply_normals_by_vector3(Vector3(1, -1, 1))
 		
 	func flip_vertices_z() -> void:
 		multiply_vertices_by_vector3(Vector3(1, 1, -1))
+		_multiply_normals_by_vector3(Vector3(1, 1, -1))
 		
 	func translate_vertices(vector: Vector3) -> void:
 		var array_vertex := self.segment.get_array_vertex()
@@ -938,12 +966,10 @@ class MInvertSurfaceArrays extends Modifier:
 class MYUp extends Modifier:
 	func modify(mutator: IndexChangeTrackingSegmentMutator) -> void:
 		var array_vertex := mutator.segment.get_array_vertex()
-		for i_vert in range(len(array_vertex)):
-			var vertex := array_vertex[i_vert]
-			var y := vertex.y
-			vertex.y = vertex.z
-			vertex.z = y
-			array_vertex[i_vert] = vertex
+		mutator.swap_vertex_components(
+			mutator.VectorComponentIndex.Y,
+			mutator.VectorComponentIndex.Z
+		)
 			
 			
 class MYFlipUVs extends Modifier:
