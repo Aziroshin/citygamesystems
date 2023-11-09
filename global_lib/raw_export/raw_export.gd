@@ -209,12 +209,24 @@ class BasicMaterialResolver extends MaterialResolver:
 				
 			elif basetype_material_data.type == IMAGE_FILES_MATERIAL_TYPE:
 				var material_data := basetype_material_data as ImageTextureMaterialData
+				# TODO: Evaluate whether we need to deal with multiple filenames
+				#  and do it if we do need to do so.
+				var albedo_base_path := "res://assets/parts/textures/%s" % material_data.filenames[0]
+				# If some other part of the file name contains "albedo_base",
+				# we're screwed. :p
+				var normal_path := albedo_base_path.replace("albedo_base", "normal")
+				var albedo_texture := load(albedo_base_path)
+				var normal_texture := load(normal_path)
 				var material := StandardMaterial3D.new()
-				material.albedo_texture = load(
-					# TODO: Evaluate whether we need to deal with multiple filenames
-					#  and do it if we do need to do so.
-					"res://assets/parts/textures/%s" % material_data.filenames[0]
-				)
+				if albedo_texture:
+					material.albedo_texture = albedo_texture
+				if normal_texture:
+					print("adding normal texture:", normal_texture.resource_path)
+					material.normal_texture = normal_texture
+					material.normal_enabled = true
+				#material.metallic = 0.0
+				# material.roughness = 1.0
+				#material.metallic_specular = 0.1
 				materials.append(material)
 			else:
 				var material_data := basetype_material_data as DefaultMaterialData
