@@ -9,8 +9,8 @@ const IMAGE_FILES_MATERIAL_TYPE := "IMAGE_FILES"
 static func convert_array_to_color(array: Array) -> Color:
 	if len(array) == 3:
 		return Color(array[0], array[1], array[2])
-		
 	return Color(array[0], array[1], array[2], array[3])
+
 
 static func convert_array_to_packed_vector3_array(array: Array) -> PackedVector3Array:
 	var packed_vector3_array = PackedVector3Array()
@@ -19,6 +19,7 @@ static func convert_array_to_packed_vector3_array(array: Array) -> PackedVector3
 			push_error("Not a Vector3 array.")
 		packed_vector3_array.append(Vector3(element[0], element[1], element[2]))
 	return packed_vector3_array
+	
 	
 static func convert_array_to_packed_vector2_array(array: Array) -> PackedVector2Array:
 	var packed_vector3_array = PackedVector2Array()
@@ -51,6 +52,7 @@ class DefaultMaterialData extends MaterialData:
 		self.index = index
 		self.name = "Default"
 
+
 static func DefaultMaterialData_from_dict(dict: Dictionary) -> DefaultMaterialData:
 	return DefaultMaterialData.new(
 		dict.index
@@ -77,6 +79,7 @@ class BasicMaterialData extends MaterialData:
 		})
 		return dict
 		
+		
 static func BasicMaterialData_from_dict(dict:Dictionary) -> BasicMaterialData:
 	return BasicMaterialData.new(
 		dict.index,
@@ -84,11 +87,12 @@ static func BasicMaterialData_from_dict(dict:Dictionary) -> BasicMaterialData:
 		RawExport.convert_array_to_color(dict.color)
 	)
 
+
 class ImageTextureMaterialData extends MaterialData:
 	var filenames: PackedStringArray
 	
-#	static func from_json(json: String) -> ImageTextureMaterial:
-#		return ImageTextureMaterial.new(1, "", PackedStringArray())
+	#static func from_json(json: String) -> ImageTextureMaterialData:
+	#	return ImageTextureMaterialData.new(1, "", PackedStringArray())
 	
 	func _init(
 		index: int,
@@ -109,6 +113,7 @@ class ImageTextureMaterialData extends MaterialData:
 			"filenames": self.filenames
 		})
 		return dict
+		
 		
 static func ImageTextureMaterialData_from_dict(dict: Dictionary) -> ImageTextureMaterialData:
 	return ImageTextureMaterialData.new(
@@ -211,7 +216,6 @@ class BasicMaterialResolver extends MaterialResolver:
 					"res://assets/parts/textures/%s" % material_data.filenames[0]
 				)
 				materials.append(material)
-				
 			else:
 				var material_data := basetype_material_data as DefaultMaterialData
 				var material := StandardMaterial3D.new()

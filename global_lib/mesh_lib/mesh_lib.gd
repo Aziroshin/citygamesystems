@@ -184,6 +184,11 @@ class SegmentMutator:
 		for idx in range(0, len(array_vertex)):
 			array_vertex[idx] = array_vertex[idx] + vector
 			
+	func swap_vertex_components(comp_idx_a: int, comp_idx_b: int):
+		_swap_vector3_components(self.segment.get_array_vertex(), comp_idx_a, comp_idx_b)
+		_swap_vector3_components(self.segment.get_array_normal(), comp_idx_a, comp_idx_b)
+			
+			
 	# TODO: In-place swapping.
 			
 	func swap_vertex(idx_1: int, idx_2: int) -> void:
@@ -562,7 +567,6 @@ class AModifiableSegment extends AVertexTrackingSegment:
 			for i_modifier in range(self.modifier_cursor, len(self.modifiers)):
 				self.modifiers[i_modifier].modify(mutator)
 				self.modifier_cursor += 1
-			print(self.modifier_cursor, " ", len(self.modifiers))
 			
 			self._update_from_ASegment(mutator.segment)
 			self.change_tracked_array_vertex_indexes(
