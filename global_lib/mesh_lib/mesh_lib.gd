@@ -171,6 +171,7 @@ class SegmentMutator:
 		comp_idx_a,
 		comp_idx_b
 	) -> void:
+		# Get the remaining third idx that hasn't been specified.
 		var comp_idx_c = [0, 1, 2].filter(func(a): return a != comp_idx_a and a != comp_idx_b)[0]
 		
 		for idx in range(0, len(array)):
