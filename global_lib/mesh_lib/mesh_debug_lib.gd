@@ -1,7 +1,9 @@
 extends RefCounted
 class_name MeshDebugLib
 
+
 class ADebugOverlay extends Node3D:
+	const ROTATION_90_DEG = 2 * PI / 4
 	var default_font_size := 8
 	var _show_vertices := true
 	var _show_normals := true
@@ -57,7 +59,7 @@ class ADebugOverlay extends Node3D:
 		var superior_length := shaft_length * 0.9
 		var inferior_length := shaft_length - superior_length
 		
-		var indicator = Node3D.new()
+		var indicator := Node3D.new()
 		var shaft := CSGCylinder3D.new()
 		var nock := CSGBox3D.new()
 		var tip := CSGCylinder3D.new()
@@ -77,28 +79,25 @@ class ADebugOverlay extends Node3D:
 		nock.material_override = create_single_color_material(nock_color)
 		tip.material_override = create_single_color_material(tip_color)
 		
-		
 		# Positions
+		shaft.rotate_x(self.ROTATION_90_DEG)
+		tip.rotate_x(self.ROTATION_90_DEG)
+		nock.rotate_x(self.ROTATION_90_DEG)
 		shaft.translate(Vector3(0.0, (shaft_length / 2.0) - inferior_length, 0.0))
 		nock.translate(Vector3(0.0, -(inferior_length + nock_size / 2.0), 0.0))
 		tip.translate(Vector3(0.0, superior_length + tip_length / 2.0, 0.0))
 		
+		# Indicator position and normal-aligned rotation.
 		indicator.translate(vert_xyz)
-		var basis_z = (normal_xyz * -1).normalized()
-		var basis_x = Vector3(0.0, 0.0, 1.0).cross(basis_z).normalized()
-		var basis_y = basis_z.cross(basis_x).normalized()
+		var old_basis := indicator.transform.basis
+		var basis_z := normal_xyz.normalized()
+		var basis_x := old_basis.z.cross(basis_z).normalized()
+		var basis_y := basis_z.cross(basis_x).normalized()
 		indicator.transform.basis = Basis(
 			basis_x,
 			basis_y,
 			basis_z,
 		)
-		
-		var dbg_normal_point := CSGBox3D.new()
-		dbg_normal_point.size = Vector3(nock_size, nock_size, nock_size)
-		dbg_normal_point.material_override = create_single_color_material(Color(0.2, 1.0, 0.2))
-		#dbg_normal_point.translate(Vector3(0.0, superior_length + tip_length / 2.0, 0.0))
-		dbg_normal_point.translate(vert_xyz + (normal_xyz * 0.05))
-		add_child(dbg_normal_point)
 		
 		add_child(indicator)
 		return self

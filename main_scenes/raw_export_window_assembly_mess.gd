@@ -40,7 +40,7 @@ func _mess(show_debug_overlay) -> Array[Node3D]:
 	if show_debug_overlay:
 		window_array_mesh_node.add_child(ADebugOverlay.new()
 				.show_vertices(false)
-				.show_normals(false)
+				.show_normals(true)
 				.visualize_arrays(
 			window_surface_tris.tris.get_arrays()
 		))
