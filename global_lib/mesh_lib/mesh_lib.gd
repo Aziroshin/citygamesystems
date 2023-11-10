@@ -193,7 +193,7 @@ class SegmentMutator:
 			segment._array_vertex[idx] = segment._array_vertex[idx] * vector
 			
 	func _multiply_normals_by_vector3(vector: Vector3):
-		for idx in range(0, len(segment.array_normal)):
+		for idx in range(0, len(segment._array_normal)):
 			segment._array_normal[idx] = segment._array_normal[idx] * vector
 
 	func flip_vertices_x() -> void:
@@ -879,7 +879,8 @@ class MMultiplyVerticesByVector3 extends Modifier:
 		self.vector = vector
 	
 	func modify(mutator: IndexChangeTrackingSegmentMutator) -> void:
-		mutator.multiply_vertices_by_vector3(self.vector)
+		#mutator.multiply_vertices_by_vector3(self.vector)
+		mutator.flip_vertices_x()
 		
 		
 class MFlipVerticesX extends MMultiplyVerticesByVector3:
