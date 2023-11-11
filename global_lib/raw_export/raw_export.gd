@@ -221,7 +221,6 @@ class BasicMaterialResolver extends MaterialResolver:
 				if albedo_texture:
 					material.albedo_texture = albedo_texture
 				if normal_texture:
-					print("adding normal texture:", normal_texture.resource_path)
 					material.normal_texture = normal_texture
 					material.normal_enabled = true
 				#material.metallic = 0.0

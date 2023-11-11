@@ -34,23 +34,14 @@ func _mess(show_debug_overlay) -> Array[Node3D]:
 	window_surface_tris.tris.apply_all()
 		
 	var window_array_mesh_node := window_surface_tris.get_mesh_instance_3d()
-	var decor_flat_spikes_array_mesh_node := decor_flat_spikes_surface_tris.get_mesh_instance_3d()
-	var decor_nothing_array_mesh_node := decor_nothing_surface_tris.get_mesh_instance_3d()
-	
 	if show_debug_overlay:
-		window_array_mesh_node.add_child(ADebugOverlay.new()
-				.show_vertices(false)
-				.show_normals(true)
-				.visualize_arrays(
-			window_surface_tris.tris.get_arrays()
-		))
-	
-	
-	return [
-		window_array_mesh_node,
-		#decor_flat_spikes_array_mesh_node
-		#decor_nothing_array_mesh_node
-	]
+		window_array_mesh_node.add_child(
+			ADebugOverlay.new()
+			.show_vertices(false)
+			.show_normals(true)
+			.visualize_arrays(window_surface_tris.tris.get_arrays())
+		)
+	return [window_array_mesh_node,]
 
 
 func _ready() -> void:

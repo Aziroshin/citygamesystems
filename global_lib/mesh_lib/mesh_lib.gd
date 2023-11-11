@@ -7,8 +7,7 @@ class_name MeshLib
 # - CityGeoFuncs.get_grouped_surfaces_by_material_index
 	
 	
-# Base class for ArrayMesh array classes for arrays of any number of array_vertex.
-# Has common elements such as the arrays and transforms.
+# Base class for ArrayMesh array classes.
 class ASegment:
 	var _arrays: Array = []
 	var _array_vertex := PackedVector3Array():
@@ -147,16 +146,6 @@ class ASegment:
 	func copy_as_ASegment() -> ASegment:
 		return ASegment.new_from_ASegment(self)
 		
-		
-### Idea:
-# class SegmentMutatorBase
-# class SegmentMutator extends SegmentMutatorBase
-# class SegmentMutatorCompanion extends SegmentMutatorBase
-# With this, segment mutators would always have the same base interface,
-# so SegmentMutator could "hook" into its registered companions and call
-# the same methods with the same arguments, with the companions doing whatever
-# with that. This could be useful to implement material data or metadata
-# mutations without concern-creeping `ASegment`.
 		
 class SegmentMutator:
 	var segment: ASegment
@@ -325,7 +314,7 @@ class ATransformableSegment extends ASegment:
 			
 			
 class Vertex:
-	var transformed_segment: ATransformableSegment
+	var transformed_segment: ATransformableSegment  # TODO: Can't this be `ASegment`?
 	var untransformed_segment: ASegment
 	var array_vertex_indexes: PackedInt64Array
 	var vertex_array_primary_index: int
@@ -526,7 +515,7 @@ class AVertexTrackingSegment extends ATransformableSegment:
 		var vertex := Vertex.new(
 			initial_value,
 			self,
-			untransformed,
+			self.untransformed,
 			array_vertex_indexes,
 			normals_by_array_vertex_index,
 			uvs_by_array_vertex_index

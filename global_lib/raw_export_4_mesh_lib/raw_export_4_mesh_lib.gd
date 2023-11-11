@@ -20,6 +20,7 @@ static func new_STris_from_file(
 	path: String,
 	_dbg_apply_fixes = true
 ) -> STris:
+	assert(FileAccess.file_exists(path), "File doesn't exist: %s" % path)
 	return new_STris_from_JSON(
 		FileAccess.get_file_as_string(path),
 		_dbg_apply_fixes
@@ -43,7 +44,6 @@ static func new_STris_from_RawObjectData(
 	# TODO: This actually doesn't work - passing the class causes a type error.
 	ResolverClass := BasicMaterialResolver,
 ) -> STris:
-	
 	var vertices := raw_object_data.vertices
 	var normals := raw_object_data.normals
 	var uvs := raw_object_data.uvs
