@@ -807,23 +807,35 @@ class ATri extends AModifiableSegment:
 # directly. Instead, they should get their segments through .get_segments.
 # How .get_segments gets their segments is entirely up to the sub-class.
 class AMultiSegment extends AModifiableSegment:
+	var _array_vertex_index_offset: int = 0
+	
+	# Override in sub-class.
+	func _reset_array_vertex_index_offset() -> void:
+		self._array_vertex_index_offset = 0
+		
+	# Override in sub-class.
+	func _reset_modifier_cursor() -> void:
+		self.modifier_cursor = 0
+	
 	# @virtual
 	func get_segments() -> Array[AModifiableSegment]:
 		return []
 	
 	func _update_vertices_from_segments() -> void:
-		var array_vertex_index_offset: int = 0
 		for segment in get_segments():
 			for vertex in segment.vertices:
 				var updated_indexes := PackedInt64Array()
 				for array_vertex_index in vertex.array_vertex_indexes:
-					updated_indexes.append(array_vertex_index_offset + array_vertex_index)
+					updated_indexes.append(self._array_vertex_index_offset + array_vertex_index)
 				add_vertex_from_vertex_with_new_indexes(updated_indexes, vertex)
-			array_vertex_index_offset += len(segment.untransformed.get_array_vertex())
-		return
+			self._array_vertex_index_offset += len(segment.untransformed.get_array_vertex())
+		_reset_array_vertex_index_offset()
 		
 	func apply_segments() -> void:
 		_update_vertices_from_segments()
+		
+	func apply_modifiers() -> void:
+		super()
 		
 	func apply_all() -> void:
 		apply_segments()
@@ -834,7 +846,7 @@ class AMultiSegment extends AModifiableSegment:
 		# NOTE: This won't mesh well with multi-segments that directly alter
 		# their .untransformed without going through the apply_segments
 		# pipeline.
-		self.modifier_cursor = 0
+		_reset_modifier_cursor()
 		
 	# @virtual
 	func as_AVertexTrackingSegment(do_apply_all := false) -> AVertexTrackingSegment:
@@ -844,6 +856,29 @@ class AMultiSegment extends AModifiableSegment:
 		else:
 			apply_segments()
 		return self
+		
+		
+# Applies segments only once, then clears them, so on subsequent calls of
+# .apply_segments only segments that got added since the last .apply_segments
+# call will be applied.
+# The important part for this to work is to override `clear_segments` in a
+# sub-class to make sure the next call to .get_segments will return an empty
+# array (unless new segments got added again).
+class AFlushingMultiSegment extends AMultiSegment:
+	# @virtual
+	func clear_segments() -> void:
+		pass
+		
+	func _reset_modifier_cursor() -> void:
+		pass
+	
+	func _reset_array_vertex_index_offset() -> void:
+		pass
+		
+	func apply_all() -> void:
+		super()
+		clear_segments()
+		
 		
 		
 ###########################################################################
