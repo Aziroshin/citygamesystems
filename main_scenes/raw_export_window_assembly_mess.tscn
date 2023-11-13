@@ -10,8 +10,13 @@ script = ExtResource("1_0aewg")
 override_existing_actions = true
 
 [node name="OmniLight" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.22485, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 6.225, 2)
+visible = false
 light_color = Color(0.964706, 0.929412, 0.745098, 1)
 light_energy = 0.8
+shadow_enabled = true
 omni_range = 12.1831
 omni_attenuation = 0.0743256
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.95516, 0, 0.296092, 0, 1, 0, -0.296092, 0, 0.95516, 11.6455, 10.2913, 22.2223)
