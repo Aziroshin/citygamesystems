@@ -1039,6 +1039,24 @@ class AMultiTri extends AMultiSegment:
 		return segments
 	
 	
+class AFlushingMultiTri extends AFlushingMultiSegment:
+	var _flushable_base_tris: Array[ATri] = []
+	
+	func add_tri(tri: ATri):
+		self._flushable_base_tris.append(tri)
+		
+	func get_segments() -> Array[AModifiableSegment]:
+		var segments := super()
+		for tri in self._flushable_base_tris:
+			segments.append(tri)
+		# This should return an empty array if called again after .apply_all
+		# has finished for the first time.
+		return segments
+		
+	func clear_segments() -> void:
+		self._flushable_base_tris = []
+	
+	
 class LineVertexArrayChecker:
 	const CLASS_NAME := "LineVertexArrayChecker"
 	
@@ -1283,12 +1301,12 @@ class Surface:
 		
 		
 class STris extends Surface:
-	var tris: AMultiTri
+	var tris: AFlushingMultiTri
 	var material_indices: PackedInt64Array
 	var materials: Array[Material]
 	
 	func _init(
-		tris: AMultiTri,
+		tris: AFlushingMultiTri,
 		material_indices: PackedInt64Array,
 		materials: Array[Material] = []
 	):
@@ -1310,8 +1328,28 @@ class STris extends Surface:
 		return instance_3d
 		
 	func add(addee: STris) -> void:
-		for tri in addee.tris.get_segments():
+		var vertices := addee.tris.get_array_vertex()
+		var normals := addee.tris.get_array_normal()
+		var uvs := addee.tris.get_array_tex_uv()
+		
+		for i_tri in range(0, len(vertices) / 3):
+			var offset := i_tri * 3
+			var tri := ATri.new(
+				vertices[offset],
+				vertices[offset+1],
+				vertices[offset+2],
+
+				normals[offset],
+				normals[offset+1],
+				normals[offset+2],
+
+				uvs[offset],
+				uvs[offset+1],
+				uvs[offset+2]
+			)
 			self.tris.add_tri(tri)
+		self.tris.apply_all()
+		
 		for addee_material in addee.materials:
 			self.materials.append(addee_material)
 		for addee_material_index in addee.material_indices:

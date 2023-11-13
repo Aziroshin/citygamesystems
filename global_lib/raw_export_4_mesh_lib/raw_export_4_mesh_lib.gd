@@ -3,7 +3,7 @@ class_name RawExport4MeshLib
 
 ### "Imports": MeshLib
 const STris := MeshLib.STris
-const AMultiTri := MeshLib.AMultiTri
+const AFlushingMultiTri := MeshLib.AFlushingMultiTri
 const ATri := MeshLib.ATri
 const MYFlipUVs := MeshLib.MYFlipUVs
 const MYUp := MeshLib.MYUp
@@ -48,7 +48,7 @@ static func new_STris_from_RawObjectData(
 	var normals := raw_object_data.normals
 	var uvs := raw_object_data.uvs
 	
-	var multi_tri = AMultiTri.new()
+	var multi_tri := AFlushingMultiTri.new()
 	for i_face in range(len(vertices) / 3):
 		var offset := i_face * 3
 		var tri := ATri.new(
