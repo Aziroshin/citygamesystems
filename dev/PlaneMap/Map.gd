@@ -55,7 +55,7 @@ func _ready():
 	
 	add_child(mesh_instance)
 	
-func _on_mouse_event(camera, event, click_position, click_normal, shape):
+func _on_mouse_event(camera: Camera3D, event: InputEvent, click_position:, click_normal, shape):
 	if event is InputEventMouseButton:
 		pass
 
