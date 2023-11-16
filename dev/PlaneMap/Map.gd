@@ -1,5 +1,6 @@
 @tool
 extends StaticBody3D
+class_name PlaneMap
 
 var noise = preload("res://dev/PlaneMap/PlaneMapNoise.tres")
 var material = preload("res://dev/PlaneMap/MapMaterial.tres")
@@ -7,6 +8,21 @@ var material = preload("res://dev/PlaneMap/MapMaterial.tres")
 @export var resolution := 10
 @export var size := Vector2(10, 10)
 @export var subdivision := Vector2(100, 100)
+
+signal mouse_motion(
+	camera: Camera3D,
+	event: InputEventMouseMotion,
+	click_position: Vector3,
+	click_normal: Vector3,
+	shape: int
+)
+signal mouse_button(
+	camera: Camera3D,
+	event: InputEventMouseButton,
+	click_position: Vector3,
+	click_normal: Vector3,
+	shape: int
+)
 
 # With some helpful input from Digital KI's post:
 #   https://digitalki.net/2018/04/25/alter-a-plane-mesh-programmatically-with-godot-3-0-2/
@@ -55,7 +71,16 @@ func _ready():
 	
 	add_child(mesh_instance)
 	
-func _on_mouse_event(camera: Camera3D, event: InputEvent, click_position:, click_normal, shape):
+func _on_mouse_event(
+	camera: Camera3D,
+	event: InputEvent,
+	mouse_position: Vector3,
+	normal: Vector3,
+	shape: int
+):
+	if event is InputEventMouseMotion:
+		mouse_motion.emit(camera, event, mouse_position, normal, shape)
 	if event is InputEventMouseButton:
-		pass
+		mouse_button.emit(camera, event, mouse_position, normal, shape)
+	
 
