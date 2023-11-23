@@ -6,7 +6,7 @@ class ToolState extends Resource:
 	pass
 
 
-class StatefulTool:
+class StatefulTool extends Node:
 	#func get_class() -> String: return "StatefulTool"
 	signal state_updated()
 	
