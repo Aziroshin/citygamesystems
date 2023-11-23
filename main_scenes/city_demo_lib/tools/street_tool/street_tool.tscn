@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://ccyygvukdrgue"]
+
+[ext_resource type="Script" path="res://main_scenes/city_demo_lib/tools/street_tool/street_tool.gd" id="1_h44oj"]
+
+[node name="street_tool" type="Node"]
+script = ExtResource("1_h44oj")
