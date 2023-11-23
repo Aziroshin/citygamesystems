@@ -103,12 +103,14 @@ class ADebugOverlay extends Node3D:
 		return self
 		
 	func visualize_arrays(arrays: Array) -> ADebugOverlay:
+		var has_normals := true if arrays[ArrayMesh.ARRAY_NORMAL] else false
+		
 		var idx := 0
 		for vert_xyz in arrays[ArrayMesh.ARRAY_VERTEX]:
 			if self._show_vertices:
 				add_label("%s" % idx, vert_xyz)
 			
-			if self._show_normals:
+			if self._show_normals and has_normals:
 				var normal_xyz: Vector3 = arrays[ArrayMesh.ARRAY_NORMAL][idx]
 				add_normal_indicator(vert_xyz, normal_xyz)
 				
