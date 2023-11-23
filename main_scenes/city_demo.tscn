@@ -43,17 +43,19 @@ subdivision = Vector2(128, 128)
 [node name="tool_arbiter" type="Node" parent="."]
 script = ExtResource("5_ar3lr")
 
-[node name="street_tool" type="Node" parent="." node_paths=PackedStringArray("arbiter")]
+[node name="street_tool" type="Node" parent="." node_paths=PackedStringArray("arbiter", "map")]
 script = ExtResource("5_knyav")
 arbiter = NodePath("../tool_arbiter")
+map = NodePath("../Map")
 
-[node name="arbiter_test_tool" type="Node" parent="." node_paths=PackedStringArray("arbiter")]
+[node name="arbiter_test_tool" type="Node" parent="." node_paths=PackedStringArray("arbiter", "map")]
 script = ExtResource("5_knyav")
 arbiter = NodePath("../tool_arbiter")
+map = NodePath("../Map")
 
 [connection signal="button_up" from="VBoxContainer/street_tool_button/TextureButton" to="street_tool" method="_on_activation_requested" flags=3]
 [connection signal="button_up" from="VBoxContainer/arbiter_test_tool_button/TextureButton" to="arbiter_test_tool" method="_on_activation_requested" flags=3]
-[connection signal="mouse_button" from="Map" to="." method="_on_map_mouse_button"]
+[connection signal="mouse_button" from="Map" to="street_tool" method="_on_map_mouse_button"]
 
 [editable path="VBoxContainer/street_tool_button"]
 [editable path="VBoxContainer/arbiter_test_tool_button"]
