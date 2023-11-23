@@ -70,9 +70,18 @@ func _on_request_granted(granted: bool):
 		activated.connect(arbiter._on_tool_activated, CONNECT_ONE_SHOT)
 		activated.emit()
 		
-	
 func _on_deactivate():
 	_deactivate()
 	self.active = false
 	deactivated.connect(arbiter._on_tool_deactivated, CONNECT_ONE_SHOT)
 	deactivated.emit()
+	
+# Make that conditional based on `active` later (connect/disconnect) signal.
+func _on_map_mouse_button(
+	camera: Camera3D,
+	event: InputEvent,
+	mouse_position: Vector3,
+	normal: Vector3,
+	shape: int
+) -> void:
+	add_node(mouse_position)

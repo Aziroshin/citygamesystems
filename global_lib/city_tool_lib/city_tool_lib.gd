@@ -19,3 +19,25 @@ class StreetTool extends StateDuplicatingUndoableTool:
 		
 	func set_state(state: StreetToolState) -> void:
 		set_base_type_state(state)
+		
+	func get_node_count() -> int:
+		# The baked points don't correspond to control nodes in the sense
+		# that we'd want them for streets, so that doesn't work.
+		# What we'd need here is a way to get the points as we've added them.
+		# We might have to make something like a "CurveControl3D".
+		return len(get_state().curve.get_baked_points())
+		
+	func get_last_node_idx() -> int:
+		return get_node_count() - 1
+		
+	func add_node(position: Vector3) -> void:
+		get_state().curve.add_point(position)
+		copy_state_to_undo()
+		
+		var point := get_state().curve.get_point_position(get_last_node_idx())
+		print(get_last_node_idx())
+		
+		Cavedig.needle(
+			self.map,
+			Transform3D(Basis(), point)
+		)
