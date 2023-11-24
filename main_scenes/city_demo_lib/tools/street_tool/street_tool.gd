@@ -84,4 +84,9 @@ func _on_map_mouse_button(
 	normal: Vector3,
 	shape: int
 ) -> void:
-	add_node(mouse_position)
+	var idx := add_node(mouse_position)
+	Cavedig.needle(
+		map,
+		Transform3D(Basis(), get_state().curve.get_point_position(idx))
+	)
+	
