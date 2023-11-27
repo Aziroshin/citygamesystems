@@ -38,20 +38,20 @@ class ASegment:
 		_init_arrays(arrays, array_vertex)
 		
 	func _init_arrays(
-		arrays: Array = [],
-		_array_vertex: PackedVector3Array = PackedVector3Array(),
-		_array_normal: PackedVector3Array = PackedVector3Array(),
-		_array_tex_uv: PackedVector2Array = PackedVector2Array()
+		p_arrays: Array = [],
+		p_array_vertex: PackedVector3Array = PackedVector3Array(),
+		p_array_normal: PackedVector3Array = PackedVector3Array(),
+		p_array_tex_uv: PackedVector2Array = PackedVector2Array()
 	):
-		self._arrays = arrays
+		self._arrays = p_arrays
 		self._arrays.resize(ArrayMesh.ARRAY_MAX)
 		
-		if len(_array_vertex) > 0 or arrays[ArrayMesh.ARRAY_VERTEX] == null:
-			self._arrays[ArrayMesh.ARRAY_VERTEX] = _array_vertex
-		if len(_array_normal) > 0 or arrays[ArrayMesh.ARRAY_NORMAL] == null:
-			self._arrays[ArrayMesh.ARRAY_NORMAL] = _array_normal
-		if len(_array_tex_uv) > 0 or arrays[ArrayMesh.ARRAY_TEX_UV] == null:
-			self._arrays[ArrayMesh.ARRAY_TEX_UV] = _array_tex_uv
+		if len(p_array_vertex) > 0 or p_arrays[ArrayMesh.ARRAY_VERTEX] == null:
+			self._arrays[ArrayMesh.ARRAY_VERTEX] = p_array_vertex
+		if len(p_array_normal) > 0 or p_arrays[ArrayMesh.ARRAY_NORMAL] == null:
+			self._arrays[ArrayMesh.ARRAY_NORMAL] = p_array_normal
+		if len(p_array_tex_uv) > 0 or p_arrays[ArrayMesh.ARRAY_TEX_UV] == null:
+			self._arrays[ArrayMesh.ARRAY_TEX_UV] = p_array_tex_uv
 		
 	func _update_arrays_from_arrays(
 		arrays: Array

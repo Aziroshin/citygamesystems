@@ -16,15 +16,15 @@ extends Node3D
 
 class PathNode:
 	var neighbours = []
-	func _addNeighbour(pathNode):
-		self.neighbours.append(pathNode)
+	func _addNeighbour(p_pathNode):
+		neighbours.append(p_pathNode)
 		return self
-	func connectWithNeighbour(pathNode):
-		self._addNeighbour(pathNode)
-		pathNode._addNeighbour(self)
+	func connectWithNeighbour(p_pathNode):
+		_addNeighbour(p_pathNode)
+		p_pathNode._addNeighbour(self)
 		return self
 	func getNeighbours():
-		return self.neighbours
+		return neighbours
 		
 class PathNodePathFindState:
 	pass
@@ -34,14 +34,16 @@ class PathNodePath:
 	var startNode
 	var endNode
 	var nodes = []
-	func _init(startNode, endNode):
-		self.startNode = startNode
-		self.endNode = endNode
+	
+	func _init(p_startNode, p_endNode):
+		startNode = p_startNode
+		endNode = p_endNode
+	
 	func find():
-		var currentNode = self.startNode
+		var currentNode = startNode
 		var endNodeFound = false
 		while !endNodeFound:
-			if currentNode == self.endNode:
+			if currentNode == endNode:
 				endNodeFound = true
 		return self
 	
@@ -89,28 +91,28 @@ func _ready():
 	
 	#######################################################################
 	# Beginning of path experiments/testing.
-	var pathNodeA = PathNode.new()
-	var pathNodeB = PathNode.new().connectWithNeighbour(pathNodeA)
-	var pathNodeC = PathNode.new().connectWithNeighbour(pathNodeB)
-	var pathNodeD = PathNode.new().connectWithNeighbour(pathNodeC)
-	var pathNodeE = PathNode.new().connectWithNeighbour(pathNodeD)
-	var entityB = Entity.new().addPathNode(pathNodeB)
-	var entityD = Entity.new().addPathNode(pathNodeD)
+#	var pathNodeA = PathNode.new()
+#	var pathNodeB = PathNode.new().connectWithNeighbour(pathNodeA)
+#	var pathNodeC = PathNode.new().connectWithNeighbour(pathNodeB)
+#	var pathNodeD = PathNode.new().connectWithNeighbour(pathNodeC)
+#	var pathNodeE = PathNode.new().connectWithNeighbour(pathNodeD)
+#	var entityB = Entity.new().addPathNode(pathNodeB)
+#	var entityD = Entity.new().addPathNode(pathNodeD)
 	
 	
 func _on_map_input_event(
-	camera: Node,
-	event: InputEvent,
-	position: Vector3,
-	normal: Vector3,
-	shape_idx: int
+	_p_camera: Node,
+	p_event: InputEvent,
+	p_position: Vector3,
+	p_normal: Vector3,
+	_p_shape_idx: int
 ) -> void:
-	if event is InputEventMouseButton:
+	if p_event is InputEventMouseButton:
 #		if event.button_index == BUTTON_LEFT and event.pressed:
 		assert(Visualization.OctagonMarker.instantiate()\
 			.add_as_child_to(self)\
-			.position_at(position)\
-			.align_along(normal)\
+			.position_at(p_position)\
+			.align_along(p_normal)\
 			.set_size(0.2)\
 			.primary.set_color(Vector3(0.2, 0.7, 0.2))\
 			.secondary.set_color(Vector3(0.4, 1, 0.4))\

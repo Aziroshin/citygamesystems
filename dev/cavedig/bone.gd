@@ -11,10 +11,10 @@ func set_bone_component_material(
 	component.material_override = material.duplicate()
 
 func set_bone_component_color(
-		component: GeometryInstance3D,
-		color: Vector3
+		p_component: GeometryInstance3D,
+		p_color: Vector3
 ) -> void:
-	component.material_override.set_shader_parameter("color", color)
+	p_component.material_override.set_shader_parameter("color", p_color)
 
 func _ready() -> void:
 	set_bone_component_material($Shaft, shader)

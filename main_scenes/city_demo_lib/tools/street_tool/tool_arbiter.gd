@@ -1,6 +1,6 @@
 extends Node
 
-signal request_granted(granted: bool)
+signal request_granted(p_granted: bool)
 signal deactivate()
 @onready var tool_default := Node.new()
 
@@ -25,8 +25,8 @@ var activation_requesting_tool: Node:
 			push_error("Error: var `activation_requesting_tool` accessed "
 			+ "outside of `ACTIVATION_REQUEST` state.")
 		return activation_requesting_tool
-	set(value):
-		activation_requesting_tool = value
+	set(p_value):
+		activation_requesting_tool = p_value
 var active_tool: Node:
 	get:
 		if not active_tool:
@@ -39,28 +39,28 @@ var active_tool: Node:
 			# activation related errors? I'm gravitating towards "no".
 			active_tool = tool_default
 		return active_tool
-	set(value):
-		active_tool = value
+	set(p_value):
+		active_tool = p_value
 
 func reset():
 	state = State.NOTHING
 	active_tool = tool_default
 	activation_requesting_tool = tool_default
 
-func set_activation_request_state(tool: Node):
+func set_activation_request_state(p_tool: Node):
 	state = State.ACTIVATION_REQUEST
-	activation_requesting_tool = tool
+	activation_requesting_tool = p_tool
  
-func _on_request_activation(tool: Node):
+func _on_request_activation(p_tool: Node):
 	if state == State.NOTHING:
 		print("NOTHING")
-		set_activation_request_state(tool)
+		set_activation_request_state(p_tool)
 		request_granted.emit(true)
 		return
 		
 	if state == State.TOOL_ACTIVE:
 		print("TOOL_ACTIVE")
-		set_activation_request_state(tool)
+		set_activation_request_state(p_tool)
 		deactivate.connect(active_tool._on_deactivate, CONNECT_ONE_SHOT)
 		deactivate.emit()
 		return

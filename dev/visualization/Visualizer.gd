@@ -23,8 +23,8 @@ func _init():
 	tertiary = MeshDelegate.new(self, "Tertiary")
 	quaternary = MeshDelegate.new(self, "Quaternary")
 	
-func set_description(description: String) -> Visualizer:
-	self.description = description
+func set_description(p_description: String) -> Visualizer:
+	description = p_description
 	return self
 	
 func new_knockoff() -> Visualizer:
@@ -41,7 +41,7 @@ func new_knockoff() -> Visualizer:
 	knockoff.tertiary = tertiary.new_knockoff(knockoff)
 	knockoff.quaternary = quaternary.new_knockoff(knockoff)
 	
-	knockoff.transform = self.transform
+	knockoff.transform = transform
 	
 	return knockoff
 
@@ -49,21 +49,21 @@ class NoodleConnections extends RefCounted:
 	var visualizer: Visualizer
 	var connections: Dictionary = {}
 	
-	func _init(our_visualizer: Visualizer):
-		self.visualizer = our_visualizer
+	func _init(p_our_visualizer: Visualizer):
+		visualizer = p_our_visualizer
 	
-	func add_connection(connection: NoodleConnection):
-		self.connections[connection.other_visualizer] = connection
+	func add_connection(p_connection: NoodleConnection):
+		connections[p_connection.other_visualizer] = p_connection
 		
-	func remove_connection(other_visualizer: Visualizer):
-		self.connections.erase(other_visualizer)
+	func remove_connection(p_other_visualizer: Visualizer):
+		connections.erase(p_other_visualizer)
 		
-	func get_connection(other_visualizer: Visualizer) -> NoodleConnection:
-		return self.connections[other_visualizer]
+	func get_connection(p_other_visualizer: Visualizer) -> NoodleConnection:
+		return connections[p_other_visualizer]
 		
 	# Return schema: `{other_visualizer: NoodleConnection}`.
 	func get_all_connections() -> Dictionary:
-		return self.connections
+		return connections
 
 class NoodleConnection extends RefCounted:
 	var visualizer: Visualizer
@@ -84,15 +84,15 @@ class NoodleConnection extends RefCounted:
 	}
 	
 	func _init(
-		our_visualizer: Visualizer,
-		connected_visualizer: Visualizer,
-		connecting_noodle: VisualizationNoodle,
-		noodle_direction: int
+		p_our_visualizer: Visualizer,
+		p_connected_visualizer: Visualizer,
+		p_connecting_noodle: VisualizationNoodle,
+		p_noodle_direction: int
 	):
-		self.visualizer = our_visualizer
-		self.other_visualizer = connected_visualizer
-		self.noodle = connecting_noodle
-		self.direction = noodle_direction
+		visualizer = p_our_visualizer
+		other_visualizer = p_connected_visualizer
+		noodle = p_connecting_noodle
+		direction = p_noodle_direction
 	
 class MeshDelegate extends RefCounted:
 	var visualizer: Visualizer
@@ -102,58 +102,58 @@ class MeshDelegate extends RefCounted:
 	var _material: ShaderMaterial
 	var _material_is_unique := false
 	
-	func _init(visualizer: Visualizer, mesh_name: String):
-		self.visualizer = visualizer
-		self.mesh_name = mesh_name
-		if self.visualizer.has_node(self.mesh_name):
-			self._set_mesh(visualizer.get_node(self.mesh_name))
+	func _init(p_visualizer: Visualizer, p_mesh_name: String):
+		visualizer = p_visualizer
+		mesh_name = p_mesh_name
+		if visualizer.has_node(mesh_name):
+			_set_mesh(p_visualizer.get_node(mesh_name))
 	
 	# Sets our mesh.
 	# Even though this is a `_` method, this may still be called from
 	# other places within the Visualizer lib.
-	func _set_mesh(new_mesh: MeshInstance3D) -> MeshDelegate:
-		self.mesh = new_mesh
-		self.has_mesh = true
-		self._set_material(VisualizationShader)
+	func _set_mesh(p_new_mesh: MeshInstance3D) -> MeshDelegate:
+		mesh = p_new_mesh
+		has_mesh = true
+		_set_material(VisualizationShader)
 		return self
 	
-	func _set_material(material: ShaderMaterial) -> void:
-		self._material = material
-		if self.has_mesh:
-			self.mesh.material_override = self._material
+	func _set_material(p_material: ShaderMaterial) -> void:
+		_material = p_material
+		if has_mesh:
+			mesh.material_override = _material
 		else:
 			# More sophisticated error handling would be a good idea.
 			push_error("VisualizerError: Tried to set material when we don't even have a mesh.")
 	
 	func _make_material_unique() -> void:
-		self._set_material(self._material.duplicate())
+		_set_material(_material.duplicate())
 	
 	# Copy on Write, but for our material. ;)
 	func _get_material_for_mutation() -> ShaderMaterial:
 		if not _material_is_unique:
-			self._make_material_unique()
-		return self._material
+			_make_material_unique()
+		return _material
 	
 	# Sets the color of our mesh.
 	# Returns our visualizer, as this is a top level builder pattern
 	# method.
-	func set_color(color: Vector3) -> Visualizer:
-		if self.has_mesh:
-			self._get_material_for_mutation().set_shader_parameter("color", color)
-			return self.visualizer
-		return self.visualizer
+	func set_color(p_color: Vector3) -> Visualizer:
+		if has_mesh:
+			_get_material_for_mutation().set_shader_parameter("color", p_color)
+			return visualizer
+		return visualizer
 	
 	# Returns `Vector3(0, 0, 0)` if there is no mesh.
 	func get_color() -> Vector3:
-		if self.has_mesh:
-			return self._material.get_shader_param("color")
+		if has_mesh:
+			return _material.get_shader_param("color")
 		return Vector3(0, 0, 0)
 	
-	func new_knockoff(new_visualizer) -> MeshDelegate:
+	func new_knockoff(p_new_visualizer) -> MeshDelegate:
 		# Light convention: Not relying on `_` prefixed functions and vars here
 		# is strongly advised, even when it comes at a cost.
 		
-		var knockoff := MeshDelegate.new(new_visualizer, self.mesh_name)
+		var knockoff := MeshDelegate.new(p_new_visualizer, mesh_name)
 		
 		# The color is already on it by virtue of the duplicated mesh, but
 		# not using the `set_color` function would create a strange situation
@@ -164,22 +164,22 @@ class MeshDelegate extends RefCounted:
 		# when considering that future changes not aware of the idiosyncrasies
 		# of this here function might introduce feral bugs if we're not careful
 		# here.
-		knockoff.set_color(self.get_color())
+		knockoff.set_color(get_color())
 		
 		return knockoff
 
-func add_as_child_to(parent: Node3D) -> Visualizer:
-	parent.add_child(self)
+func add_as_child_to(p_parent: Node3D) -> Visualizer:
+	p_parent.add_child(self)
 	return self
 
-func position_at(position: Vector3) -> Visualizer:
+func position_at(p_position: Vector3) -> Visualizer:
 	
 #	# Correct
 #	print("previous global marker position: %s" % global_transform.origin)
 #	var needle_parent = get_tree().root
 #	Cavedig.needle(get_tree().root, global_transform.origin, Cavedig.Colors.GREEN, 0.1, 0.2).set_as_toplevel(true)
 	
-	self.global_transform.origin = position
+	global_transform.origin = p_position
 	
 #	var green_needle: CSGCylinder = Cavedig.needle(self, global_transform.origin, Vector3(0.2, 0.2, 0.2) + Cavedig.Colors.GREEN, 2, 0.05)
 #	green_needle.set_as_toplevel(true)
@@ -210,11 +210,11 @@ func position_at(position: Vector3) -> Visualizer:
 	
 	return self
 
-func set_size(size: float) -> Visualizer:
+func set_size(p_size: float) -> Visualizer:
 	# TODO: Resize noodles.
 #	var previous_scale = self.scale
-	self._size = size
-	self.scale = Vector3(size, size, size)
+	_size = p_size
+	scale = Vector3(p_size, p_size, p_size)
 #	for untyped_connection in self.connections.get_all_connections().values():
 #		var connection: NoodleConnection = untyped_connection
 #		connection.direction = NoodleConnection.Direction.FROM
@@ -225,56 +225,65 @@ func set_size(size: float) -> Visualizer:
 #	self.set_size(self.scale * size_coefficient)
 #	return self
 
-func align_along(vector: Vector3) -> Visualizer:
+func align_along(p_vector: Vector3) -> Visualizer:
 	# Solution inspired by r/Sprowl: https://www.reddit.com/r/godot/comments/f2fowu/aligning_node_to_surface_normal/
-	self.global_transform.basis = Basis(
-		vector.cross(self.global_transform.basis.z),
-		vector,
-		self.global_transform.basis.x.cross(vector)
+	global_transform.basis = Basis(
+		p_vector.cross(global_transform.basis.z),
+		p_vector,
+		global_transform.basis.x.cross(p_vector)
 	)
 	return self
 
-func noodle_to(other_visualizer: Visualizer) -> Visualizer:
+func noodle_to(p_other_visualizer: Visualizer) -> Visualizer:
 	#Cavedig.needle(needle_parent, global_transform.origin, Cavedig.Colors.YELLOW, 0.1, 0.2).set_as_toplevel(true)
 	print("source visualizer origin (yellow): %s" % global_transform.origin)
-	noodle_up(other_visualizer, NoodleConnection.Direction.TO)
+	noodle_up(p_other_visualizer, NoodleConnection.Direction.TO)
 	return self
 
-static func get_highest_spatial_in_hierarchy(spatial: Node3D) -> Node3D:
-	var immediate_parent_spatial = spatial.get_parent_spatial()
+static func get_highest_spatial_in_hierarchy(p_spatial: Node3D) -> Node3D:
+	var immediate_parent_spatial = p_spatial.get_parent_spatial()
 	if immediate_parent_spatial:
-		return get_highest_spatial_in_hierarchy(immediate_parent_spatial)
-	return spatial
+		return Visualizer.get_highest_spatial_in_hierarchy(immediate_parent_spatial)
+	return p_spatial
 	
 func get_highest_parent_spatial() -> NilableNode3D:
-	var maybe_self = get_highest_spatial_in_hierarchy(self)
+	var maybe_self = Visualizer.get_highest_spatial_in_hierarchy(self)
 	if maybe_self.get_instance_id() == self.get_instance_id():
 		return NilableNode3D.new()
 	return NilableNode3D.new().set_value(maybe_self)
 	
-func noodle_up(other_visualizer: Visualizer, direction: int) -> Visualizer:
+func noodle_up(p_other_visualizer: Visualizer, p_direction: int) -> Visualizer:
 	var noodle: VisualizationNoodle = VisualizationNoodleScene.instantiate()\
 		.add_as_child_to(get_tree().current_scene)\
 		.set_size(self._size)\
 		.set_start(global_transform.origin)
 	connections.add_connection(NoodleConnection.new(
 		self, 
-		other_visualizer,
+		p_other_visualizer,
 		noodle,
-		direction
+		p_direction
 	))
-	other_visualizer.get_noodled(self, noodle, NoodleConnection.OppositeDirectionOf[direction])
+	p_other_visualizer.get_noodled(
+		self,
+		noodle,
+		NoodleConnection.OppositeDirectionOf[p_direction]
+	)
 	return self
 	
-func get_noodled(noodling_visualizer: Visualizer, noodle: VisualizationNoodle, direction) -> Visualizer:
-	noodle.set_end(global_transform.origin)
+func get_noodled(
+	p_noodling_visualizer: Visualizer,
+	p_noodle: VisualizationNoodle,
+	p_direction
+) -> Visualizer:
+	p_noodle.set_end(global_transform.origin)
 	connections.add_connection(NoodleConnection.new(
 		self,
-		noodling_visualizer,
-		noodle,
-		direction
+		p_noodling_visualizer,
+		p_noodle,
+		p_direction
 	))
-	Cavedig.needle(self, global_transform, Cavedig.Colors.SEA_GREEN, 0.05, 0.3).set_as_top_level(true)
+	Cavedig.needle(self, global_transform, Cavedig.Colors.SEA_GREEN, 0.05, 0.3)\
+		.set_as_top_level(true)
 	print("target visualizer origin (sea green): %s" % global_transform.origin)
 	return self
 

@@ -8,16 +8,15 @@ static func create_kinked_roof_line(
 	kinks: int,
 	inset_ratio := 1.0,
 	height_ratio := 1.0,
-	mid_stretch_ratio := 1.0 # TODO
+	_mid_stretch_ratio := 1.0 # TODO
 ) -> PackedVector3Array:
 	var line := PackedVector3Array()
 	assert(start.x == end.x)
-	var x := start.x
 	
 	var depth := end.z
-	var kink_depth := depth / (kinks + 1)
+	#var kink_depth := depth / (kinks + 1)
 	var height := end.y
-	var kink_height := height / (kinks + 1)
+	#var kink_height := height / (kinks + 1)
 	
 	var items := kinks + 2
 	line.resize(items)
@@ -138,7 +137,6 @@ static func get_grouped_surfaces_by_material_index(
 	var array_vertex: PackedVector3Array = surface_arrays[ArrayMesh.ARRAY_VERTEX]
 	var array_tex_uv: PackedVector2Array = surface_arrays[ArrayMesh.ARRAY_TEX_UV]
 	var array_normal: PackedVector3Array = surface_arrays[ArrayMesh.ARRAY_NORMAL]
-	var face_count := len(array_vertex) / 3
 	var grouped: Array[Array] = []
 	
 	### Initialize our array of surface arrays.

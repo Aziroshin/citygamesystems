@@ -15,13 +15,13 @@ const DEFAULT_END = Vector3(0, 0, -1)
 @export var start: Vector3 = DEFAULT_START:
 	get:
 		return get_start()
-	set(value):
-		set_start(value)
+	set(p_value):
+		set_start(p_value)
 @export var end: Vector3 = DEFAULT_END:
 	get:
 		return get_end()
-	set(value):
-		set_end(value)
+	set(p_value):
+		set_end(p_value)
 
 func _ready():
 	path.curve.clear_points()
@@ -29,8 +29,8 @@ func _ready():
 	path.curve.add_point(DEFAULT_END)
 	is_post_ready = true
 
-func set_size(new_size: float) -> VisualizationNoodle:
-	call_deferred("_deferred_set_size", new_size)
+func set_size(p_new_size: float) -> VisualizationNoodle:
+	call_deferred("_deferred_set_size", p_new_size)
 	return self
 #	if is_post_ready:
 #		call_deferred("_deferred_set_size", new_size)
@@ -52,8 +52,8 @@ func get_start() -> Vector3:
 		return path.curve.get_point_position(0)
 	return DEFAULT_START
 
-func _deferred_set_size(new_size: float):
-	sleeve.transform.origin = sleeve.transform.origin * new_size
+func _deferred_set_size(p_new_size: float):
+	sleeve.transform.origin = sleeve.transform.origin * p_new_size
 	var new_scale: Vector3 = Vector3(0.2, 0.2, 0.2)
 	
 #	var new_transform = Transform(
@@ -71,9 +71,9 @@ func _deferred_set_size(new_size: float):
 #	sleeve.transform.basis.y /= new_scale
 #	sleeve.transform.basis.z /= new_scale
 
-func _deferred_set_start(position: Vector3):
+func _deferred_set_start(p_position: Vector3):
 	if is_post_ready:
-		path.curve.set_point_position(0, position)
+		path.curve.set_point_position(0, p_position)
 		print("noodle start (orange): %s" % global_transform.origin)
 		Cavedig.needle(
 			self,
@@ -81,9 +81,9 @@ func _deferred_set_start(position: Vector3):
 			Cavedig.Colors.ORANGE
 		)
 
-func _deferred_set_end(position: Vector3):	
+func _deferred_set_end(p_position: Vector3):	
 	if is_post_ready:
-		path.curve.set_point_position(get_end_idx(), position)
+		path.curve.set_point_position(get_end_idx(), p_position)
 	print("noodle end (aqua): %s" % global_transform.origin)
 	Cavedig.needle(
 		self,
@@ -95,8 +95,8 @@ func _deferred_set_end(position: Vector3):
 ### Builder methods (return self)
 ###
 
-func add_as_child_to(node: Node3D) -> VisualizationNoodle:
-	node.call_deferred("add_child", self)
+func add_as_child_to(p_node: Node3D) -> VisualizationNoodle:
+	p_node.call_deferred("add_child", self)
 	
 	# Since the noodles form a connection between two visualizers which aren't
 	# necessarily hierarchically related, tying the noodle's transformation
@@ -106,11 +106,11 @@ func add_as_child_to(node: Node3D) -> VisualizationNoodle:
 	return self
 
 # Start point of the noodle.
-func set_start(position: Vector3) -> VisualizationNoodle:
-	call_deferred("_deferred_set_start", position)
+func set_start(p_position: Vector3) -> VisualizationNoodle:
+	call_deferred("_deferred_set_start", p_position)
 	return self
 
 # End point of the noodle.
-func set_end(position: Vector3) -> VisualizationNoodle:
-	call_deferred("_deferred_set_end", position)
+func set_end(p_position: Vector3) -> VisualizationNoodle:
+	call_deferred("_deferred_set_end", p_position)
 	return self

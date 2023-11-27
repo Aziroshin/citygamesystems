@@ -6,5 +6,5 @@ extends Node3D
 func _ready() -> void:
 	pass
 	
-func _process(delta) -> void:
+func _process(_p_delta) -> void:
 	pass

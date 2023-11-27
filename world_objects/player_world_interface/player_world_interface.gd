@@ -107,13 +107,16 @@ enum Modifiers {
 	ALT,
 }
 
-func create_input_event(keycode: int, modifiers: PackedInt64Array = PackedInt64Array() ) -> InputEvent:
+func create_input_event(
+	p_keycode: int,
+	p_modifiers: PackedInt64Array = PackedInt64Array()
+) -> InputEvent:
 	var key_event_for_action := InputEventKey.new()
-	key_event_for_action.keycode = keycode
+	key_event_for_action.keycode = p_keycode
 	# TODO: [bug] The autoremap somehow breaks input.
 	# key_event_for_action.command_or_control_autoremap = true
 	
-	for modifier in modifiers:
+	for modifier in p_modifiers:
 		if modifier == Modifiers.SHIFT:
 			key_event_for_action.shift_pressed = true
 		if modifier == Modifiers.CONTROL_OR_META:
@@ -147,8 +150,11 @@ func ensure_action_configured(action: String, override: bool = false) -> void:
 		InputMap.add_action(action)
 		InputMap.action_add_event(action, action_default_keys[action])
 		if enable_integration_warnings:
-			push_warning("Action not found: %s. Spoofing it with hotkey: %s."\
-				% [action, InputMap.action_get_events(action)[0].as_text()])
+			push_warning(
+				"Action not found: %s. Spoofing it with hotkey: %s. "\
+				% [action, InputMap.action_get_events(action)[0].as_text()]
+				+ "[integration warning]"
+			)
 	elif override:
 		InputMap.action_add_event(action, action_default_keys[action])
 		
@@ -318,6 +324,6 @@ func _physics_process(delta: float) -> void:
 	delta_without_up_action = delta_without_up_action + delta
 	
 	
-func _input(event: InputEvent) -> void:
+func _input(_event: InputEvent) -> void:
 	pass
 ###########################################################################

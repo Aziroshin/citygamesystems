@@ -50,32 +50,32 @@ class StateDuplicatingUndoableTool extends UndoableTool:
 	
 	func prepare_buffers():
 		copy_state_to_undo()
-		self._redo_buffer.clear()
+		_redo_buffer.clear()
 		
 	func get_base_type_state() -> ToolState:
-		return self._state
+		return _state
 	
-	func set_base_type_state(state: ToolState) -> void:
+	func set_base_type_state(p_state: ToolState) -> void:
 		prepare_buffers()
-		self._state = state
+		_state = p_state
 	
 	func copy_state_to_undo():
-		self._undo_buffer.append(copy_base_type_state())
+		_undo_buffer.append(copy_base_type_state())
 		
 	func undo() -> void:
-		if len(self._undo_buffer) == 0:
+		if len(_undo_buffer) == 0:
 			return
 		
-		var previous_state: ToolState = self._undo_buffer.pop_back()
-		self._redo_buffer.append(_state)
-		self._state = previous_state
-		self.state_reset.emit()
+		var previous_state: ToolState = _undo_buffer.pop_back()
+		_redo_buffer.append(_state)
+		_state = previous_state
+		state_reset.emit()
 		
 	func redo() -> void:
-		if len(self._redo_buffer) == 0:
+		if len(_redo_buffer) == 0:
 			return
 			
-		var most_recent_undone_state: ToolState = self._redo_buffer.pop_back()
-		self._undo_buffer.append(self._state)
-		self._state = most_recent_undone_state
-		self.state_reset.emit()
+		var most_recent_undone_state: ToolState = _redo_buffer.pop_back()
+		_undo_buffer.append(_state)
+		_state = most_recent_undone_state
+		state_reset.emit()
