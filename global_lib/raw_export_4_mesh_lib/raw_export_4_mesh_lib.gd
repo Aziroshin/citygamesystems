@@ -48,8 +48,14 @@ static func new_STris_from_RawObjectData(
 	var normals := p_raw_object_data.normals
 	var uvs := p_raw_object_data.uvs
 	
+	if not len(vertices) % 3 == 0:
+		push_error(
+			"Attempted to initialize `STris` from a list of vertices not"
+			+ "divisible by 3."
+		)
+		
 	var multi_tri := AFlushingMultiTri.new()
-	for i_face in range(len(vertices) / 3):
+	for i_face in range(len(vertices) / 3.0):
 		var offset := i_face * 3
 		var tri := ATri.new(
 			vertices[offset],

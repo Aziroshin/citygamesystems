@@ -1332,7 +1332,9 @@ class STris extends Surface:
 		var normals := addee.tris.get_array_normal()
 		var uvs := addee.tris.get_array_tex_uv()
 		
-		for i_tri in range(0, len(vertices) / 3):
+		assert(len(vertices) % 3 == 0)
+		
+		for i_tri in range(0, len(vertices) / 3.0):
 			var offset := i_tri * 3
 			var tri := ATri.new(
 				vertices[offset],
