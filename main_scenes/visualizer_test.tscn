@@ -12,6 +12,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.941, 2.14225, -6.547)
 default_speed = 512.0
 override_existing_actions = true
 initial_motion_mode = 0
+enable_integration_warnings = false
 
 [node name="Map" parent="." instance=ExtResource("3_oqnec")]
 subdivision = Vector2(50, 50)

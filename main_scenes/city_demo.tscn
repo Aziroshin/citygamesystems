@@ -28,6 +28,7 @@ layout_mode = 2
 
 [node name="PlayerWorldInterface" parent="." instance=ExtResource("2_16h52")]
 override_existing_actions = true
+enable_integration_warnings = false
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.955159, 0, 0.296092, 0, 1, 0, -0.296092, 0, 0.955159, 185.105, 121.291, 177.885)

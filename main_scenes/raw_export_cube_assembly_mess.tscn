@@ -8,6 +8,7 @@ script = ExtResource("1_65vpw")
 
 [node name="PlayerWorldInterface" parent="." instance=ExtResource("2_0x2rq")]
 override_existing_actions = true
+enable_integration_warnings = false
 
 [node name="OmniLight" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.22485, 0)

@@ -11,6 +11,7 @@ transform = Transform3D(0.999649, 0, 0.026491, 0, 1, 0, -0.026491, 0, 0.999649, 
 default_speed = 512.0
 override_existing_actions = true
 initial_motion_mode = 0
+enable_integration_warnings = false
 
 [node name="OmniLight" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.22485, 0)
