@@ -108,7 +108,7 @@ enum Modifiers {
 }
 
 func create_input_event(
-	p_keycode: int,
+	p_keycode: Key,
 	p_modifiers: PackedInt64Array = PackedInt64Array()
 ) -> InputEvent:
 	var key_event_for_action := InputEventKey.new()
@@ -135,7 +135,7 @@ func create_input_event(
 
 # Set a key for an action.
 # This alters `InputMap` at runtime and doesn't write to the project.
-func set_action_key(action: String, keycode: int):
+func set_action_key(action: String, keycode: Key):
 	var key_event_for_action := InputEventKey.new()
 	key_event_for_action.keycode = keycode
 	InputMap.action_add_event(action, key_event_for_action)
@@ -237,7 +237,7 @@ func _ready():
 	# Load motion mode
 	var motion_mode_data_from_config := load_motion_mode()
 	if not motion_mode_data_from_config.is_nil:
-		motion_mode = motion_mode_data_from_config.value
+		motion_mode = motion_mode_data_from_config.value as MotionMode
 	else:
 		motion_mode = initial_motion_mode
 	
