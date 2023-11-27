@@ -13,9 +13,9 @@ static func create_kinked_roof_line(
 	var line := PackedVector3Array()
 	assert(start.x == end.x)
 	
-	var depth := end.z
+	#var depth := end.z
 	#var kink_depth := depth / (kinks + 1)
-	var height := end.y
+	#var height := end.y
 	#var kink_height := height / (kinks + 1)
 	
 	var items := kinks + 2

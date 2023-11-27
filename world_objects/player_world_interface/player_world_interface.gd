@@ -83,16 +83,16 @@ var transform_before_config_load: Transform3D = transform
 # Misc
 ###########################################################################
 # Get the resulting vector from adding up all vectors in the specified array.
-func force_from_forces(forces: Array[Vector3]) -> Vector3:
-	assert(len(forces) > 0, "`forces` can't be empty.")
+func force_from_forces(p_forces: Array[Vector3]) -> Vector3:
+	assert(len(p_forces) > 0, "`forces` can't be empty.")
 	
-	if len(forces) == 1:
-		return forces[0]
+	if len(p_forces) == 1:
+		return p_forces[0]
 	
 	var force: Vector3
 	var i = 0
-	while i < len(forces) - 1:
-		force = forces[i] + forces[i + 1]
+	while i < len(p_forces) - 1:
+		force = p_forces[i] + p_forces[i + 1]
 		i = i + 1
 	return force
 ###########################################################################
@@ -135,36 +135,38 @@ func create_input_event(
 
 # Set a key for an action.
 # This alters `InputMap` at runtime and doesn't write to the project.
-func set_action_key(action: String, keycode: Key):
+func set_action_key(p_action: String, p_keycode: Key):
 	var key_event_for_action := InputEventKey.new()
-	key_event_for_action.keycode = keycode
-	InputMap.action_add_event(action, key_event_for_action)
+	key_event_for_action.keycode = p_keycode
+	InputMap.action_add_event(p_action, key_event_for_action)
 	
 	
 # Add (and override if specified) an action as required to make sure it's
 # reasonably set up as configured without having to set it up in the Input Map
 # first.
 # This alters `InputMap` at runtime and doesn't write to the project.
-func ensure_action_configured(action: String, override: bool = false) -> void:
-	if not InputMap.has_action(action):
-		InputMap.add_action(action)
-		InputMap.action_add_event(action, action_default_keys[action])
+func ensure_action_configured(
+	p_action: String, p_override: bool = false
+) -> void:
+	if not InputMap.has_action(p_action):
+		InputMap.add_action(p_action)
+		InputMap.action_add_event(p_action, action_default_keys[p_action])
 		if enable_integration_warnings:
 			push_warning(
 				"Action not found: %s. Spoofing it with hotkey: %s. "\
-				% [action, InputMap.action_get_events(action)[0].as_text()]
+				% [p_action, InputMap.action_get_events(p_action)[0].as_text()]
 				+ "[integration warning]"
 			)
-	elif override:
-		InputMap.action_add_event(action, action_default_keys[action])
+	elif p_override:
+		InputMap.action_add_event(p_action, action_default_keys[p_action])
 		
 		
 # Add (and override if specified) actions as required to provide reasonable
 # controls as configured without having to set them up in the Input Map first.
 # This alters `InputMap` at runtime and doesn't write to the project.
-func ensure_actions_configured(override: bool = false) -> void:
+func ensure_actions_configured(p_override: bool = false) -> void:
 	for action in action_default_keys.keys():
-		ensure_action_configured(action, override)
+		ensure_action_configured(action, p_override)
 ###########################################################################
 
 
@@ -181,29 +183,36 @@ func check_config_access() -> bool:
 	
 	
 # Saves config value and returns true or fails and returns false.
-func save_config_value(section: String, key: String, value) -> bool:
+func save_config_value(p_section: String, p_key: String, p_value) -> bool:
 	if check_config_access():
 		var config := ConfigFile.new()
 		config.load(config_file_path)
-		config.set_value(section, key, value)
+		config.set_value(p_section, p_key, p_value)
 		config.save(config_file_path)
 		return true
 	return false
 	
 	
 # Loads config and returns config value, or `null` if it fails.
-func load_config_value(section: String, key: String) -> Variant:
+func load_config_value(p_section: String, p_key: String) -> Variant:
 	var config := ConfigFile.new()
 	config.load(config_file_path)
-	return config.get_value(section, key)
+	return config.get_value(p_section, p_key)
 	
 	
 func save_transform() -> bool:
-	return save_config_value(config_section, CONFIG_VALUE_NAME_TRANSFORM, transform)
+	return save_config_value(
+		config_section,
+		CONFIG_VALUE_NAME_TRANSFORM,
+		transform
+	)
 	
 	
 func load_transform() -> NilableTransform3D:
-	var value = load_config_value(config_section, CONFIG_VALUE_NAME_TRANSFORM)
+	var value = load_config_value(
+		config_section,
+		CONFIG_VALUE_NAME_TRANSFORM
+	)
 	if value is Transform3D:
 		return NilableTransform3D.new().set_value(value)
 	else:
@@ -211,11 +220,18 @@ func load_transform() -> NilableTransform3D:
 		
 		
 func save_motion_mode() -> bool:
-	return save_config_value(config_section, CONFIG_VALUE_NAME_MOTION_MODE, motion_mode)
+	return save_config_value(
+		config_section,
+		CONFIG_VALUE_NAME_MOTION_MODE,
+		motion_mode
+	)
 		
 		
 func load_motion_mode() -> NilableInt:
-	var value = load_config_value(config_section, CONFIG_VALUE_NAME_MOTION_MODE)
+	var value = load_config_value(
+		config_section,
+		CONFIG_VALUE_NAME_MOTION_MODE
+	)
 	if typeof(value) == TYPE_INT:
 		return NilableInt.new().set_value(value)
 	return NilableInt.new()
@@ -244,7 +260,7 @@ func _ready():
 	ensure_actions_configured(override_existing_actions)
 	
 	
-func _physics_process(delta: float) -> void:
+func _physics_process(p_delta: float) -> void:
 	var forces: Array[Vector3] = []
 	
 	#######################################################################
@@ -285,25 +301,25 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_pressed(ROTATE_LEFT_ACTION):
 		transform = transform.rotated(
 			Vector3(0, 1, 0),
-			default_rotation_speed * delta
+			default_rotation_speed * p_delta
 		)
 		
 	if Input.is_action_pressed(ROTATE_RIGHT_ACTION):
 		transform = transform.rotated(
 			Vector3(0, 1, 0),
-			default_rotation_speed * delta * -1
+			default_rotation_speed * p_delta * -1
 		)
 		
 	if Input.is_action_pressed(PITCH_UP_ACTION):
 		camera.transform = camera.transform.rotated_local(
 			Vector3(1, 0, 0),
-			default_pitch_speed * delta
+			default_pitch_speed * p_delta
 		)
 		
 	if Input.is_action_pressed(PITCH_DOWN_ACTION):
 		camera.transform = camera.transform.rotated_local(
 			Vector3(1, 0, 0),
-			default_pitch_speed * delta * -1
+			default_pitch_speed * p_delta * -1
 		)
 		
 	if Input.is_action_pressed(RESET_TRANSFORM_ACTION):
@@ -318,12 +334,13 @@ func _physics_process(delta: float) -> void:
 	
 	# Combine all forces and move.
 	if len(forces) > 0:
-		velocity = force_from_forces(forces).normalized() * default_speed * delta
+		velocity = force_from_forces(forces)\
+			.normalized() * default_speed * p_delta
 		move_and_slide()
 		
-	delta_without_up_action = delta_without_up_action + delta
+	delta_without_up_action = delta_without_up_action + p_delta
 	
 	
-func _input(_event: InputEvent) -> void:
+func _input(_p_event: InputEvent) -> void:
 	pass
 ###########################################################################
