@@ -147,7 +147,10 @@ func _ready():
 
 
 func remove_and_delete_scene(p_scene: Node3D) -> void:
-	root_scene.remove_child(p_scene)
+	var scene_parent_node := p_scene.get_parent()
+	if not scene_parent_node == null:
+		assert(scene_parent_node == root_scene)
+		scene_parent_node.remove_child(p_scene)
 	current_scene.queue_free()
 	
 
