@@ -29,6 +29,7 @@ static func needle(
 	debug_cylinder.height = height
 	debug_cylinder.radius = radius
 	debug_cylinder.global_transform = transform
+	debug_cylinder.transform = transform
 	
 	return debug_cylinder
 
