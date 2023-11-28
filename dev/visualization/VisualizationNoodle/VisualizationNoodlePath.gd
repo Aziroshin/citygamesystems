@@ -9,13 +9,13 @@ class_name VisualizationNoodlePath
 @export var start: Vector3 = Vector3(0, 0, 1):
 	get:
 		return get_start()
-	set(value):
-		set_start(value)
+	set(p_value):
+		set_start(p_value)
 @export var end: Vector3 = Vector3(0, 0, -1):
 	get:
 		return get_end()
-	set(value):
-		set_end(value)
+	set(p_value):
+		set_end(p_value)
 
 func _init():
 	curve.add_point(start)
@@ -30,12 +30,12 @@ func get_end() -> Vector3:
 func get_start() -> Vector3:
 	return curve.get_point_position(0)
 
-func set_start(position: Vector3) -> VisualizationNoodlePath:
-	curve.set_point_position(0, position)
+func set_start(p_position: Vector3) -> VisualizationNoodlePath:
+	curve.set_point_position(0, p_position)
 	return self
 
-func set_end(position: Vector3) -> VisualizationNoodlePath:
-	curve.set_point_position(get_end_idx(), position)
+func set_end(p_position: Vector3) -> VisualizationNoodlePath:
+	curve.set_point_position(get_end_idx(), p_position)
 	return self
 
 func _enter_tree():

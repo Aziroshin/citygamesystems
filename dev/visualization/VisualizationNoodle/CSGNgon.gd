@@ -13,16 +13,16 @@ const DEFAULT_CIRCUMRADIUS := 1.0
 const DEFAULT_OFFSET := Vector2(0, 0)
 
 @export var sides := DEFAULT_SIDES:
-	set(value):
-		sides = value
+	set(p_value):
+		sides = p_value
 		_update()
 @export var circumradius := DEFAULT_CIRCUMRADIUS:
-	set(value):
-		circumradius = value
+	set(p_value):
+		circumradius = p_value
 		_update()
 @export var offset := DEFAULT_OFFSET:
-	set(value):
-		offset = value
+	set(p_value):
+		offset = p_value
 		_update()
 
 # Returns an array with one vector per vertex in a 2D n-gon,

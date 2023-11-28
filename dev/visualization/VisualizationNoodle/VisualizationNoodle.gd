@@ -36,7 +36,7 @@ func set_size(p_new_size: float) -> VisualizationNoodle:
 #		call_deferred("_deferred_set_size", new_size)
 #		return self
 #
-#	self.connect("ready", self, "set_size", [new_size])
+#	connect("ready", self, "set_size", [new_size])
 #	return self
 
 func get_end_idx() -> int:
@@ -77,7 +77,7 @@ func _deferred_set_start(p_position: Vector3):
 		print("noodle start (orange): %s" % global_transform.origin)
 		Cavedig.needle(
 			self,
-			Transform3D(self.transform.basis, path.curve.get_point_position(0)),
+			Transform3D(transform.basis, path.curve.get_point_position(0)),
 			Cavedig.Colors.ORANGE
 		)
 
@@ -87,7 +87,7 @@ func _deferred_set_end(p_position: Vector3):
 	print("noodle end (aqua): %s" % global_transform.origin)
 	Cavedig.needle(
 		self,
-		Transform3D(self.transform.basis, path.curve.get_point_position(get_end_idx())),
+		Transform3D(transform.basis, path.curve.get_point_position(get_end_idx())),
 		Cavedig.Colors.AQUA
 	)
 
@@ -101,7 +101,7 @@ func add_as_child_to(p_node: Node3D) -> VisualizationNoodle:
 	# Since the noodles form a connection between two visualizers which aren't
 	# necessarily hierarchically related, tying the noodle's transformation
 	# to one of them would unnecessarily complicate things.
-	self.set_as_top_level(true)
+	set_as_top_level(true)
 	
 	return self
 
