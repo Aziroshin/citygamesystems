@@ -32,15 +32,15 @@ class HouseSideFeatures:
 		var adjacent = false
 		var berlin_corner = false
 		
-		func _init(delegator: HouseSideFeatures):
-			self.delegator = delegator
+		func _init(p_delegator: HouseSideFeatures):
+			delegator = p_delegator
 		
-		func set_free(value: bool) -> HouseSideFeatures:
-			free = value
+		func set_free(p_value: bool) -> HouseSideFeatures:
+			free = p_value
 			return delegator
 			
-		func set_adjacent(value: bool) -> HouseSideFeatures:
-			adjacent = value
+		func set_adjacent(p_value: bool) -> HouseSideFeatures:
+			adjacent = p_value
 			return delegator
 		
 		
@@ -49,11 +49,11 @@ class HouseSideFeatures:
 		var busy = false
 		var private = false
 		
-		func _init(delegator: HouseSideFeatures):
-			self.delegator = delegator
+		func _init(p_delegator: HouseSideFeatures):
+			delegator = p_delegator
 		
-		func set_busy(value: bool) -> HouseSideFeatures:
-			busy = value
+		func set_busy(p_value: bool) -> HouseSideFeatures:
+			busy = p_value
 			return delegator
 			
 	var kind: Kind
@@ -80,11 +80,11 @@ class HouseSide:
 			return end - start
 	
 	func _init(
-		points: PackedVector3Array,
-		kind: HouseSideKinds,
-		exposedness: HouseSideExposedness
+		p_points: PackedVector3Array,
+		p_kind: HouseSideKinds,
+		p_exposedness: HouseSideExposedness
 	):
-		assert(len(points) >= 2)
+		assert(len(p_points) >= 2)
 	
 	
 # TODO: Holds all `HouseSide` objects for a house and includes sanity
@@ -97,7 +97,7 @@ class HouseSide:
 class HouseFrame:
 	var sides: Array[HouseSide]
 	
-	func _init(sides: Array[HouseSide]):
+	func _init(p_sides: Array[HouseSide]):
 		pass
 		# Assert/test/push_error whether the set of points from all the
 		# house sides form a loop (good) or not (bad).
@@ -114,7 +114,7 @@ class SimpleRowHouse extends Building:
 	var frame: HouseFrame
 	
 	func _init(
-		frame: HouseFrame
+		p_frame: HouseFrame
 	):
 		pass
 		

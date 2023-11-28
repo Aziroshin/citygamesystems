@@ -25,8 +25,8 @@ class BasicBuildingPartControl extends PartControl:
 	# TODO [workaround-cleanup]: Remove _init when this is fixed:
 	#   https://github.com/godotengine/godot/issues/70605
 	#   Remove this TODO if the _init becomes permanent.
-	func _init(to_be_controlled_part: Node3D):
-		super._init(to_be_controlled_part)
+	func _init(p_to_be_controlled_part: Node3D):
+		super._init(p_to_be_controlled_part)
 	
 	# TODO: Skeleton sanity check, based on a method in the base class
 	#   which, in the base class, is factored into the decision whether to
@@ -70,8 +70,8 @@ class BasicFacadePartControl extends BasicBuildingPartControl:
 	# TODO [workaround-cleanup]: Remove _init when this is fixed:ttwitch
 	#   https://github.com/godotengine/godot/issues/70605
 	#   Remove this TODO if the _init becomes permanent.
-	func _init(to_be_controlled_part: Node3D):
-		super._init(to_be_controlled_part)
+	func _init(p_to_be_controlled_part: Node3D):
+		super._init(p_to_be_controlled_part)
 
 	func _init_connectors() -> DefaultConnectors:
 		var default_connectors := super._init_connectors()
@@ -118,25 +118,25 @@ class PartTransformer:
 			return part_length / part_columns
 	
 	func _init(
-		part_control: PartControl,
-		part_columns: int,
-		part_rows: int,
-		#part_layers: int,
-		part_length: float,
-		#part_height: float
-		#part_depth: float
+		p_part_control: PartControl,
+		p_part_columns: int,
+		p_part_rows: int,
+		#p_part_layers: int,
+		p_part_length: float,
+		#p_part_height: float
+		#p_part_depth: float
 	):
-		self.part_control = part_control
-		self.part_columns = part_columns
-		self.part_rows = part_rows
-		#self.part_layers = part_layers
-		self.part_length = part_length
-		#self.part_height = part_height
-		#self.part_depth = part_depth
+		part_control = p_part_control
+		part_columns = p_part_columns
+		part_rows = p_part_rows
+		#part_layers = p_part_layers
+		part_length = p_part_length
+		#part_height = p_part_height
+		#part_depth = p_part_depth
 		
-	func respan_to_columns(columns: int) -> void:
+	func respan_to_columns(p_columns: int) -> void:
 		#var new_part_length: float = part_length_per_column * columns
-		var scaling_factor: float = float(columns) / float(part_columns)
+		var scaling_factor: float = float(p_columns) / float(part_columns)
 		
 		#print("part_columns:", part_columns, ", columns:", columns, ", scaling_factor:", scaling_factor)
 		part_control.part.transform = part_control.part.transform * Transform3D(
@@ -149,21 +149,21 @@ class PartTransformer:
 		
 		
 static func respan_3_columns(
-	left_part_transformer: PartTransformer,
-	center_part_transformer: PartTransformer,
-	right_part_transformer: PartTransformer,
-	overall_columns: int,
-	center_respan_factor: float = 1.0,
+	p_left_part_transformer: PartTransformer,
+	p_center_part_transformer: PartTransformer,
+	p_right_part_transformer: PartTransformer,
+	p_overall_columns: int,
+	p_center_respan_factor: float = 1.0,
 ):
 	var overall_column_span: float = 3.0
-	var base_resize_factor: float = overall_columns / overall_column_span
-	var center_resize_factor: float = base_resize_factor * center_respan_factor
+	var base_resize_factor: float = p_overall_columns / overall_column_span
+	var center_resize_factor: float = base_resize_factor * p_center_respan_factor
 	#print("center_resize_factor (%s) = " % center_resize_factor, base_resize_factor, " / ", center_respan_factor)
 	var non_center_resize_factor: float = base_resize_factor + ((base_resize_factor - center_resize_factor) / (overall_column_span - 1.0))
 	var non_center_part_columns: int = floor(non_center_resize_factor)
-	var center_part_columns: int = non_center_part_columns + (overall_columns % non_center_part_columns)
+	var center_part_columns: int = non_center_part_columns + (p_overall_columns % non_center_part_columns)
 	#print("center_part_columns:", center_part_columns, ", non_center_part_columns:", non_center_part_columns)
 	
-	left_part_transformer.respan_to_columns(non_center_part_columns)
-	center_part_transformer.respan_to_columns(center_part_columns)
-	right_part_transformer.respan_to_columns(non_center_part_columns)
+	p_left_part_transformer.respan_to_columns(non_center_part_columns)
+	p_center_part_transformer.respan_to_columns(center_part_columns)
+	p_right_part_transformer.respan_to_columns(non_center_part_columns)

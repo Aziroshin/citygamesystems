@@ -12,13 +12,13 @@ class StreetToolState extends ToolState:
 
 class StreetTool extends StateDuplicatingUndoableTool:
 	func _init():
-		self._state = StreetToolState.new()
+		_state = StreetToolState.new()
 	
 	func get_state() -> StreetToolState:
 		return get_base_type_state() as StreetToolState
 		
-	func set_state(state: StreetToolState) -> void:
-		set_base_type_state(state)
+	func set_state(p_state: StreetToolState) -> void:
+		set_base_type_state(p_state)
 		
 	func get_node_count() -> int:
 		# The baked points don't correspond to control nodes in the sense
@@ -30,7 +30,7 @@ class StreetTool extends StateDuplicatingUndoableTool:
 	func get_last_node_idx() -> int:
 		return get_node_count() - 1
 		
-	func add_node(position: Vector3) -> int:
-		get_state().curve.add_point(position)
+	func add_node(p_position: Vector3) -> int:
+		get_state().curve.add_point(p_position)
 		copy_state_to_undo()
 		return get_last_node_idx()

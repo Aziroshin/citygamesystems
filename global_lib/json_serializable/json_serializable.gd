@@ -3,7 +3,7 @@ class_name JsonSerializable
 
 
 func to_json() -> String:
-	return JSON.stringify(self.to_dict())
+	return JSON.stringify(to_dict())
 	
 func to_dict() -> Dictionary:
 	push_error(
