@@ -6,9 +6,9 @@ var initialized = false
 var scene_resource_path: String = ""
 
 
-func init(new_scene_resource_path: String, button_text: String) -> void:
-	scene_resource_path = new_scene_resource_path
-	$SetSceneButton.text = button_text
+func init(p_new_scene_resource_path: String, p_button_text: String) -> void:
+	scene_resource_path = p_new_scene_resource_path
+	$SetSceneButton.text = p_button_text
 	initialized = true
 
 

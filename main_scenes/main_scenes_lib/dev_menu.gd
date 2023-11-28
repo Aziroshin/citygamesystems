@@ -41,8 +41,8 @@ func _ready():
 		show()
 
 
-func _input(event: InputEvent) -> void:
-	if event.is_action_pressed(toggle_action):
+func _input(p_event: InputEvent) -> void:
+	if p_event.is_action_pressed(toggle_action):
 		if visible:
 			set_to_hidden()
 		else:
