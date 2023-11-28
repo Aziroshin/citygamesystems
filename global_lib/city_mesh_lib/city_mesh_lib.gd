@@ -41,7 +41,7 @@ class ATwoSidedRoof extends AMultiSegment:
 		# subdivisions, this is ineffective right now.
 		p_bottom_back_outline := PackedVector3Array(),
 	):
-		# Convention: Variables defined in this method are prefixed with `l_`,
+		# Convention: Variables declared in this method are prefixed with `l_`,
 		# for "local".
 		
 		assert(len(p_left_outline) >= 3)
