@@ -33,35 +33,38 @@ class ATwoSidedRoof extends AMultiSegment:
 	var ridge: ASubdividedLine
 	
 	func _init(
-		left_outline: PackedVector3Array,
-		right_outline: PackedVector3Array,
+		p_left_outline: PackedVector3Array,
+		p_right_outline: PackedVector3Array,
 		# TODO: Will currently only respect 2 vertices, no subdivisions.
-		bottom_front_outline := PackedVector3Array(),
+		p_bottom_front_outline := PackedVector3Array(),
 		# TODO: Since this currently only respects 2 vertices and no
 		# subdivisions, this is ineffective right now.
-		bottom_back_outline := PackedVector3Array(),
+		p_bottom_back_outline := PackedVector3Array(),
 	):
-		assert(len(left_outline) >= 3)
-		assert(len(right_outline) >= 3)
-		assert(len(left_outline) % 2 != 0)
+		# Convention: Variables defined in this method are prefixed with `l_`,
+		# for "local".
+		
+		assert(len(p_left_outline) >= 3)
+		assert(len(p_right_outline) >= 3)
+		assert(len(p_left_outline) % 2 != 0)
 		
 		super()
 		
-		self.left_outline = ASubdividedLine.new(left_outline)
-		self.right_outline = ASubdividedLine.new(right_outline)
+		left_outline = ASubdividedLine.new(p_left_outline)
+		right_outline = ASubdividedLine.new(p_right_outline)
 		
-		var bottom_front_outline_found_incomplete := false
-		if len(bottom_front_outline) < 2:
-			bottom_front_outline_found_incomplete = true
+		var l_p_bottom_front_outline_found_incomplete := false
+		if len(p_bottom_front_outline) < 2:
+			l_p_bottom_front_outline_found_incomplete = true
 			# New array, since len could also be == 1, in which case the
 			# appends would cause a mess.
-			bottom_front_outline = PackedVector3Array()
-			bottom_front_outline.append(self.left_outline.start.transformed)
-			bottom_front_outline.append(self.right_outline.start.transformed)
-		self.bottom_front_outline = ASubdividedLine.new(bottom_front_outline)
+			p_bottom_front_outline = PackedVector3Array()
+			p_bottom_front_outline.append(left_outline.start.transformed)
+			p_bottom_front_outline.append(right_outline.start.transformed)
+		bottom_front_outline = ASubdividedLine.new(p_bottom_front_outline)
 		
-		if len(bottom_back_outline) == len(bottom_front_outline):
-			self.bottom_back_outline = ASubdividedLine.new(bottom_back_outline)
+		if len(p_bottom_back_outline) == len(p_bottom_front_outline):
+			bottom_back_outline = ASubdividedLine.new(p_bottom_back_outline)
 		else:
 			# This assumes the bottom back outline hasn't been specified, which
 			# indicates it's supposed to have the same shape as the front.
@@ -74,9 +77,9 @@ class ATwoSidedRoof extends AMultiSegment:
 			#   bottom back outline instead in that case.
 			#   CAVEAT: Too much magic like that might make the behaviour of the
 			#     class confusing to intuit.
-			if bottom_front_outline_found_incomplete:
-				var warning_message := "Bottom back outline is not the same "\
-					+ "length (%s) " % len(bottom_back_outline)\
+			if l_p_bottom_front_outline_found_incomplete:
+				var l_warning_message := "Bottom back outline is not the same "\
+					+ "length (%s) " % len(p_bottom_back_outline)\
 					+ "as the bottom front outline "\
 					+ "(%s), " % len(bottom_front_outline)\
 					+ "but the latter was found to have too few vertices "\
@@ -88,41 +91,41 @@ class ATwoSidedRoof extends AMultiSegment:
 					+ "bug at the call site. Stack (if there's no debugger "\
 					+ "connection this will be empty): "\
 					+ " -- ".join(get_stack())
-				push_warning(warning_message)
+				push_warning(l_warning_message)
 				#assert(false, warning_message)
 			
-			self.bottom_back_outline = self.bottom_front_outline.copy_as_ASubdividedLine()
-			self.bottom_back_outline.add_modifier(MTranslateVertices.new(
-				self.left_outline.end.transformed
+			bottom_back_outline = bottom_front_outline.copy_as_ASubdividedLine()
+			bottom_back_outline.add_modifier(MTranslateVertices.new(
+				left_outline.end.transformed
 			))
-			self.bottom_back_outline.apply_all()
+			bottom_back_outline.apply_all()
 			
-		assert(self.left_outline.start.transformed == self.bottom_front_outline.start.transformed)
-		assert(self.left_outline.end.transformed == self.bottom_back_outline.start.transformed)
-		assert(self.right_outline.start.transformed == self.bottom_front_outline.end.transformed)
-		assert(self.right_outline.end.transformed == self.bottom_back_outline.end.transformed,\
+		assert(left_outline.start.transformed == bottom_front_outline.start.transformed)
+		assert(left_outline.end.transformed == bottom_back_outline.start.transformed)
+		assert(right_outline.start.transformed == bottom_front_outline.end.transformed)
+		assert(right_outline.end.transformed == bottom_back_outline.end.transformed,\
 			"right_outline.end: %s, bottom_back_outline.end: %s"\
-			% [self.right_outline.end.transformed, self.bottom_back_outline.end.transformed]\
+			% [right_outline.end.transformed, bottom_back_outline.end.transformed]\
 		)
 		
-		outline_ridge_idx = floor(len(self.left_outline.vertices) / 2.0)
-		left_outline_ridge_vertex = self.left_outline.vertices[outline_ridge_idx].transformed
-		right_outline_ridge_vertex = self.right_outline.vertices[outline_ridge_idx].transformed
+		outline_ridge_idx = floor(len(left_outline.vertices) / 2.0)
+		left_outline_ridge_vertex = left_outline.vertices[outline_ridge_idx].transformed
+		right_outline_ridge_vertex = right_outline.vertices[outline_ridge_idx].transformed
 		
 		left_front_outline = ASubdividedLine.new(
-			self.left_outline.get_array_vertex().slice(0, outline_ridge_idx + 1)
+			left_outline.get_array_vertex().slice(0, outline_ridge_idx + 1)
 		)
 		left_back_outline = ASubdividedLine.new(
-			self.left_outline.get_array_vertex().slice(
-				outline_ridge_idx, len(self.left_outline.vertices)
+			left_outline.get_array_vertex().slice(
+				outline_ridge_idx, len(left_outline.vertices)
 			)
 		)
 		right_front_outline = ASubdividedLine.new(
-			self.right_outline.get_array_vertex().slice(0, outline_ridge_idx + 1)
+			right_outline.get_array_vertex().slice(0, outline_ridge_idx + 1)
 		)
 		right_back_outline = ASubdividedLine.new(
-			self.right_outline.get_array_vertex().slice(
-				outline_ridge_idx, len(self.right_outline.vertices)
+			right_outline.get_array_vertex().slice(
+				outline_ridge_idx, len(right_outline.vertices)
 			)
 		)
 		
@@ -131,7 +134,7 @@ class ATwoSidedRoof extends AMultiSegment:
 		#   it to get the ridge. This will yield uneven results if the bottom
 		#   back outline isn't congruent to it.
 		
-#		var ridge := self.bottom_front_outline.copy_as_ASubdividedLine()
+#		var l_ridge := bottom_front_outline.copy_as_ASubdividedLine()
 #		ridge.translate_vertices(left_outline_ridge_vertex)
 #		# If we don't apply here, the reference to `ridge.end` below won't
 #		# take into account the translation.
@@ -141,27 +144,40 @@ class ATwoSidedRoof extends AMultiSegment:
 #		)
 #		ridge.apply_all()
 		
-		var outline_ridge_vertex_difference := right_outline_ridge_vertex - left_outline_ridge_vertex
-		print("outline ridge vertex difference: ", outline_ridge_vertex_difference)
+		var l_outline_ridge_vertex_difference\
+		:= right_outline_ridge_vertex - left_outline_ridge_vertex
+		print("outline ridge vertex difference: ", l_outline_ridge_vertex_difference)
 		
-		var ridge_vertice_count := len(self.bottom_front_outline.vertices)
-		var ridge_change_rate_per_vertice: float = 1.0 / (ridge_vertice_count - 1)
-		var ridge_vertices := PackedVector3Array()
-		for idx in range(0, ridge_vertice_count):
-			#print("idx: %s, change rate: %s, change rate by idx: %s" % [idx, ridge_change_rate_per_vertice, ridge_change_rate_per_vertice * idx])
-			ridge_vertices.append(
+		var l_ridge_vertex_count := len(bottom_front_outline.vertices)
+		var l_ridge_change_rate_per_vertice: float = 1.0 / (l_ridge_vertex_count - 1)
+		var l_ridge_vertices := PackedVector3Array()
+		for i_ridge_vertex in range(0, l_ridge_vertex_count):
+#			print("i_ridge_vertex: %s, change rate: %s, change rate by i_ridge_vertex: %s" % [\
+#				i_ridge_vertex, l_ridge_change_rate_per_vertice,\
+#				l_ridge_change_rate_per_vertice * i_ridge_vertex\
+#			])
+			l_ridge_vertices.append(
 				# In anticipation of special treatment of the x and z value
 				# (for bent ridges), this "exploded view" of the Vector3
 				# is left like this for now. If this is found long past the
 				# prototyping phase, this can probably be collapsed.
 				Vector3(
-					left_outline_ridge_vertex.x + outline_ridge_vertex_difference.x * ridge_change_rate_per_vertice * idx,
-					left_outline_ridge_vertex.y + outline_ridge_vertex_difference.y * ridge_change_rate_per_vertice * idx,
-					left_outline_ridge_vertex.z + outline_ridge_vertex_difference.z * ridge_change_rate_per_vertice * idx
+					left_outline_ridge_vertex.x
+					+ l_outline_ridge_vertex_difference.x
+					* l_ridge_change_rate_per_vertice
+					* i_ridge_vertex,
+					left_outline_ridge_vertex.y
+					+ l_outline_ridge_vertex_difference.y
+					* l_ridge_change_rate_per_vertice
+					* i_ridge_vertex,
+					left_outline_ridge_vertex.z
+					+ l_outline_ridge_vertex_difference.z
+					* l_ridge_change_rate_per_vertice
+					* i_ridge_vertex
 				)
 			)
-			print(ridge_vertices)
-		var ridge := ASubdividedLine.new(ridge_vertices)
+			print(l_ridge_vertices)
+		var ridge := ASubdividedLine.new(l_ridge_vertices)
 		
 		# Debug ridge.
 		#var ridge := ASubdividedLine.new(PackedVector3Array([Vector3(0, 0.5, -0.5), Vector3(1, 0.5, -0.5)]))
@@ -172,7 +188,7 @@ class ATwoSidedRoof extends AMultiSegment:
 		front = AFoldedPlane.new(
 			left_front_outline,
 			right_front_outline,
-			self.bottom_front_outline,
+			bottom_front_outline,
 			ridge
 		)
 		print("===== BACK =====")
@@ -183,7 +199,7 @@ class ATwoSidedRoof extends AMultiSegment:
 			# full outline.
 			ASubdividedLine.new(left_back_outline.copy_inverted_array_vertex()),
 			ASubdividedLine.new(right_back_outline.copy_inverted_array_vertex()),
-			self.bottom_back_outline,
+			bottom_back_outline,
 			ridge
 		)
 		
@@ -207,17 +223,17 @@ class ATwoSidedRoof extends AMultiSegment:
 		# CONTINUE: Debug AFoldedPlane next. The problem is probably there.
 		var vector_arrays := {
 			# Contains Vector3(0, 0.5, -0.5)
-			"left_outline": left_outline,
+			"left_outline": left_outline.get_array_vertex(),
 			"left_front_outline": left_front_outline.get_array_vertex(),
 			"left_back_outline": left_back_outline.get_array_vertex(),
-			"ridge_vertices": ridge_vertices,
+			"ridge_vertices": ridge.get_array_vertex(),
 			"front": front.get_array_vertex(),
 			"back": back.get_array_vertex(),
 			
 			# Does NOT contain it.
-			"right_outline": right_outline,
-			"bottom_front_outline": bottom_front_outline,
-			"bottom_back_outline": bottom_back_outline,
+			"right_outline": right_outline.get_array_vertex(),
+			"bottom_front_outline": bottom_front_outline.get_array_vertex(),
+			"bottom_back_outline": bottom_back_outline.get_array_vertex(),
 			"right_front_outline": right_front_outline.get_array_vertex(),
 			"right_back_outline": right_back_outline.get_array_vertex(),
 			"ridge": ridge.get_array_vertex(),
