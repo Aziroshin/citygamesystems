@@ -493,22 +493,24 @@ class AVertexTrackingSegment extends ATransformableSegment:
 	var vertices: Array[Vertex]
 	
 	func _init(
-		transform := Transform3D(),
+		p_transform := Transform3D(),
 	):
 		super(
 			ASegment.new([]),
-			transform,
+			p_transform,
 			false
 		)
 		
 	func add_vertex(
-		array_vertex_indexes: PackedInt64Array,
-		initial_value: Vector3 = Vector3(),
-		normals_by_array_vertex_index := PackedVector3Array(),
-		uvs_by_array_vertex_index := PackedVector2Array()
+		p_array_vertex_indexes: PackedInt64Array,
+		p_initial_value: Vector3 = Vector3(),
+		p_normals_by_array_vertex_index := PackedVector3Array(),
+		p_uvs_by_array_vertex_index := PackedVector2Array()
 	) -> Vertex:
 		### BEGIN: Ensure Sanity
-		var missing_normals_count := len(array_vertex_indexes) - len(normals_by_array_vertex_index)
+		var missing_normals_count\
+		:= len(p_array_vertex_indexes) - len(p_normals_by_array_vertex_index)
+		
 		if missing_normals_count > 0:
 			var default_normal := Vector3()
 			push_error(
@@ -516,9 +518,11 @@ class AVertexTrackingSegment extends ATransformableSegment:
 				+ "%s" % default_normal
 				)
 			for i_missing_normal in range(missing_normals_count):
-				normals_by_array_vertex_index.append(default_normal)
-			
-		var missing_uvs_count := len(array_vertex_indexes) - len(uvs_by_array_vertex_index)
+				p_normals_by_array_vertex_index.append(default_normal)
+		
+		var missing_uvs_count\
+		:= len(p_array_vertex_indexes) - len(p_uvs_by_array_vertex_index)
+		
 		if missing_uvs_count > 0:
 			var default_uv := Vector2()
 			push_error(
@@ -526,18 +530,18 @@ class AVertexTrackingSegment extends ATransformableSegment:
 				+ "%s." % default_uv
 			)
 			for i_missing_uv in range(missing_uvs_count):
-				uvs_by_array_vertex_index.append(default_uv)
+				p_uvs_by_array_vertex_index.append(default_uv)
 		### END: Ensure Sanity
-			
+		
 		var vertex := Vertex.new(
-			initial_value,
+			p_initial_value,
 			self,
-			self.untransformed,
-			array_vertex_indexes,
-			normals_by_array_vertex_index,
-			uvs_by_array_vertex_index
+			untransformed,
+			p_array_vertex_indexes,
+			p_normals_by_array_vertex_index,
+			p_uvs_by_array_vertex_index
 		)
-		self.vertices.append(vertex)
+		vertices.append(vertex)
 		
 		return vertex
 		
@@ -548,31 +552,31 @@ class AVertexTrackingSegment extends ATransformableSegment:
 	# by sub-classes to do what they need to do to accommodate the change.
 		
 	func add_vertex_from_vertex_with_new_indexes(
-		new_indexes,
-		source_vertex: Vertex,
-		take_initial_value_from_transformed := false
+		p_new_indexes,
+		p_source_vertex: Vertex,
+		p_take_initial_value_from_transformed := false
 	) -> Vertex:
-		var initial_value := source_vertex.untransformed
-		if take_initial_value_from_transformed:
-			initial_value = source_vertex.transformed
+		var initial_value := p_source_vertex.untransformed
+		if p_take_initial_value_from_transformed:
+			initial_value = p_source_vertex.transformed
 		
 		return add_vertex(
-			new_indexes,
+			p_new_indexes,
 			initial_value,
-			source_vertex.get_untransformed_normals(),
-			source_vertex.get_untransformed_tex_uvs()
+			p_source_vertex.get_untransformed_normals(),
+			p_source_vertex.get_untransformed_tex_uvs()
 		)
 		
 	func change_tracked_array_vertex_indexes(
-		new_indexes_by_old: PackedInt64Array
+		p_new_indexes_by_old: PackedInt64Array
 	):
 		for vertex in self.vertices:
-			vertex.change_tracked_array_vertex_indexes(new_indexes_by_old)
+			vertex.change_tracked_array_vertex_indexes(p_new_indexes_by_old)
 			
 			
 class Modifier:
 	# @virtual
-	func modify(mutator: IndexChangeTrackingSegmentMutator) -> void:
+	func modify(p_mutator: IndexChangeTrackingSegmentMutator) -> void:
 		# Perform your modifications here.
 		pass
 			
@@ -590,21 +594,21 @@ class AModifiableSegment extends AVertexTrackingSegment:
 	# debugging-relevant information around in an appropriate manner.
 	var modifier_cursor: int
 		
-	func add_modifier(modifier: Modifier) -> void:
-		self.modifiers.append(modifier)
+	func add_modifier(p_modifier: Modifier) -> void:
+		modifiers.append(p_modifier)
 		
 	func apply_modifiers() -> void:
-		if not self.modifier_cursor == len(self.modifiers):
+		if not modifier_cursor == len(modifiers):
 			var mutator := IndexChangeTrackingSegmentMutator.new(
-				self.untransformed,
-				len(self.untransformed.get_array_vertex())
+				untransformed,
+				len(untransformed.get_array_vertex())
 			)
-			for i_modifier in range(self.modifier_cursor, len(self.modifiers)):
-				self.modifiers[i_modifier].modify(mutator)
-				self.modifier_cursor += 1
+			for i_modifier in range(self.modifier_cursor, len(modifiers)):
+				modifiers[i_modifier].modify(mutator)
+				modifier_cursor += 1
 			
-			self._update_from_ASegment(mutator.segment)
-			self.change_tracked_array_vertex_indexes(
+			_update_from_ASegment(mutator.segment)
+			change_tracked_array_vertex_indexes(
 				mutator.index_changes_by_array_vertex_index
 			)
 		
@@ -627,16 +631,16 @@ class APoint extends AVertexTrackingSegment:
 	var vertex: Vertex
 	
 	func _init(
-		vertex: Vector3,
-		normal := Vector3(),
-		uv := Vector2()
+		p_vertex: Vector3,
+		p_normal := Vector3(),
+		p_uv := Vector2()
 	):
-		self.vertex = add_vertex([0], vertex, [normal], [uv])
+		vertex = add_vertex([0], p_vertex, [p_normal], [p_uv])
 		
 # Idea:
-# One way to have AVertexTrackingSegments with edges and faces is to create further
-# subclasses of it that feature these things, which will then be parent classes
-# to AQuad and so on.
+# One way to have AVertexTrackingSegments with edges and faces is to create
+# further subclasses of it that feature these things, which will then be parent
+# classes to AQuad and so on.
 # Note: Godot's MeshDataTool features edges and faces.
 		
 		
@@ -645,77 +649,77 @@ class ALine extends AModifiableSegment:
 	var end: Vertex
 	
 	static func create_default_normals(
-		vertices: PackedVector3Array
+		p_vertices: PackedVector3Array
 	) -> PackedVector3Array:
 		var normals := PackedVector3Array()
-		var last_vertex := vertices[len(vertices)-1]
-		for idx in len(vertices):
+		var last_vertex := p_vertices[len(p_vertices)-1]
+		for idx in len(p_vertices):
 			# Normals pointing up - can be recalculated to roof slope later.
 			normals.append(Vector3(0, 1, 0))
 		return normals
 			
 	static func create_default_uvs(
-		vertices: PackedVector3Array
+		p_vertices: PackedVector3Array
 	) -> PackedVector2Array:
 			var uvs := PackedVector2Array()
-			var last_vertex := vertices[len(vertices)-1]
-			for idx in len(vertices):
-				var u: float = last_vertex.x / vertices[idx].x
+			var last_vertex := p_vertices[len(p_vertices)-1]
+			for idx in len(p_vertices):
+				var u: float = last_vertex.x / p_vertices[idx].x
 				var v: float = 1.0
 				uvs.append(Vector2(u,v))
 			return uvs
 			
 	func _init(
-		start: Vector3,
-		end: Vector3,
+		p_start: Vector3,
+		p_end: Vector3,
 		# Intended for subclassing use. This enables subclasses to start
 		# initializing their geometry on a clean object; `start` and `end` will
 		# be Nil.
-		_no_vertex_init := false,
-		start_normal := Vector3(),
-		end_normal := Vector3(),
-		start_uv := Vector2(),
-		end_uv := Vector2(),
+		p_no_vertex_init := false,
+		p_start_normal := Vector3(),
+		p_end_normal := Vector3(),
+		p_start_uv := Vector2(),
+		p_end_uv := Vector2(),
 	):
 		super()
-		if not _no_vertex_init:
-			self.start = add_vertex([0], start, [start_normal], [start_uv])
-			self.end = add_vertex([1], end, [end_normal], [end_uv])
+		if not p_no_vertex_init:
+			start = add_vertex([0], p_start, [p_start_normal], [p_start_uv])
+			end = add_vertex([1], p_end, [p_end_normal], [p_end_uv])
 			apply_all()
 			
 			
 # A line of two or more vertices.
 # TODO (maybe):
-	# If an array of two or more vertices is specified, it is subdivided according
-	# to `subdivisions`. For example: 2 vertices and a subdivision value of `1`
-	# would result in a line with 3 vertices. If the array had 3 or more vertices
-	# however, `subdivisions` would be ignored and the line would be identical to
-	# the specified array.
+	# If an array of two or more vertices is specified, it is subdivided
+	# according to `subdivisions`. For example: 2 vertices and a subdivision
+	# value of `1` would result in a line with 3 vertices. If the array had 3
+	# or more vertices however, `subdivisions` would be ignored and the line
+	# would be identical to the specified array.
 class ASubdividedLine extends ALine:
 	func _init(
-		array_vertex: PackedVector3Array,
-		array_normal := PackedVector3Array(),
-		array_tex_uv := PackedVector2Array()
+		p_array_vertex: PackedVector3Array,
+		p_array_normal := PackedVector3Array(),
+		p_array_tex_uv := PackedVector2Array()
 		# subdivisions := 0
 	):
-		assert(len(array_vertex) > 1)
+		assert(len(p_array_vertex) > 1)
 		
 		super(Vector3(), Vector3(), true)
 		
-		if len(array_normal) == 0:
-			array_normal = create_default_normals(array_vertex)
-		if len(array_tex_uv) == 0:
-			array_tex_uv = create_default_uvs(array_vertex)
+		if len(p_array_normal) == 0:
+			p_array_normal = create_default_normals(p_array_vertex)
+		if len(p_array_tex_uv) == 0:
+			p_array_tex_uv = create_default_uvs(p_array_vertex)
 		
-		for idx in range(0, len(array_vertex)):
+		for idx in range(0, len(p_array_vertex)):
 			add_vertex(
 				PackedInt64Array([idx]),
-				array_vertex[idx],
-				PackedVector3Array([array_normal[idx]]),
-				PackedVector2Array([array_tex_uv[idx]])
+				p_array_vertex[idx],
+				PackedVector3Array([p_array_normal[idx]]),
+				PackedVector2Array([p_array_tex_uv[idx]])
 			)
-		self.start = vertices[0]
-		self.end = vertices[len(vertices)-1]
+		start = vertices[0]
+		end = vertices[len(vertices)-1]
 		
 		apply_all()
 		
@@ -734,45 +738,45 @@ class AQuad extends AModifiableSegment:
 	var bottom_right: Vertex
 	
 	func _init(
-		bottom_left: Vector3,
-		top_left: Vector3,
-		top_right: Vector3,
-		bottom_right: Vector3,
+		p_bottom_left: Vector3,
+		p_top_left: Vector3,
+		p_top_right: Vector3,
+		p_bottom_right: Vector3,
 		
-		bottom_left_normal := Vector3(),
-		top_left_normal := Vector3(),
-		top_right_normal := Vector3(),
-		bottom_right_normal := Vector3(),
+		p_bottom_left_normal := Vector3(),
+		p_top_left_normal := Vector3(),
+		p_top_right_normal := Vector3(),
+		p_bottom_right_normal := Vector3(),
 		
-		bottom_left_uv := Vector2(),
-		top_left_uv := Vector2(),
-		top_right_uv := Vector2(),
-		bottom_right_uv := Vector2(),
+		p_bottom_left_uv := Vector2(),
+		p_top_left_uv := Vector2(),
+		p_top_right_uv := Vector2(),
+		p_bottom_right_uv := Vector2(),
 	):
 		super()
 		self.bottom_left = add_vertex(
 			[0],
-			bottom_left,
-			[bottom_left_normal],
-			[bottom_left_uv]
+			p_bottom_left,
+			[p_bottom_left_normal],
+			[p_bottom_left_uv]
 		)
 		self.top_left = add_vertex(
 			[1, 3],
-			top_left,
-			[top_left_normal, top_left_normal],
-			[top_left_uv, top_left_uv]
+			p_top_left,
+			[p_top_left_normal, p_top_left_normal],
+			[p_top_left_uv, p_top_left_uv]
 		)
 		self.top_right = add_vertex(
 			[4],
-			top_right,
-			[top_right_normal],
-			[top_right_uv]
+			p_top_right,
+			[p_top_right_normal],
+			[p_top_right_uv]
 		)
 		self.bottom_right = add_vertex(
 			[2, 5],
-			bottom_right,
-			[bottom_right_normal, bottom_right_normal],
-			[bottom_right_uv, bottom_right_uv]
+			p_bottom_right,
+			[p_bottom_right_normal, p_bottom_right_normal],
+			[p_bottom_right_uv, p_bottom_right_uv]
 		)
 		self.apply_all()
 		
@@ -787,38 +791,38 @@ class ATri extends AModifiableSegment:
 	var bottom_right: Vertex
 	
 	func _init(
-		bottom_left: Vector3,
-		top: Vector3,
-		bottom_right: Vector3,
+		p_bottom_left: Vector3,
+		p_top: Vector3,
+		p_bottom_right: Vector3,
 		
-		bottom_left_normal := Vector3(),
-		top_normal := Vector3(),
-		bottom_right_normal := Vector3(),
+		p_bottom_left_normal := Vector3(),
+		p_top_normal := Vector3(),
+		p_bottom_right_normal := Vector3(),
 		
-		bottom_left_uv := Vector2(),
-		top_uv := Vector2(),
-		bottom_right_uv := Vector2()
+		p_bottom_left_uv := Vector2(),
+		p_top_uv := Vector2(),
+		p_bottom_right_uv := Vector2()
 	):
 		super()
-		self.bottom_left = add_vertex(
+		bottom_left = add_vertex(
 			[0],
-			bottom_left,
-			PackedVector3Array([bottom_left_normal]),
-			PackedVector2Array([bottom_left_uv])
+			p_bottom_left,
+			PackedVector3Array([p_bottom_left_normal]),
+			PackedVector2Array([p_bottom_left_uv])
 		)
-		self.top = add_vertex(
+		top = add_vertex(
 			[1],
-			top,
-			PackedVector3Array([top_normal]),
-			PackedVector2Array([top_uv])
+			p_top,
+			PackedVector3Array([p_top_normal]),
+			PackedVector2Array([p_top_uv])
 		)
-		self.bottom_right = add_vertex(
+		bottom_right = add_vertex(
 			[2],
-			bottom_right,
-			PackedVector3Array([bottom_right_normal]),
-			PackedVector2Array([bottom_right_uv])
+			p_bottom_right,
+			PackedVector3Array([p_bottom_right_normal]),
+			PackedVector2Array([p_bottom_right_uv])
 		)
-		self.apply_all()
+		apply_all()
 		
 # NOTE: AMultiSegment and sub-classes shouldn't alter .untransformed
 # directly. Instead, they should get their segments through .get_segments.
@@ -828,11 +832,11 @@ class AMultiSegment extends AModifiableSegment:
 	
 	# Override in sub-class.
 	func _reset_array_vertex_index_offset() -> void:
-		self._array_vertex_index_offset = 0
+		_array_vertex_index_offset = 0
 		
 	# Override in sub-class.
 	func _reset_modifier_cursor() -> void:
-		self.modifier_cursor = 0
+		modifier_cursor = 0
 	
 	# @virtual
 	func get_segments() -> Array[AModifiableSegment]:
@@ -843,9 +847,9 @@ class AMultiSegment extends AModifiableSegment:
 			for vertex in segment.vertices:
 				var updated_indexes := PackedInt64Array()
 				for array_vertex_index in vertex.array_vertex_indexes:
-					updated_indexes.append(self._array_vertex_index_offset + array_vertex_index)
+					updated_indexes.append(_array_vertex_index_offset + array_vertex_index)
 				add_vertex_from_vertex_with_new_indexes(updated_indexes, vertex)
-			self._array_vertex_index_offset += len(segment.untransformed.get_array_vertex())
+			_array_vertex_index_offset += len(segment.untransformed.get_array_vertex())
 		_reset_array_vertex_index_offset()
 		
 	func apply_segments() -> void:
@@ -897,42 +901,42 @@ class AFlushingMultiSegment extends AMultiSegment:
 class MTranslateVertices extends Modifier:
 	var translation: Vector3
 	
-	func _init(translation: Vector3):
-		self.translation = translation
+	func _init(p_translation: Vector3):
+		translation = p_translation
 		
-	func modify(mutator: IndexChangeTrackingSegmentMutator) -> void:
-		mutator.translate_vertices(self.translation)
+	func modify(p_mutator: IndexChangeTrackingSegmentMutator) -> void:
+		p_mutator.translate_vertices(translation)
 		
 		
 class MMultiplyVerticesByVector3 extends Modifier:
 	var vector: Vector3
 	
-	func _init(vector: Vector3):
-		self.vector = vector
+	func _init(p_vector: Vector3):
+		vector = p_vector
 	
-	func modify(mutator: IndexChangeTrackingSegmentMutator) -> void:
+	func modify(p_mutator: IndexChangeTrackingSegmentMutator) -> void:
 		#mutator.multiply_vertices_by_vector3(self.vector)
-		mutator.flip_vertices_x()
+		p_mutator.flip_vertices_x()
 		
 		
 class MFlipVerticesX extends MMultiplyVerticesByVector3:
 	func _init():
-		self.vector = Vector3(-1, 1, 1)
+		vector = Vector3(-1, 1, 1)
 		
 		
 class MFlipVerticesYModifier extends MMultiplyVerticesByVector3:
 	func _init():
-		self.vector = Vector3(1, -1, 1)
+		vector = Vector3(1, -1, 1)
 		
 		
 class MFlipVerticesZModifier extends MMultiplyVerticesByVector3:
 	func _init():
-		self.vector = Vector3(1, 1, -1)
+		vector = Vector3(1, 1, -1)
 		
 		
 class MFlipTris extends Modifier:
-	func modify(mutator: IndexChangeTrackingSegmentMutator) -> void:
-		mutator.flip_tris()
+	func modify(p_mutator: IndexChangeTrackingSegmentMutator) -> void:
+		p_mutator.flip_tris()
 		
 		
 	# Stretch by the specified amount.
@@ -943,17 +947,19 @@ class MFlipTris extends Modifier:
 class MStretchVerticesByAmount extends Modifier:
 	var stretch_amount: Vector3
 	
-	func _init(stretch_amount: Vector3):
-		self.stretch_amount = stretch_amount
+	func _init(p_stretch_amount: Vector3):
+		stretch_amount = p_stretch_amount
 		
-	func modify(mutator: IndexChangeTrackingSegmentMutator) -> void:
-		var array_vertex := mutator.segment.get_array_vertex()
+	func modify(p_mutator: IndexChangeTrackingSegmentMutator) -> void:
+		var array_vertex := p_mutator.segment.get_array_vertex()
 		var vertex_count := float(len(array_vertex))
 		
 		if vertex_count < 2.0:
 			push_error(\
 				"Attempted to stretch mesh with less than 2 vertices. "
-				+ "Returning without stretching, as there's nothing to stretch.")
+				+ "Returning without stretching, as there's nothing to "
+				+ "stretch."
+			)
 			return
 		assert(vertex_count >= 2.0)
 		
@@ -970,45 +976,45 @@ class MShearVertices extends Modifier:
 	var axis_factors: Vector3
 	
 	func _init(
-		shear_factor: float,
-		axis_factors: Vector3
+		p_shear_factor: float,
+		p_axis_factors: Vector3
 	):
-		self.shear_factor = shear_factor
-		self.axis_factors = axis_factors
+		shear_factor = p_shear_factor
+		axis_factors = p_axis_factors
 		
-	func modify(mutator: IndexChangeTrackingSegmentMutator) -> void:
+	func modify(p_mutator: IndexChangeTrackingSegmentMutator) -> void:
 		# TODO: A version of shear_line that makes it so we can operate on
 		#  the array directly without the superfluous loop.
 		var idx := 0
 		# TODO: Normals might have to be adjusted too. Evaluate.
 		for vertex in CityGeoFuncs.shear_line(
-			mutator.segment.get_array_vertex(),
-			self.shear_factor,
-			self.axis_factors
+			p_mutator.segment.get_array_vertex(),
+			shear_factor,
+			axis_factors
 		):
-			mutator.segment.get_array_vertex()[idx] = vertex
+			p_mutator.segment.get_array_vertex()[idx] = vertex
 			idx += 1
 			
 			
 class MInvertSurfaceArrays extends Modifier:
-	func modify(mutator: IndexChangeTrackingSegmentMutator) -> void:
-		mutator.segment.get_array_vertex().reverse()
-		mutator.segment.get_array_normal().reverse()
-		mutator.segment.get_array_tex_uv().reverse()
+	func modify(p_mutator: IndexChangeTrackingSegmentMutator) -> void:
+		p_mutator.segment.get_array_vertex().reverse()
+		p_mutator.segment.get_array_normal().reverse()
+		p_mutator.segment.get_array_tex_uv().reverse()
 			
 			
 class MYUp extends Modifier:
-	func modify(mutator: IndexChangeTrackingSegmentMutator) -> void:
-		var array_vertex := mutator.segment.get_array_vertex()
-		mutator.swap_vertex_components(
-			mutator.VectorComponentIndex.Y,
-			mutator.VectorComponentIndex.Z
+	func modify(p_mutator: IndexChangeTrackingSegmentMutator) -> void:
+		var array_vertex := p_mutator.segment.get_array_vertex()
+		p_mutator.swap_vertex_components(
+			p_mutator.VectorComponentIndex.Y,
+			p_mutator.VectorComponentIndex.Z
 		)
 			
 			
 class MYFlipUVs extends Modifier:
-	func modify(mutator: IndexChangeTrackingSegmentMutator) -> void:
-		var array_tex_uv := mutator.segment.get_array_tex_uv()
+	func modify(p_mutator: IndexChangeTrackingSegmentMutator) -> void:
+		var array_tex_uv := p_mutator.segment.get_array_tex_uv()
 		var y_flipped_uvs = PackedVector2Array()
 		for i_tri in range(len(array_tex_uv) / 3):
 			array_tex_uv[3*i_tri].y = 1.0 - array_tex_uv[3*i_tri].y
@@ -1024,12 +1030,12 @@ class MYFlipUVs extends Modifier:
 class AMultiQuad extends AMultiSegment:
 	var base_quads: Array[AQuad]
 	
-	func add_quad(quad: AQuad):
-		self.base_quads.append(quad)
+	func add_quad(p_quad: AQuad):
+		base_quads.append(p_quad)
 		
 	func get_segments() -> Array[AModifiableSegment]:
 		var segments := super()
-		for quad in self.base_quads:
+		for quad in base_quads:
 			segments.append(quad)
 		return segments
 	
@@ -1037,12 +1043,12 @@ class AMultiQuad extends AMultiSegment:
 class AMultiTri extends AMultiSegment:
 	var base_tris: Array[ATri]
 	
-	func add_tri(tri: ATri):
-		self.base_tris.append(tri)
+	func add_tri(p_tri: ATri):
+		base_tris.append(p_tri)
 		
 	func get_segments() -> Array[AModifiableSegment]:
 		var segments := super()
-		for tri in self.base_tris:
+		for tri in base_tris:
 			segments.append(tri)
 		return segments
 	
@@ -1050,19 +1056,19 @@ class AMultiTri extends AMultiSegment:
 class AFlushingMultiTri extends AFlushingMultiSegment:
 	var _flushable_base_tris: Array[ATri] = []
 	
-	func add_tri(tri: ATri):
-		self._flushable_base_tris.append(tri)
+	func add_tri(p_tri: ATri):
+		self._flushable_base_tris.append(p_tri)
 		
 	func get_segments() -> Array[AModifiableSegment]:
 		var segments := super()
-		for tri in self._flushable_base_tris:
+		for tri in _flushable_base_tris:
 			segments.append(tri)
 		# This should return an empty array if called again after .apply_all
 		# has finished for the first time.
 		return segments
 		
 	func clear_segments() -> void:
-		self._flushable_base_tris = []
+		_flushable_base_tris = []
 	
 	
 class LineVertexArrayChecker:
@@ -1077,8 +1083,10 @@ class LineVertexArrayChecker:
 	var error_message:
 		set(value):
 			# Read-only.
-			push_warning("Attempt to set read-only value for `error_message` in"
-				+ " `%s` class (or subclass)." % CLASS_NAME)
+			push_warning(
+				"Attempt to set read-only value for `error_message` in "
+				+ "`%s` class (or subclass)." % CLASS_NAME
+			)
 		get:
 			return " -- ".join(error_messages)
 		
@@ -1093,38 +1101,41 @@ class LineVertexArrayChecker:
 			return len(error_messages) == 0
 	
 	func _init(
-		class_designation: String,
-		array1_name := "array1",
-		array2_name := "array2",
-		extra_verbose := false
+		p_class_designation: String,
+		p_array1_name := "array1",
+		p_array2_name := "array2",
+		p_extra_verbose := false
 	):
-		self.class_designation = class_designation
-		self.array1_name = array1_name
-		self.array2_name = array2_name
-		self.extra_verbose = extra_verbose
+		class_designation = p_class_designation
+		array1_name = p_array1_name
+		array2_name = p_array2_name
+		extra_verbose = p_extra_verbose
 		
 	func _append_arrays_to_error_message(
-		error_message: String,
-		array1: PackedVector3Array,
-		array2: PackedVector3Array
+		p_error_message: String,
+		p_array1: PackedVector3Array,
+		p_array2: PackedVector3Array
 	) -> String:
-		return error_message + " array1: %s. array2: %s." % [array1, array2]
+		return\
+			p_error_message\
+			+ " array1: %s. " % p_array1\
+			+ "array2: %s." % p_array2
 		
 	func error_if_not_same_size(
-		array1: PackedVector3Array,
-		array2: PackedVector3Array
+		p_array1: PackedVector3Array,
+		p_array2: PackedVector3Array
 	) -> String:
-		if len(array1) == len(array1):
+		if len(p_array1) == len(p_array1):
 			return ""
 		var error_details :=\
-			" Happened in `%s` (or subclass)." % self.class_designation\
-			+ " %s size: %s." % [self.array1_name, len(array1)]\
-			+ " %s size: %s." % [self.array2_name, len(array2)]
-		if self.extra_verbose:
+			" Happened in `%s` (or subclass)." % class_designation\
+			+ " %s size: %s." % [array1_name, len(p_array1)]\
+			+ " %s size: %s." % [array2_name, len(p_array2)]
+		if extra_verbose:
 			error_details = _append_arrays_to_error_message(
 				error_details,
-				array1,
-				array2
+				p_array1,
+				p_array2
 			)
 		push_error(error_details)
 		error_messages.append(error_details)
@@ -1145,16 +1156,19 @@ class AHorizontallyFoldedTriangle extends AMultiSegment:
 	
 	# TODO: Add support for empty left and right side vertex arrays.
 	func _init(
-		left_side_vertices: PackedVector3Array,
-		right_side_vertices: PackedVector3Array
+		p_left_side_vertices: PackedVector3Array,
+		p_right_side_vertices: PackedVector3Array
 	):
 #		self._side_arrays_error.error_if_not_same_size(
 #			self.left_side_vertices,
 #			self.right_side_vertices
 #		)
-#		assert(self._side_arrays_error.is_ok, self._side_arrays_error.error_message)
-		self.left_line = left_side_vertices
-		self.right_line = right_side_vertices
+#		assert(
+#			self._side_arrays_error.is_ok,
+#			self._side_arrays_error.error_message
+#		)
+		left_line = p_left_side_vertices
+		right_line = p_right_side_vertices
 		
 		super()
 		
@@ -1172,20 +1186,20 @@ class AHorizontallyFoldedTriangle extends AMultiSegment:
 		# can construct from the "bottom left" vertex up.
 		# If there are only three vertices, skip this.
 		while number_of_segments_to_create - number_of_segments_created > 1:
-			self.base_quads.append(AQuad.new(
-				self.left_line[number_of_segments_created], # bottom_left
-				self.left_line[number_of_segments_created+1], # top_left
-				self.right_line[number_of_segments_created+1], # top_right
-				self.right_line[number_of_segments_created] # bottom_right
+			base_quads.append(AQuad.new(
+				left_line[number_of_segments_created], # bottom_left
+				left_line[number_of_segments_created+1], # top_left
+				right_line[number_of_segments_created+1], # top_right
+				right_line[number_of_segments_created] # bottom_right
 			))
 			number_of_segments_created += 1
 			
 		# Make the triangular tip. If there are only three vertices, this will
 		# be the entire segment.
-			self.tip_tri = ATri.new(
-				self.left_line[number_of_segments_created], # left
-				self.left_line[number_of_segments_created+1], # tip
-				self.right_line[number_of_segments_created] # right
+			tip_tri = ATri.new(
+				left_line[number_of_segments_created], # left
+				left_line[number_of_segments_created+1], # tip
+				right_line[number_of_segments_created] # right
 			)
 			number_of_segments_created += 1
 			
@@ -1194,9 +1208,9 @@ class AHorizontallyFoldedTriangle extends AMultiSegment:
 		# TODO: `base_quads.duplicate` isn't working for some reason. When
 		# subsequently calling .append, the array stays empty.
 		var segments := super()
-		for quad in self.base_quads:
+		for quad in base_quads:
 			segments.append(quad)
-		segments.append(self.tip_tri)
+		segments.append(tip_tri)
 		return segments
 		
 		
@@ -1214,29 +1228,29 @@ class AHorizontallyFoldedPlane extends AMultiSegment:
 	var bottom_quad: AQuad
 	
 	func _init(
-		left_side_vertices: PackedVector3Array,
-		right_side_vertices: PackedVector3Array
+		p_left_side_vertices: PackedVector3Array,
+		p_right_side_vertices: PackedVector3Array
 	):
-		self._side_arrays_error.error_if_not_same_size(
-			left_side_vertices,
-			right_side_vertices
+		_side_arrays_error.error_if_not_same_size(
+			p_left_side_vertices,
+			p_right_side_vertices
 		)
-		assert(self._side_arrays_error.is_ok, self._side_arrays_error.error_message)
+		assert(_side_arrays_error.is_ok, _side_arrays_error.error_message)
 		
 		super()
 		
 		# TODO: Handle inappropriate number of vertices, e.g. len == 1.
-		for idx in range(0, len(left_side_vertices) - 1):
-			self.quads.append(AQuad.new(
-				left_side_vertices[idx], # bottom_left
-				left_side_vertices[idx+1], # top_left
-				right_side_vertices[idx+1], # top_right
-				right_side_vertices[idx] # bottom_right
+		for idx in range(0, len(p_left_side_vertices) - 1):
+			quads.append(AQuad.new(
+				p_left_side_vertices[idx], # bottom_left
+				p_left_side_vertices[idx+1], # top_left
+				p_right_side_vertices[idx+1], # top_right
+				p_right_side_vertices[idx] # bottom_right
 			))
 			
 		# TODO: Add support for empty left and right side vertiex arrays.
-		self.bottom_quad = quads[0]
-		self.top_quad = quads[len(quads)-1]
+		bottom_quad = quads[0]
+		top_quad = quads[len(quads)-1]
 		
 		apply_all()
 		
@@ -1251,19 +1265,20 @@ class AFoldedPlane extends AMultiSegment:
 	var strips: Array[AHorizontallyFoldedPlane] = []
 	
 	func _init(
-		outer_left_outline: ASubdividedLine,
-		outer_right_outline: ASubdividedLine,
-		bottom_outline: ASubdividedLine,
-		top_outline: ASubdividedLine
+		p_outer_left_outline: ASubdividedLine,
+		p_outer_right_outline: ASubdividedLine,
+		p_bottom_outline: ASubdividedLine,
+		p_top_outline: ASubdividedLine
 	):
 		super()
-		var last_idx := len(bottom_outline.get_array_vertex()) - 1
-		var left_outline := outer_left_outline.copy_as_ASubdividedLine()
+		var last_idx := len(p_bottom_outline.get_array_vertex()) - 1
+		var left_outline := p_outer_left_outline.copy_as_ASubdividedLine()
+		
 		for idx in range(0, last_idx):
-			var outer_bottom_vertex := outer_right_outline.start.transformed
-			var inner_bottom_vertex := bottom_outline.vertices[idx+1].transformed
+			var outer_bottom_vertex := p_outer_right_outline.start.transformed
+			var inner_bottom_vertex := p_bottom_outline.vertices[idx+1].transformed
 			
-			var right_outline := outer_right_outline.copy_as_ASubdividedLine()
+			var right_outline := p_outer_right_outline.copy_as_ASubdividedLine()
 			right_outline.add_modifier(MTranslateVertices.new(
 				-(outer_bottom_vertex - inner_bottom_vertex)
 			))
@@ -1276,28 +1291,25 @@ class AFoldedPlane extends AMultiSegment:
 			right_outline.apply_modifiers()
 			
 			right_outline.add_modifier(MStretchVerticesByAmount.new(
-				top_outline.vertices[idx+1].transformed\
+				p_top_outline.vertices[idx+1].transformed\
 				- right_outline.end.transformed
 			))
 			right_outline.apply_all()
 			
 			# NOTE: It might be wise to check whether the right outline and
 			# the outer right line are identical when it's the last pass, since
-			# they should be. If they aren't, it's an error in this here function.
-			# This woud be more of a test/assert level thing, though.
+			# they should be. If they aren't, it's an error in this here
+			# function. This woud be more of a test/assert level thing, though.
 			
-			self.strips.append(AHorizontallyFoldedPlane.new(
+			strips.append(AHorizontallyFoldedPlane.new(
 				left_outline.get_array_vertex(),
 				right_outline.get_array_vertex()
 			))
 		apply_all()
-			
-#	func get_segments() -> Array[ATransformableSegment]:
-#		return self.strips as Array[ATransformableSegment]
 		
 	func get_segments() -> Array[AModifiableSegment]:
 		var segments := super()
-		for strip in self.strips:
+		for strip in strips:
 			segments.append(strip)
 		return segments
 		
@@ -1314,31 +1326,34 @@ class STris extends Surface:
 	var materials: Array[Material]
 	
 	func _init(
-		tris: AFlushingMultiTri,
-		material_indices: PackedInt64Array,
-		materials: Array[Material] = []
+		p_tris: AFlushingMultiTri,
+		p_material_indices: PackedInt64Array,
+		p_materials: Array[Material] = []
 	):
-		self.tris = tris
-		self.materials = materials
-		self.material_indices = get_inverted_material_indices(material_indices)
+		tris = p_tris
+		materials = p_materials
+		material_indices = get_inverted_material_indices(p_material_indices)
 		
 	func get_mesh_instance_3d() -> MeshInstance3D:
 		var grouped_surface_arrays := CityGeoFuncs.get_grouped_surfaces_by_material_index(
 			material_indices,
-			self.tris.get_arrays()
+			tris.get_arrays()
 		)
 		var instance_3d := CityGeoFuncs.get_multi_surface_array_mesh_node(
 			grouped_surface_arrays
 		)
 		for i_material in range(len(materials)):
-			instance_3d.mesh.surface_set_material(i_material, materials[i_material])
+			instance_3d.mesh.surface_set_material(
+				i_material,
+				materials[i_material]
+			)
 		
 		return instance_3d
 		
-	func add(addee: STris) -> void:
-		var vertices := addee.tris.get_array_vertex()
-		var normals := addee.tris.get_array_normal()
-		var uvs := addee.tris.get_array_tex_uv()
+	func add(p_addee: STris) -> void:
+		var vertices := p_addee.tris.get_array_vertex()
+		var normals := p_addee.tris.get_array_normal()
+		var uvs := p_addee.tris.get_array_tex_uv()
 		
 		assert(len(vertices) % 3 == 0)
 		
@@ -1357,20 +1372,20 @@ class STris extends Surface:
 				uvs[offset+1],
 				uvs[offset+2]
 			)
-			self.tris.add_tri(tri)
-		self.tris.apply_all()
+			tris.add_tri(tri)
+		tris.apply_all()
 		
-		for addee_material in addee.materials:
-			self.materials.append(addee_material)
-		for addee_material_index in addee.material_indices:
-			self.material_indices.append(addee_material_index)
+		for addee_material in p_addee.materials:
+			materials.append(addee_material)
+		for addee_material_index in p_addee.material_indices:
+			material_indices.append(addee_material_index)
 			
 	static func get_inverted_material_indices(
-		material_indices: PackedInt64Array
+		p_material_indices: PackedInt64Array
 	):
 		var inverted_material_indices := PackedInt64Array()
-		var length := len(material_indices)
+		var length := len(p_material_indices)
 		for i_index in range(length):
 			var i_index_inverted := length - i_index - 1
-			inverted_material_indices.append(material_indices[i_index_inverted])
+			inverted_material_indices.append(p_material_indices[i_index_inverted])
 		return inverted_material_indices
