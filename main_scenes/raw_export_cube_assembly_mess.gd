@@ -8,7 +8,7 @@ const ADebugOverlay := MeshDebugLib.ADebugOverlay
 
 const test_cube_path: StringName = "res://assets/parts/raw_export_test_cube.json"
 
-func _mess(show_debug_overlay) -> Node3D:
+func _mess(p_show_debug_overlay) -> Node3D:
 	# Red needle: +X (Godot)
 	Cavedig.needle(self, self.transform.translated(Vector3(3, 0, 0)), Vector3(1, 0, 0), 10.0, 0.02)
 	# Blue needle with green disc: +Z (Godot) and +Y (Blender)
@@ -20,7 +20,7 @@ func _mess(show_debug_overlay) -> Node3D:
 	var surface_tris := RawExport4MeshLib.new_STris_from_file(test_cube_path)
 	var array_mesh_node := surface_tris.get_mesh_instance_3d()
 	
-	if show_debug_overlay:
+	if p_show_debug_overlay:
 		array_mesh_node.add_child(ADebugOverlay.new().visualize_array_vertex(
 			surface_tris.tris.get_arrays()
 		))

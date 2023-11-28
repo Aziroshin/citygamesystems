@@ -41,7 +41,7 @@ func get_kinked_roof_line_arrays() -> Array:
 	arrays[ArrayMesh.ARRAY_TEX_UV] = tex_uv
 	return arrays
 
-func _mess_AHorizontallyFoldedTriangle(show_debug_overlay := false) -> Node3D:
+func _mess_AHorizontallyFoldedTriangle(p_show_debug_overlay := false) -> Node3D:
 	var mess_node := Node3D.new()
 		
 	var kinked_roof_line := get_kinked_roof_line_arrays()
@@ -87,7 +87,7 @@ func _mess_AHorizontallyFoldedTriangle(show_debug_overlay := false) -> Node3D:
 	
 	mess_node.add_child(tri_node)
 	mess_node.add_child(tri2_node)
-	if show_debug_overlay:
+	if p_show_debug_overlay:
 		mess_node.add_child(ADebugOverlay.new().visualize_arrays(tri_surface_arrays))
 	return mess_node
 	

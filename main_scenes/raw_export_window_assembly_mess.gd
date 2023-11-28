@@ -15,7 +15,7 @@ const decor_nothing_path: StringName =\
 const decor_crown_path: StringName =\
 	"res://assets/parts/window_decor_flat_spikes_crown_raw_export_test.rxm.json"
 
-func _mess(show_debug_overlay) -> Array[Node3D]:
+func _mess(p_show_debug_overlay) -> Array[Node3D]:
 	var to_godot_space := true
 	
 	# Red needle: +X (Godot)
@@ -48,7 +48,7 @@ func _mess(show_debug_overlay) -> Array[Node3D]:
 			
 	var window_array_mesh_node := window_surface_tris.get_mesh_instance_3d()
 	var decor_crown_mesh_node := decor_crown_surface_tris.get_mesh_instance_3d()
-	if show_debug_overlay:
+	if p_show_debug_overlay:
 		window_array_mesh_node.add_child(
 			ADebugOverlay.new()
 			.show_vertices(false)
