@@ -5,10 +5,10 @@ var is_nil: bool = true
 var value: Transform3D:
 	get:
 		return value
-	set(new_value):
+	set(p_value):
 		is_nil = false
-		value = new_value
+		value = p_value
 
-func set_value(new_value: Transform3D) -> NilableTransform3D:
-	value = new_value
+func set_value(p_value: Transform3D) -> NilableTransform3D:
+	value = p_value
 	return self

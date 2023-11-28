@@ -5,11 +5,11 @@ var is_nil: bool = true
 var value: int:
 	get:
 		return value
-	set(new_value):
+	set(p_value):
 		is_nil = false
-		value = new_value
+		value = p_value
 
-func set_value(new_value: int) -> NilableInt:
-	value = new_value
+func set_value(p_value: int) -> NilableInt:
+	value = p_value
 	return self
 	
