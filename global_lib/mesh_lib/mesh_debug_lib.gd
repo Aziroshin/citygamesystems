@@ -125,30 +125,3 @@ class ADebugOverlay extends Node3D:
 		surface_arrays[ArrayMesh.ARRAY_VERTEX] = array_vertex
 		visualize_arrays(surface_arrays)
 		return self
-		
-		
-#class ADebugOverlay2D extends Sprite3D:
-#	var viewport := SubViewport.new()
-#
-#	func _init():
-#		self.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-#		add_child(viewport)
-#
-#	func _on_process(delta: float) -> void:
-#		#viewport.size = 
-#		pass
-#
-#	func add_label(title: String, xyz: Vector3) -> ADebugOverlay2D:
-#		var label := Label.new()
-#		label.translate(xyz)
-#		label.text = "%s: %s" % [title, xyz]
-#		label.font_size = 6
-#		label.fixed_size = true
-#		return self
-#
-#	func visualize_arrays(arrays: Array) -> ADebugOverlay2D: 
-#		var idx := 0
-#		for xyz in arrays[ArrayMesh.ARRAY_VERTEX]:
-#			add_label("%s" % idx, xyz)
-#			idx += idx
-#		return self
