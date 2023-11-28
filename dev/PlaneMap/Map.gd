@@ -10,18 +10,18 @@ var material = preload("res://dev/PlaneMap/MapMaterial.tres")
 @export var subdivision := Vector2(100, 100)
 
 signal mouse_motion(
-	camera: Camera3D,
-	event: InputEventMouseMotion,
-	click_position: Vector3,
-	click_normal: Vector3,
-	shape: int
+	p_camera: Camera3D,
+	p_event: InputEventMouseMotion,
+	p_click_position: Vector3,
+	p_click_normal: Vector3,
+	p_shape: int
 )
 signal mouse_button(
-	camera: Camera3D,
-	event: InputEventMouseButton,
-	click_position: Vector3,
-	click_normal: Vector3,
-	shape: int
+	p_camera: Camera3D,
+	p_event: InputEventMouseButton,
+	p_click_position: Vector3,
+	p_click_normal: Vector3,
+	p_shape: int
 )
 
 # With some helpful input from Digital KI's post:
@@ -72,15 +72,27 @@ func _ready():
 	add_child(mesh_instance)
 	
 func _on_mouse_event(
-	camera: Camera3D,
-	event: InputEvent,
-	mouse_position: Vector3,
-	normal: Vector3,
-	shape: int
+	p_camera: Camera3D,
+	p_event: InputEvent,
+	p_mouse_position: Vector3,
+	p_normal: Vector3,
+	p_shape: int
 ):
-	if event is InputEventMouseMotion:
-		mouse_motion.emit(camera, event, mouse_position, normal, shape)
-	if event is InputEventMouseButton:
-		mouse_button.emit(camera, event, mouse_position, normal, shape)
+	if p_event is InputEventMouseMotion:
+		mouse_motion.emit(
+			p_camera,
+			p_event,
+			p_mouse_position,
+			p_normal,
+			p_shape
+		)
+	if p_event is InputEventMouseButton:
+		mouse_button.emit(
+			p_camera,
+			p_event,
+			p_mouse_position,
+			p_normal,
+			p_shape
+		)
 	
 
