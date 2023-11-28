@@ -865,15 +865,6 @@ class AMultiSegment extends AModifiableSegment:
 		# pipeline.
 		_reset_modifier_cursor()
 		
-	# @virtual
-	func as_AVertexTrackingSegment(do_apply_all := false) -> AVertexTrackingSegment:
-		# TODO: Proper implementation. :p
-		if do_apply_all:
-			apply_all()
-		else:
-			apply_segments()
-		return self
-		
 		
 # Applies segments only once, then clears them, so on subsequent calls of
 # .apply_segments only segments that got added since the last .apply_segments
