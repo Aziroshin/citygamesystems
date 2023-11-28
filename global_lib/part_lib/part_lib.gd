@@ -18,13 +18,13 @@ class Node3DBone:
 	var idx: int
 	
 	func _init(
-		node_with_skeleton: Node3D,
-		skeleton_of_node: Skeleton3D,
-		bone_idx: int
+		p_node_with_skeleton: Node3D,
+		p_skeleton_of_node: Skeleton3D,
+		p_bone_idx: int
 	):
-		idx = bone_idx
-		skeleton = skeleton_of_node
-		node = node_with_skeleton
+		idx = p_bone_idx
+		skeleton = p_skeleton_of_node
+		node = p_node_with_skeleton
 		
 	func get_transform() -> Transform3D:
 		return skeleton.get_bone_global_pose(idx)
@@ -45,13 +45,21 @@ class Node3DTailedBone extends Node3DBone:
 	var tail: Node3DBone
 	
 	func _init(
-		node_with_skeleton: Node3D,
-		skeleton_of_node: Skeleton3D,
-		this_bone_idx: int,
-		tail_bone_idx: int
+		p_node_with_skeleton: Node3D,
+		p_skeleton_of_node: Skeleton3D,
+		p_this_bone_idx: int,
+		p_tail_bone_idx: int
 	):
-		super(node_with_skeleton, skeleton_of_node, this_bone_idx)
-		tail = Node3DBone.new(node_with_skeleton, skeleton_of_node, tail_bone_idx)
+		super(
+			p_node_with_skeleton,
+			p_skeleton_of_node,
+			p_this_bone_idx
+		)
+		tail = Node3DBone.new(
+			p_node_with_skeleton,
+			p_skeleton_of_node,
+			p_tail_bone_idx
+		)
 		
 	func get_global_transform() -> Transform3D:
 		return Transform3D(
@@ -68,11 +76,11 @@ class PartConnector:
 	var bone: Node3DTailedBone
 	
 	func _init(
-		corresponding_part: Node3D,
-		connector_bone: Node3DTailedBone
+		p_corresponding_part: Node3D,
+		p_connector_bone: Node3DTailedBone
 	):
-		part = corresponding_part
-		bone = connector_bone
+		part = p_corresponding_part
+		bone = p_connector_bone
 		
 	# Returns the transform with respect to its parent part.
 	#
@@ -102,9 +110,9 @@ class DefaultConnectors:
 	var receiving: PartConnector
 	var docking: PartConnector
 	
-	func _init(receiving: PartConnector, docking: PartConnector):
-		self.receiving = receiving
-		self.docking = docking
+	func _init(p_receiving: PartConnector, p_docking: PartConnector):
+		receiving = p_receiving
+		docking = p_docking
 
 
 class PartControl:
@@ -129,19 +137,19 @@ class PartControl:
 	var default_receiving_connector: PartConnector
 	var default_docking_connector: PartConnector
 	
-	func _init(to_be_controlled_part: Node3D):
-		part = to_be_controlled_part
+	func _init(p_to_be_controlled_part: Node3D):
+		part = p_to_be_controlled_part
 		if not _init_usable_skeleton_from_part(part):
 			_init_fallback_skeleton()
 		var default_connectors := _init_connectors()
 		default_receiving_connector = default_connectors.receiving
 		default_docking_connector = default_connectors.docking
 		
-	func transform_to_connector(connector: PartConnector):
-		self.part.transform = connector.get_transform_to_part_parent()
+	func transform_to_connector(p_connector: PartConnector):
+		part.transform = p_connector.get_transform_to_part_parent()
 		
-	func origin_to_connector(connector: PartConnector):
-		self.part.transform.origin = connector.get_origin_to_part_parent()
+	func origin_to_connector(p_connector: PartConnector):
+		part.transform.origin = p_connector.get_origin_to_part_parent()
 		
 	# Connector for the fallback skeleton, but works with any other skeleton
 	# which has at least two bones, with one of them having a name which
@@ -185,11 +193,11 @@ class PartControl:
 		)
 		
 	func _init_usable_skeleton_from_part(
-		node: Node3D,
-		err_if_skeleton_missing = true
+		p_node: Node3D,
+		p_err_if_skeleton_missing = true
 	) -> bool:
-		var children = node.get_children()#[0].get_node(SKELETON_NODE_NAME)
-		print(node.name)
+		var children = p_node.get_children()#[0].get_node(SKELETON_NODE_NAME)
+		print(p_node.name)
 		for child in children:
 			print("after suffix")
 			var skeleton_with_maybe_too_few_bones = child.get_node(SKELETON_NODE_NAME)
@@ -199,8 +207,8 @@ class PartControl:
 				print("after too few bones")
 				skeleton = skeleton_with_maybe_too_few_bones # Has enough bones. :p
 				return true
-		if err_if_skeleton_missing:
-			var err = "Couldn't find a skeleton for %s" % node
+		if p_err_if_skeleton_missing:
+			var err = "Couldn't find a skeleton for %s" % p_node
 			push_error(err)
 			assert(false, err)
 		return false
