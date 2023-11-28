@@ -11,31 +11,31 @@ class_name MeshLib
 class ASegment:
 	var _arrays: Array = []
 	var _array_vertex := PackedVector3Array():
-		set(value):
-			self._arrays[ArrayMesh.ARRAY_VERTEX] = value
+		set(p_value):
+			_arrays[ArrayMesh.ARRAY_VERTEX] = p_value
 		get:
-			return self._arrays[ArrayMesh.ARRAY_VERTEX]
+			return _arrays[ArrayMesh.ARRAY_VERTEX]
 			
 	var _array_normal := PackedVector3Array():
-		set(value):
-			self._arrays[ArrayMesh.ARRAY_NORMAL] = value
+		set(p_value):
+			_arrays[ArrayMesh.ARRAY_NORMAL] = p_value
 		get:
-			return self._arrays[ArrayMesh.ARRAY_NORMAL]
+			return _arrays[ArrayMesh.ARRAY_NORMAL]
 			
 	var _array_tex_uv := PackedVector2Array():
-		set(value):
-			self._arrays[ArrayMesh.ARRAY_TEX_UV] = value
+		set(p_value):
+			_arrays[ArrayMesh.ARRAY_TEX_UV] = p_value
 		get:
-			return self._arrays[ArrayMesh.ARRAY_TEX_UV]
+			return _arrays[ArrayMesh.ARRAY_TEX_UV]
 			
-	static func new_from_ASegment(source_segment: ASegment) -> ASegment:
-		return ASegment.new(source_segment.copy_arrays())
+	static func new_from_ASegment(p_source_segment: ASegment) -> ASegment:
+		return ASegment.new(p_source_segment.copy_arrays())
 		
 	func _init(
-		arrays: Array = [],
-		array_vertex: PackedVector3Array = PackedVector3Array()
+		p_arrays: Array = [],
+		p_array_vertex: PackedVector3Array = PackedVector3Array()
 	):
-		_init_arrays(arrays, array_vertex)
+		_init_arrays(p_arrays, p_array_vertex)
 		
 	func _init_arrays(
 		p_arrays: Array = [],
@@ -43,41 +43,41 @@ class ASegment:
 		p_array_normal: PackedVector3Array = PackedVector3Array(),
 		p_array_tex_uv: PackedVector2Array = PackedVector2Array()
 	):
-		self._arrays = p_arrays
-		self._arrays.resize(ArrayMesh.ARRAY_MAX)
+		_arrays = p_arrays
+		_arrays.resize(ArrayMesh.ARRAY_MAX)
 		
 		if len(p_array_vertex) > 0 or p_arrays[ArrayMesh.ARRAY_VERTEX] == null:
-			self._arrays[ArrayMesh.ARRAY_VERTEX] = p_array_vertex
+			_arrays[ArrayMesh.ARRAY_VERTEX] = p_array_vertex
 		if len(p_array_normal) > 0 or p_arrays[ArrayMesh.ARRAY_NORMAL] == null:
-			self._arrays[ArrayMesh.ARRAY_NORMAL] = p_array_normal
+			_arrays[ArrayMesh.ARRAY_NORMAL] = p_array_normal
 		if len(p_array_tex_uv) > 0 or p_arrays[ArrayMesh.ARRAY_TEX_UV] == null:
-			self._arrays[ArrayMesh.ARRAY_TEX_UV] = p_array_tex_uv
+			_arrays[ArrayMesh.ARRAY_TEX_UV] = p_array_tex_uv
 		
 	func _update_arrays_from_arrays(
-		arrays: Array
+		p_arrays: Array
 	) -> void:
 		_update_arrays(
-			arrays[ArrayMesh.ARRAY_VERTEX],
-			arrays[ArrayMesh.ARRAY_NORMAL],
-			arrays[ArrayMesh.ARRAY_TEX_UV]
+			p_arrays[ArrayMesh.ARRAY_VERTEX],
+			p_arrays[ArrayMesh.ARRAY_NORMAL],
+			p_arrays[ArrayMesh.ARRAY_TEX_UV]
 		)
 		
 	# Currently doesn't support adding or removing vertices.
 	# TODO: Make analogous to _init.
 	func _update_arrays(
-		source_array_vertex: PackedVector3Array,
-		source_array_normal: PackedVector3Array,
-		source_array_tex_uv: PackedVector2Array
+		p_source_array_vertex: PackedVector3Array,
+		p_source_array_normal: PackedVector3Array,
+		p_source_array_tex_uv: PackedVector2Array
 	) -> void:
 		# Checking if they're all equal in size.
 		assert(
 			[
-				len(self._array_vertex),
-				len(self._array_normal),
-				len(self._array_tex_uv),
-				len(source_array_vertex),
-				len(source_array_normal),
-				len(source_array_tex_uv)
+				len(_array_vertex),
+				len(_array_normal),
+				len(_array_tex_uv),
+				len(p_source_array_vertex),
+				len(p_source_array_normal),
+				len(p_source_array_tex_uv)
 			].reduce(
 				# Once one equals check in the chain fails, all subsequent
 				# checks will fail as well, because they'll all be comparing
@@ -89,31 +89,31 @@ class ASegment:
 				# TODO: Check if this runs even if the assert passes. That
 				# 	would be a bit too wasteful for comfort. xD
 				"Array sizes not equal: "
-				+ "_array_vertex: %s, " % len(self._array_vertex)
-				+ "_array_normal: %s, " % len(self._array_normal)
-				+ "_array_tex_uv: %s, " % len(self._array_tex_uv)
-				+ "source_array_vertex: %s, " % len(source_array_vertex)
-				+ "source_array_normal: %s, " % len(source_array_normal)
-				+ "source_array_tex_uv: %s." % len(source_array_tex_uv)
+				+ "_array_vertex: %s, " % len(_array_vertex)
+				+ "_array_normal: %s, " % len(_array_normal)
+				+ "_array_tex_uv: %s, " % len(_array_tex_uv)
+				+ "p_source_array_vertex: %s, " % len(p_source_array_vertex)
+				+ "p_source_array_normal: %s, " % len(p_source_array_normal)
+				+ "p_source_array_tex_uv: %s." % len(p_source_array_tex_uv)
 		)
 		
-		for idx in range(len(source_array_vertex)):
-			self._array_vertex[idx] = source_array_vertex[idx]
-			self._array_normal[idx] = source_array_normal[idx]
-			self._array_tex_uv[idx] = source_array_tex_uv[idx]
+		for idx in range(len(p_source_array_vertex)):
+			_array_vertex[idx] = p_source_array_vertex[idx]
+			_array_normal[idx] = p_source_array_normal[idx]
+			_array_tex_uv[idx] = p_source_array_tex_uv[idx]
 			
 	# TODO
 	func _update_metadata():
 		push_error("Unimplemented called.")
 		pass
 		
-	func _update_from_ASegment(segment: ASegment):
+	func _update_from_ASegment(p_source_segment: ASegment):
 		_update_arrays(
-			segment.get_array_vertex(),
-			segment.get_array_normal(),
-			segment.get_array_tex_uv()
+			p_source_segment.get_array_vertex(),
+			p_source_segment.get_array_normal(),
+			p_source_segment.get_array_tex_uv()
 		)
-		# _update_metadata()  # TODO
+		# TODO: _update_metadata()
 		
 	# TODO
 	func _get_metadata():
@@ -121,26 +121,27 @@ class ASegment:
 		pass
 			
 	func get_array_vertex() -> PackedVector3Array:
-		return self._array_vertex
+		return _array_vertex
 		
 	func get_array_normal() -> PackedVector3Array:
-		return self._array_normal
+		return _array_normal
 		
 	func get_array_tex_uv() -> PackedVector2Array:
-		return self._array_tex_uv
+		return _array_tex_uv
 		
 	func get_arrays() -> Array:
-		return self._arrays
+		return _arrays
 		
 	func copy_arrays() -> Array:
-		return self._arrays.duplicate(true)
+		return _arrays.duplicate(true)
 		
 	# TODO [prio:low]: Same for normal and tex_uv.
 	func copy_inverted_array_vertex() -> PackedVector3Array:
 		var inverted_array_vertex_copy := PackedVector3Array()
-		inverted_array_vertex_copy.resize(len(self._array_vertex))
-		for idx in range(0, len(self._array_vertex)):
-			inverted_array_vertex_copy[idx] = self._array_vertex[len(_array_vertex) - idx - 1]
+		inverted_array_vertex_copy.resize(len(_array_vertex))
+		for idx in range(0, len(_array_vertex)):
+			inverted_array_vertex_copy[idx]\
+			= _array_vertex[len(_array_vertex) - idx - 1]
 		return inverted_array_vertex_copy
 		
 	func copy_as_ASegment() -> ASegment:
@@ -156,34 +157,40 @@ class SegmentMutator:
 	}
 	
 	static func _swap_vector3_components(
-		array: PackedVector3Array,
-		comp_idx_a,
-		comp_idx_b
+		p_array: PackedVector3Array,
+		p_component_idx_a,
+		p_component_idx_b
 	) -> void:
 		# Get the remaining third idx that hasn't been specified.
-		var comp_idx_c = [0, 1, 2].filter(func(a): return a != comp_idx_a and a != comp_idx_b)[0]
+		var component_idx_c\
+		= [0, 1, 2].filter(
+			func(component_idx):
+				return\
+				not component_idx == p_component_idx_a\
+				and not component_idx == p_component_idx_b\
+		)[0]
 		
-		for idx in range(0, len(array)):
+		for idx in range(0, len(p_array)):
 			var new_vector := Vector3()
-			var unswapped := array[idx]
+			var unswapped := p_array[idx]
 			
-			new_vector[comp_idx_a] = unswapped[comp_idx_b]
-			new_vector[comp_idx_b] = unswapped[comp_idx_a]
-			new_vector[comp_idx_c] = unswapped[comp_idx_c]
+			new_vector[p_component_idx_a] = unswapped[p_component_idx_b]
+			new_vector[p_component_idx_b] = unswapped[p_component_idx_a]
+			new_vector[component_idx_c] = unswapped[component_idx_c]
 			
-			array[idx] = new_vector
+			p_array[idx] = new_vector
 		
 	
-	func _init(segment_to_mutate: ASegment):
-		self.segment = segment_to_mutate
+	func _init(p_segment_to_mutate: ASegment):
+		self.segment = p_segment_to_mutate
 	
-	func multiply_vertices_by_vector3(vector: Vector3):
+	func multiply_vertices_by_vector3(p_vector: Vector3):
 		for idx in range(0, len(segment._array_vertex)):
-			segment._array_vertex[idx] = segment._array_vertex[idx] * vector
+			segment._array_vertex[idx] = segment._array_vertex[idx] * p_vector
 			
-	func _multiply_normals_by_vector3(vector: Vector3):
+	func _multiply_normals_by_vector3(p_vector: Vector3):
 		for idx in range(0, len(segment._array_normal)):
-			segment._array_normal[idx] = segment._array_normal[idx] * vector
+			segment._array_normal[idx] = segment._array_normal[idx] * p_vector
 
 	func flip_vertices_x() -> void:
 		multiply_vertices_by_vector3(Vector3(-1, 1, 1))
@@ -197,66 +204,74 @@ class SegmentMutator:
 		multiply_vertices_by_vector3(Vector3(1, 1, -1))
 		_multiply_normals_by_vector3(Vector3(1, 1, -1))
 		
-	func translate_vertices(vector: Vector3) -> void:
-		var array_vertex := self.segment.get_array_vertex()
+	func translate_vertices(p_vector: Vector3) -> void:
+		var array_vertex := segment.get_array_vertex()
 		for idx in range(0, len(array_vertex)):
-			array_vertex[idx] = array_vertex[idx] + vector
+			array_vertex[idx] = array_vertex[idx] + p_vector
 			
-	func swap_vertex_components(comp_idx_a: int, comp_idx_b: int):
-		_swap_vector3_components(self.segment.get_array_vertex(), comp_idx_a, comp_idx_b)
-		_swap_vector3_components(self.segment.get_array_normal(), comp_idx_a, comp_idx_b)
+	func swap_vertex_components(p_comp_idx_a: int, p_comp_idx_b: int):
+		_swap_vector3_components(
+			segment.get_array_vertex(),
+			p_comp_idx_a,
+			p_comp_idx_b
+		)
+		_swap_vector3_components(
+			segment.get_array_normal(),
+			p_comp_idx_a,
+			p_comp_idx_b
+		)
 			
 			
 	# TODO: In-place swapping.
 			
-	func swap_vertex(idx_1: int, idx_2: int) -> void:
+	func swap_vertex(p_idx_1: int, p_idx_2: int) -> void:
 		var array_vertex := self.segment.get_array_vertex()
-		var tmp_idx_2_vertex := self.segment._array_vertex[idx_2]
-		array_vertex[idx_2] = array_vertex[idx_1]
-		array_vertex[idx_1] = tmp_idx_2_vertex
+		var tmp_idx_2_vertex := self.segment._array_vertex[p_idx_2]
+		array_vertex[p_idx_2] = array_vertex[p_idx_1]
+		array_vertex[p_idx_1] = tmp_idx_2_vertex
 		
-	func swap_normal(idx_1: int, idx_2: int) -> void:
+	func swap_normal(p_idx_1: int, p_idx_2: int) -> void:
 		var array_normal := self.segment.get_array_normal()
-		var tmp_idx_2_normal := self.segment._array_normal[idx_2]
-		array_normal[idx_2] = array_normal[idx_1]
-		array_normal[idx_1] = tmp_idx_2_normal
+		var tmp_idx_2_normal := self.segment._array_normal[p_idx_2]
+		array_normal[p_idx_2] = array_normal[p_idx_1]
+		array_normal[p_idx_1] = tmp_idx_2_normal
 		
-	func swap_tex_uv(idx_1: int, idx_2: int) -> void:
+	func swap_tex_uv(p_idx_1: int, p_idx_2: int) -> void:
 		var array_tex_uv := self.segment.get_array_tex_uv()
-		var tmp_idx_2_tex_uv := self.segment._array_tex_uv[idx_2]
-		array_tex_uv[idx_2] = array_tex_uv[idx_1]
-		array_tex_uv[idx_1] = tmp_idx_2_tex_uv
+		var tmp_idx_2_tex_uv := self.segment._array_tex_uv[p_idx_2]
+		array_tex_uv[p_idx_2] = array_tex_uv[p_idx_1]
+		array_tex_uv[p_idx_1] = tmp_idx_2_tex_uv
 		
-	func swap_all(idx_1: int, idx_2: int) -> void:
-		swap_vertex(idx_1, idx_2)
-		swap_normal(idx_1, idx_2)
-		swap_tex_uv(idx_1, idx_2)
+	func swap_all(p_idx_1: int, p_idx_2: int) -> void:
+		swap_vertex(p_idx_1, p_idx_2)
+		swap_normal(p_idx_1, p_idx_2)
+		swap_tex_uv(p_idx_1, p_idx_2)
 		
 	# TODO: Make resilient when the array isn't divisible by 3.
 	func flip_tris() -> void:
 		var array_vertex := self.segment.get_array_vertex()
-		for idx in range(0, len(array_vertex), 3):
-			swap_all(idx+1, idx+2)
+		for p_idx in range(0, len(array_vertex), 3):
+			swap_all(p_idx+1, p_idx+2)
 			
 			
 class IndexChangeTrackingSegmentMutator extends SegmentMutator:
 	var index_changes_by_array_vertex_index: PackedInt64Array
 	func _init(
-		segment_to_mutate,
-		index_count: int
+		p_segment_to_mutate,
+		p_index_count: int
 	):
-		super(segment_to_mutate)
-		self.index_changes_by_array_vertex_index.resize(index_count)
-		for i in range(index_count):
-			self.index_changes_by_array_vertex_index[i] = i
+		super(p_segment_to_mutate)
+		index_changes_by_array_vertex_index.resize(p_index_count)
+		for i in range(p_index_count):
+			index_changes_by_array_vertex_index[i] = i
 		
-	func track_vertex_index_swap(idx_1: int, idx_2: int):
-		self.index_changes_by_array_vertex_index[idx_1] = idx_2
-		self.index_changes_by_array_vertex_index[idx_2] = idx_1
+	func track_vertex_index_swap(p_idx_1: int, p_idx_2: int):
+		self.index_changes_by_array_vertex_index[p_idx_1] = p_idx_2
+		self.index_changes_by_array_vertex_index[p_idx_2] = p_idx_1
 		
-	func swap_vertex(idx_1: int, idx_2: int) -> void:
-		super(idx_1, idx_2)
-		self.track_vertex_index_swap(idx_1, idx_2)
+	func swap_vertex(p_idx_1: int, p_idx_2: int) -> void:
+		super(p_idx_1, p_idx_2)
+		self.track_vertex_index_swap(p_idx_1, p_idx_2)
 		
 		
 # Proxies an `ASegment` for added transform features.
@@ -270,203 +285,218 @@ class ATransformableSegment extends ASegment:
 	var offset: Transform3D
 	
 	func _init(
-		untransformed: ASegment,
-		transform := Transform3D(),
-		apply_all_on_init := true,
+		p_untransformed: ASegment,
+		p_transform := Transform3D(),
+		p_apply_all_on_init := true,
 	):
 		super()
-		self.untransformed = untransformed
-		self.transform = transform
+		untransformed = p_untransformed
+		transform = p_transform
 		
-		if apply_all_on_init:
-			self.apply_all()
+		if p_apply_all_on_init:
+			apply_all()
 		
 	func ensure_equal_array_size():
-		self._array_vertex.resize(len(self.untransformed._array_vertex))
-		self._array_normal.resize(len(self.untransformed._array_normal))
-		self._array_tex_uv.resize(len(self.untransformed._array_tex_uv))
+		_array_vertex.resize(len(untransformed._array_vertex))
+		_array_normal.resize(len(untransformed._array_normal))
+		_array_tex_uv.resize(len(untransformed._array_tex_uv))
 		
 	func apply_untransformed() -> void:
 		ensure_equal_array_size()
-		_update_from_ASegment(self.untransformed)
+		_update_from_ASegment(untransformed)
 		
 	# Sets recalculated vertices based on `.untransformed` using `.transform`.
 	# Normals and UVs are simply copied over.
 	func apply_transform() -> void:
 		ensure_equal_array_size()
-		for idx in range(0, len(self.untransformed._array_vertex)):
-			var basis_applied: Vector3 =\
-				self.transform.basis * self.untransformed._array_vertex[idx]
-			self._array_vertex[idx] = self.transform.origin + basis_applied
-			self._array_normal[idx] = self.untransformed._array_normal[idx]
-			self._array_tex_uv[idx] = self.untransformed._array_tex_uv[idx]
+		for idx in range(0, len(untransformed._array_vertex)):
+			var basis_applied: Vector3\
+			= transform.basis * untransformed._array_vertex[idx]
+			_array_vertex[idx] = transform.origin + basis_applied
+			_array_normal[idx] = untransformed._array_normal[idx]
+			_array_tex_uv[idx] = untransformed._array_tex_uv[idx]
 		apply_offset()
 		# TODO: Check if the normals have to be transformed as well.
 		
 	func apply_offset() -> void:
 		ensure_equal_array_size()
-		for idx in range (0, len(self._array_vertex)):
-			var changed_basis: Vector3 = self.offset.basis * self._array_vertex[idx]
-			self._array_vertex[idx] = self.offset.origin + changed_basis
+		for idx in range (0, len(_array_vertex)):
+			var changed_basis: Vector3 = offset.basis * _array_vertex[idx]
+			_array_vertex[idx] = offset.origin + changed_basis
 		
 	func apply_all() -> void:
 		apply_transform()
 			
 			
 class Vertex:
-	var transformed_segment: ATransformableSegment  # TODO: Can't this be `ASegment`?
+	# TODO: Can't this be `ASegment`?
+	var transformed_segment: ATransformableSegment  
 	var untransformed_segment: ASegment
 	var array_vertex_indexes: PackedInt64Array
 	var vertex_array_primary_index: int
 	
 	var transformed: Vector3:
-		set(value):
+		set(p_value):
 			for i in array_vertex_indexes:
-				self.transformed_segment._array_vertex[i] = value
+				transformed_segment._array_vertex[i] = p_value
 		get:
-			return self.transformed_segment._array_vertex[vertex_array_primary_index]
+			return\
+			transformed_segment._array_vertex[vertex_array_primary_index]
 			
 	var untransformed: Vector3:
-		set(value):
+		set(p_value):
 			for i in array_vertex_indexes:
-				self.untransformed_segment._array_vertex[i] = value
+				untransformed_segment._array_vertex[i] = p_value
 		get:
-			return self.untransformed_segment._array_vertex[vertex_array_primary_index]
+			return\
+			untransformed_segment._array_vertex[vertex_array_primary_index]
 			
 	func _init(
-		initial_value: Vector3,
-		transformed: ATransformableSegment,
-		untransformed: ASegment,
-		array_vertex_indexes: PackedInt64Array,
-		normals_by_array_vertex_index: PackedVector3Array,
-		uvs_by_array_vertex_index: PackedVector2Array
+		p_initial_value: Vector3,
+		p_transformed: ATransformableSegment,
+		p_untransformed: ASegment,
+		p_array_vertex_indexes: PackedInt64Array,
+		p_normals_by_array_vertex_index: PackedVector3Array,
+		p_uvs_by_array_vertex_index: PackedVector2Array
 	):
-		assert(len(array_vertex_indexes) > 0,\
-			"The array_vertex_indexes array must contain at least one index.")
+		assert(
+			len(p_array_vertex_indexes) > 0,
+			"The array_vertex_indexes array must contain at least one index."
+		)
 		
-		self.array_vertex_indexes = array_vertex_indexes
+		array_vertex_indexes = p_array_vertex_indexes
 		update_primary_index()
-		self.transformed_segment = transformed
-		self.untransformed_segment = untransformed
+		transformed_segment = p_transformed
+		untransformed_segment = p_untransformed
 		
 		# Make sure the untransformed vertex array is at least as long as
 		# the largest index of our vertex.
 		var highest_index := 0
-		for index in self.array_vertex_indexes:
+		for index in array_vertex_indexes:
 			highest_index = max(index, highest_index)
 			
-		if len(untransformed._array_vertex) <= highest_index:
-			untransformed._array_vertex.resize(highest_index + 1)
-			untransformed._array_normal.resize(highest_index + 1)
-			untransformed._array_tex_uv.resize(highest_index + 1)
+		if len(p_untransformed._array_vertex) <= highest_index:
+			p_untransformed._array_vertex.resize(highest_index + 1)
+			p_untransformed._array_normal.resize(highest_index + 1)
+			p_untransformed._array_tex_uv.resize(highest_index + 1)
 		
 		# Set the vertex positions of all the indexes of this vertex in the
 		# untransformed vertex array.
 		var i_array_vertex_indexes := 0
-		for index in self.array_vertex_indexes:
-			untransformed._array_vertex[index] = initial_value
-			untransformed._array_normal[index] =\
-				normals_by_array_vertex_index[i_array_vertex_indexes]
-			untransformed._array_tex_uv[index] =\
-				uvs_by_array_vertex_index[i_array_vertex_indexes]
-				
+		for index in array_vertex_indexes:
+			p_untransformed._array_vertex[index]\
+			= p_initial_value
+
+			p_untransformed._array_normal[index]\
+			= p_normals_by_array_vertex_index[i_array_vertex_indexes]
+
+			p_untransformed._array_tex_uv[index]\
+			= p_uvs_by_array_vertex_index[i_array_vertex_indexes]
+			
 			i_array_vertex_indexes += 1
 			
 	func update_primary_index() -> void:
-		self.vertex_array_primary_index = array_vertex_indexes[0]
+		vertex_array_primary_index = array_vertex_indexes[0]
 		
-	func change_tracked_array_vertex_index(old_index: int, new_index: int):
-		if old_index not in self.array_vertex_indexes:
+	func change_tracked_array_vertex_index(p_old_index: int, p_new_index: int):
+		if p_old_index not in array_vertex_indexes:
 			push_error(
 				"Attempted changing untracked index: "
-				+ "old_index: %s, new_index: %s." % [old_index, new_index]
+				+ "old_index: %s, new_index: %s." % [p_old_index, p_new_index]
 			)
-		var array_vertex_size = len(self.untransformed_segment.get_array_vertex())
-		if new_index >=  array_vertex_size:
-			push_error("Index specified greater than size of array_vertex. "
-			+ "Index: %s, array_vertex size: %s." % [new_index, array_vertex_size])
+		var array_vertex_size\
+			= len(untransformed_segment.get_array_vertex())
+		if p_new_index >=  array_vertex_size:
+			push_error(
+				"Index specified greater than size of array_vertex. "
+				+ "Index: %s, array_vertex size: " % p_new_index
+				+ "%s." % array_vertex_size
+			)
 			
-		self.array_vertex_indexes[self.array_vertex_indexes.find(old_index)] = new_index
+		array_vertex_indexes[array_vertex_indexes.find(p_old_index)]\
+		= p_new_index
 		
 	func change_tracked_array_vertex_indexes(
-		new_indexes_by_old: PackedInt64Array
+		p_new_indexes_by_old: PackedInt64Array
 	) -> void:
 		# Quite expensive for a sanity check.
 		var greatest_old_index := PackedInt64ArrayFuncs.get_max(
-			self.array_vertex_indexes
+			array_vertex_indexes
 		)
-		for old_index in self.array_vertex_indexes:
-			if len(new_indexes_by_old) <= greatest_old_index:
+		for old_index in array_vertex_indexes:
+			if len(p_new_indexes_by_old) <= greatest_old_index:
 				push_error(
 					"Greatest old index exceeds size of new indexes array. "
-					+ "new indexes array size: %s, " % new_indexes_by_old
+					+ "new indexes array size: %s, " % p_new_indexes_by_old
 					+ "greatest old index: %s." % greatest_old_index
 				)
 				
 			# Using .find every time might be quite expensive. It might be
 			# better to just range-loop through `.array_vertex_indexes` and do
 			# it here.
-			self.change_tracked_array_vertex_index(
+			change_tracked_array_vertex_index(
 				old_index,
-				new_indexes_by_old[old_index]
+				p_new_indexes_by_old[old_index]
 			)
 			update_primary_index()
 			
 	### BEGIN: Normals.
-	func get_transformed_normal(array_vertex_index: int) -> Vector3:
-		assert(array_vertex_index in self.array_vertex_indexes)
-		return self.transformed_segment._array_normal[array_vertex_index]
+	func get_transformed_normal(p_array_vertex_index: int) -> Vector3:
+		assert(p_array_vertex_index in array_vertex_indexes)
+		return transformed_segment._array_normal[p_array_vertex_index]
 		
-	func get_untransformed_normal(array_vertex_index: int) -> Vector3:
-		assert(array_vertex_index in self.array_vertex_indexes)
-		return self.untransformed_segment._array_normal[array_vertex_index]
+	func get_untransformed_normal(p_array_vertex_index: int) -> Vector3:
+		assert(p_array_vertex_index in array_vertex_indexes)
+		return untransformed_segment._array_normal[p_array_vertex_index]
 		
 	func get_untransformed_normals() -> PackedVector3Array:
 		var untransformed_normals := PackedVector3Array()
-		for array_vertex_index in self.array_vertex_indexes:
+		for array_vertex_index in array_vertex_indexes:
 			untransformed_normals.append(
-				self.get_untransformed_normal(array_vertex_index)
+				get_untransformed_normal(array_vertex_index)
 			)
 		return untransformed_normals
 		
-	func set_untransformed_normal(array_vertex_index: int) -> Vertex:
-		assert(array_vertex_index in self.array_vertex_indexes)
-		self.untransformed_segment._array_normal[array_vertex_index]
+	func set_untransformed_normal(p_array_vertex_index: int) -> Vertex:
+		assert(p_array_vertex_index in array_vertex_indexes)
+		untransformed_segment._array_normal[p_array_vertex_index]
 		return self
 	### END: Normals.
 		
 	### BEGIN: UVs.
-	func get_transformed_tex_uv(array_vertex_index: int) -> Vector2:
-		assert(array_vertex_index in self.array_vertex_indexes)
-		return self.transformed_segment._array_tex_uv[array_vertex_index]
+	func get_transformed_tex_uv(p_array_vertex_index: int) -> Vector2:
+		assert(p_array_vertex_index in array_vertex_indexes)
+		return transformed_segment._array_tex_uv[p_array_vertex_index]
 		
-	func get_untransformed_tex_uv(array_vertex_index: int) -> Vector2:
-		assert(array_vertex_index in self.array_vertex_indexes)
-		return self.untransformed_segment._array_tex_uv[array_vertex_index]
+	func get_untransformed_tex_uv(p_array_vertex_index: int) -> Vector2:
+		assert(p_array_vertex_index in array_vertex_indexes)
+		return untransformed_segment._array_tex_uv[p_array_vertex_index]
 		
 	func get_untransformed_tex_uvs() -> PackedVector2Array:
 		var untransformed_tex_uvs := PackedVector2Array()
-		for array_vertex_index in self.array_vertex_indexes:
+		for array_vertex_index in array_vertex_indexes:
 			untransformed_tex_uvs.append(
-				self.get_untransformed_tex_uv(array_vertex_index)
+				get_untransformed_tex_uv(array_vertex_index)
 			)
 		return untransformed_tex_uvs
 		
-	func set_untransformed_tex_uv(array_vertex_index: int) -> Vertex:
-		assert(array_vertex_index in self.array_vertex_indexes)
-		self.untransformed_segment._array_tex_uv[array_vertex_index]
+	func set_untransformed_tex_uv(p_array_vertex_index: int) -> Vertex:
+		assert(p_array_vertex_index in self.array_vertex_indexes)
+		self.untransformed_segment._array_tex_uv[p_array_vertex_index]
 		return self
 	### END: UVs.
 		
-	func get_translation_to_transformed_position(position: Vector3) -> Vector3:
-		return position - transformed
+	func get_translation_to_transformed_position(
+		p_position: Vector3
+	) -> Vector3:
+		return p_position - transformed
 		
-	func translate_to_transformed_position(position: Vector3) -> Vertex:
-		untransformed = get_translation_to_transformed_position(position)
+	func translate_to_transformed_position(p_position: Vector3) -> Vertex:
+		untransformed = get_translation_to_transformed_position(p_position)
 		return self
 		
-	func translate_to_transformed(vertex: Vertex) -> Vertex:
-		translate_to_transformed_position(vertex.transformed)
+	func translate_to_transformed(p_vertex: Vertex) -> Vertex:
+		translate_to_transformed_position(p_vertex.transformed)
 		return self
 		
 		

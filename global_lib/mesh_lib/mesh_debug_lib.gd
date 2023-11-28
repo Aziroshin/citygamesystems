@@ -8,22 +8,22 @@ class ADebugOverlay extends Node3D:
 	var _show_vertices := true
 	var _show_normals := true
 	
-	static func create_single_color_material(color: Color) -> StandardMaterial3D:
+	static func create_single_color_material(p_color: Color) -> StandardMaterial3D:
 		var material := StandardMaterial3D.new()
-		material.albedo_color = color
+		material.albedo_color = p_color
 		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		return material
 	
-	func set_default_font_size(new_default_font_size: int) -> ADebugOverlay:
-		default_font_size = new_default_font_size
+	func set_default_font_size(p_default_font_size: int) -> ADebugOverlay:
+		default_font_size = p_default_font_size
 		return self
 		
-	func show_vertices(flag: bool) -> ADebugOverlay:
-		self._show_vertices = flag
+	func show_vertices(p_flag: bool) -> ADebugOverlay:
+		_show_vertices = p_flag
 		return self
 	
-	func show_normals(flag: bool) -> ADebugOverlay:
-		self._show_normals = flag
+	func show_normals(p_flag: bool) -> ADebugOverlay:
+		_show_normals = p_flag
 		return self
 	
 	func add_label(
@@ -45,8 +45,8 @@ class ADebugOverlay extends Node3D:
 		return self
 		
 	func add_normal_indicator(
-		vert_xyz: Vector3,
-		normal_xyz: Vector3
+		p_vert_xyz: Vector3,
+		p_normal_xyz: Vector3
 	) -> ADebugOverlay:
 		var shaft_color := Color(0.2, 0.2, 1.0)  # Blue
 		var nock_color := Color(1.0, 0.2, 0.2)  # Red
@@ -88,9 +88,9 @@ class ADebugOverlay extends Node3D:
 		tip.translate(Vector3(0.0, superior_length + tip_length / 2.0, 0.0))
 		
 		# Indicator position and normal-aligned rotation.
-		indicator.translate(vert_xyz)
+		indicator.translate(p_vert_xyz)
 		var old_basis := indicator.transform.basis
-		var basis_z := normal_xyz.normalized()
+		var basis_z := p_normal_xyz.normalized()
 		var basis_x := old_basis.z.cross(basis_z).normalized()
 		var basis_y := basis_z.cross(basis_x).normalized()
 		indicator.transform.basis = Basis(
@@ -102,26 +102,26 @@ class ADebugOverlay extends Node3D:
 		add_child(indicator)
 		return self
 		
-	func visualize_arrays(arrays: Array) -> ADebugOverlay:
-		var has_normals := true if arrays[ArrayMesh.ARRAY_NORMAL] else false
+	func visualize_arrays(p_arrays: Array) -> ADebugOverlay:
+		var has_normals := true if p_arrays[ArrayMesh.ARRAY_NORMAL] else false
 		
 		var idx := 0
-		for vert_xyz in arrays[ArrayMesh.ARRAY_VERTEX]:
-			if self._show_vertices:
+		for vert_xyz in p_arrays[ArrayMesh.ARRAY_VERTEX]:
+			if _show_vertices:
 				add_label("%s" % idx, vert_xyz)
 			
-			if self._show_normals and has_normals:
-				var normal_xyz: Vector3 = arrays[ArrayMesh.ARRAY_NORMAL][idx]
+			if _show_normals and has_normals:
+				var normal_xyz: Vector3 = p_arrays[ArrayMesh.ARRAY_NORMAL][idx]
 				add_normal_indicator(vert_xyz, normal_xyz)
 				
 			idx += 1
 		return self
 		
 	func visualize_array_vertex(
-		array_vertex: PackedVector3Array
+		p_array_vertex: PackedVector3Array
 	) -> ADebugOverlay:
 		var surface_arrays := []
 		surface_arrays.resize(ArrayMesh.ARRAY_MAX)
-		surface_arrays[ArrayMesh.ARRAY_VERTEX] = array_vertex
+		surface_arrays[ArrayMesh.ARRAY_VERTEX] = p_array_vertex
 		visualize_arrays(surface_arrays)
 		return self
