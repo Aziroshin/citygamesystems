@@ -5,10 +5,10 @@ var shader: ShaderMaterial = load("res://dev/cavedig/cavedig_material.tres")
 
 
 func set_bone_component_material(
-		component: GeometryInstance3D,
-		material: ShaderMaterial
+		p_component: GeometryInstance3D,
+		p_material: ShaderMaterial
 ) -> void:
-	component.material_override = material.duplicate()
+	p_component.material_override = p_material.duplicate()
 
 func set_bone_component_color(
 		p_component: GeometryInstance3D,
