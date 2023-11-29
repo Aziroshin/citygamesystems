@@ -1024,12 +1024,34 @@ class MYUp extends Modifier:
 			p_mutator.VectorComponentIndex.Z
 		)
 			
-			
+# Flip UVs of a segment of tris.
 class MYFlipUVs extends Modifier:
+	var CLASS_NAME := "MYFlipUVs"
+	
 	func modify(p_mutator: IndexChangeTrackingSegmentMutator) -> void:
+		var face_count: int
+		
 		var array_tex_uv := p_mutator.segment.get_array_tex_uv()
-		var y_flipped_uvs = PackedVector2Array()
-		for i_tri in range(len(array_tex_uv) / 3):
+		var vertex_count := len(array_tex_uv)
+		var incomplete_last_face_vertex_count := vertex_count % 3
+		
+		if not incomplete_last_face_vertex_count == 0:
+			var vertex_count_without_last_face\
+			:= vertex_count - incomplete_last_face_vertex_count
+			
+			face_count = vertex_count_without_last_face / float(3) as int
+			
+			push_error(
+				"Applying the `%s` modifier " % CLASS_NAME
+				+ "on a segment that isn't divisible by 3. "
+				+ "(%s )" % (3 - incomplete_last_face_vertex_count)
+				+  "vertices are missing. "
+				+ "The UVs for the last, incomplete tri won't be flipped."
+			)
+		else:
+			face_count = vertex_count / float(3) as int
+		
+		for i_tri in range(face_count):
 			array_tex_uv[3*i_tri].y = 1.0 - array_tex_uv[3*i_tri].y
 			array_tex_uv[3*i_tri+1].y = 1.0 - array_tex_uv[3*i_tri+1].y
 			array_tex_uv[3*i_tri+2].y = 1.0 - array_tex_uv[3*i_tri+2].y
