@@ -13,6 +13,8 @@ const MTranslateVertices := MeshLib.MTranslateVertices
 
 
 class ATwoSidedRoof extends AMultiSegment:
+	var _debug := false
+	
 	var front: AFoldedPlane
 	var back: AFoldedPlane
 	var outline_ridge_idx: int
@@ -146,7 +148,8 @@ class ATwoSidedRoof extends AMultiSegment:
 		
 		var l_outline_ridge_vertex_difference\
 		:= right_outline_ridge_vertex - left_outline_ridge_vertex
-		print("outline ridge vertex difference: ", l_outline_ridge_vertex_difference)
+		if _debug:
+			print("outline ridge vertex difference: ", l_outline_ridge_vertex_difference)
 		
 		var l_ridge_vertex_count := len(bottom_front_outline.vertices)
 		var l_ridge_change_rate_per_vertice: float = 1.0 / (l_ridge_vertex_count - 1)
@@ -176,15 +179,17 @@ class ATwoSidedRoof extends AMultiSegment:
 					* i_ridge_vertex
 				)
 			)
-			print(l_ridge_vertices)
-		var ridge := ASubdividedLine.new(l_ridge_vertices)
+			if _debug:
+				print(l_ridge_vertices)
+		ridge = ASubdividedLine.new(l_ridge_vertices)
 		
 		# Debug ridge.
-		#var ridge := ASubdividedLine.new(PackedVector3Array([Vector3(0, 0.5, -0.5), Vector3(1, 0.5, -0.5)]))
+		#ridge := ASubdividedLine.new(PackedVector3Array([Vector3(0, 0.5, -0.5), Vector3(1, 0.5, -0.5)]))
 		
 		# TODO: Need an AMultiSegment to produce a folded grid.
 		#  Take `create_roof_side` and make one.
-		print("===== FRONT ===== ")
+		if _debug:
+			print("===== FRONT ===== ")
 		front = AFoldedPlane.new(
 			left_front_outline,
 			right_front_outline,
@@ -239,11 +244,13 @@ class ATwoSidedRoof extends AMultiSegment:
 			"ridge": ridge.get_array_vertex(),
 		}
 		for key in vector_arrays:
-			var vertices: PackedVector3Array = vector_arrays[key]
-			if Vector3(0, 0.5, -0.5) in vertices:
-				print("found in:", key)
+			var _vertices: PackedVector3Array = vector_arrays[key]
+			if Vector3(0, 0.5, -0.5) in _vertices:
+				if _debug:
+					print("found in:", key)
 			else:
-				print("not found in:", key)
+				if _debug:
+					print("not found in:", key)
 		
 	func get_segments() -> Array[AVertexTrackingSegment]:
 		#return [front]
