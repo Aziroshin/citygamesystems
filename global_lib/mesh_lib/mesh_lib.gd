@@ -457,10 +457,10 @@ class Vertex:
 			)
 		return untransformed_normals
 		
-	func set_untransformed_normal(p_array_vertex_index: int) -> Vertex:
-		assert(p_array_vertex_index in array_vertex_indexes)
-		untransformed_segment._array_normal[p_array_vertex_index]
-		return self
+#	func set_untransformed_normal(p_array_vertex_index: int) -> Vertex:
+#		assert(p_array_vertex_index in array_vertex_indexes)
+#		untransformed_segment._array_normal[p_array_vertex_index]
+#		return self
 	### END: Normals.
 		
 	### BEGIN: UVs.
@@ -480,10 +480,10 @@ class Vertex:
 			)
 		return untransformed_tex_uvs
 		
-	func set_untransformed_tex_uv(p_array_vertex_index: int) -> Vertex:
-		assert(p_array_vertex_index in self.array_vertex_indexes)
-		self.untransformed_segment._array_tex_uv[p_array_vertex_index]
-		return self
+#	func set_untransformed_tex_uv(p_array_vertex_index: int) -> Vertex:
+#		assert(p_array_vertex_index in self.array_vertex_indexes)
+#		self.untransformed_segment._array_tex_uv[p_array_vertex_index]
+#		return self
 	### END: UVs.
 		
 	func get_translation_to_transformed_position(
