@@ -12,6 +12,7 @@ signal deactivated()
 @export var map: PlaneMap
 var active: bool
 
+
 func _check_vars_exist(
 	p_err_msgs: PackedStringArray,
 	p_vars: Dictionary
@@ -31,17 +32,27 @@ func _on_ready_sanity_checks(
 	p_err_msgs: PackedStringArray,
 	p_with_asserts := true
 ) -> PackedStringArray:
+	var initial_err_msg_count := len(p_err_msgs)
 	_check_vars_exist(
 		p_err_msgs,
 		{"arbiter": arbiter, "map": map}
 	)
 	
-	if len(p_err_msgs) > 0:
-		assert(
-			!p_with_asserts,
-			"Errors for `%s`: %s." % [get_name(), String(", ").join(p_err_msgs)]
-		)
+	# In anticipation of changes to the map setup and type, let's be sure.
+	if "map" in self:
+		if not map.has_signal("mouse_button"):
+			p_err_msgs.append(
+				"`map` doesn't have a `mouse_button` signal. "
+				+ "Tool activation failed."
+			)
+			
+	var errors_found := len(p_err_msgs) - initial_err_msg_count > 0
+	assert(
+		!(p_with_asserts and errors_found),
+		"Errors for `%s`: %s" % [get_name(), String(", ").join(p_err_msgs)]
+	)
 	return p_err_msgs
+
 
 func _activate() -> void:
 	pass
@@ -55,7 +66,8 @@ func _ready() -> void:
 			"Failed to initialize `%s`. " % get_name()
 			+ "See earlier error(s)."
 		)
-	
+
+
 # Button signals and stuff should hook up to this. Hotkeys would probably
 # have to be captured by some node, which then signals here.
 func _on_activation_requested():
@@ -63,19 +75,22 @@ func _on_activation_requested():
 	request_activation.connect(arbiter._on_request_activation, CONNECT_ONE_SHOT)
 	request_activation.emit(self)
 
+
 func _on_request_granted(p_granted: bool):
 	if p_granted:
 		active = true
 		_activate()
 		activated.connect(arbiter._on_tool_activated, CONNECT_ONE_SHOT)
 		activated.emit()
-		
+
+
 func _on_deactivate():
 	_deactivate()
 	active = false
 	deactivated.connect(arbiter._on_tool_deactivated, CONNECT_ONE_SHOT)
 	deactivated.emit()
-	
+
+
 # Make that conditional based on `active` later (connect/disconnect) signal.
 func _on_map_mouse_button(
 	_p_camera: Camera3D,
