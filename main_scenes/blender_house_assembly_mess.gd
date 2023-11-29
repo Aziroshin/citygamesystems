@@ -28,32 +28,32 @@ func _mess_blender_house() -> Node3D:
 	# understood as defaults (but may coincidentally end up as defaults).
 	var standard_part_length: float = 0.5
 	var standard_part_columns: int = 16
-	var standard_part_rows: int = 16
+	var _standard_part_rows: int = 16
 	
 	# Part metadata assumptions
 	var house_facade_columns: int = 64
 	# Semi-basement lowers it by 8.
-	var house_facade_rows: int = 56
+	var _house_facade_rows: int = 56
 	
 	var house: Node3D = Node3D.new()
 	
 	# Sides.
-	var side_1_control: CityPartLib.BasicBuildingPartControl = CityPartLib.BasicBuildingPartControl.new(RoofDoublePitchedSide.instantiate())
-	var side_2_control: CityPartLib.BasicBuildingPartControl = CityPartLib.BasicBuildingPartControl.new(RoofDoublePitchedSide.instantiate())
-	var side_3_control: CityPartLib.BasicBuildingPartControl = CityPartLib.BasicBuildingPartControl.new(RoofDoublePitchedSide.instantiate())
-	var side_4_control: CityPartLib.BasicBuildingPartControl = CityPartLib.BasicBuildingPartControl.new(RoofDoublePitchedSide.instantiate())
+	var _side_1_control: CityPartLib.BasicBuildingPartControl = CityPartLib.BasicBuildingPartControl.new(RoofDoublePitchedSide.instantiate())
+	var _side_2_control: CityPartLib.BasicBuildingPartControl = CityPartLib.BasicBuildingPartControl.new(RoofDoublePitchedSide.instantiate())
+	var _side_3_control: CityPartLib.BasicBuildingPartControl = CityPartLib.BasicBuildingPartControl.new(RoofDoublePitchedSide.instantiate())
+	var _side_4_control: CityPartLib.BasicBuildingPartControl = CityPartLib.BasicBuildingPartControl.new(RoofDoublePitchedSide.instantiate())
 	
 	# Forked gable wings.
 	var mid_1_control: CityPartLib.BasicBuildingPartControl = CityPartLib.BasicBuildingPartControl.new(RoofDoublePitchedSideForkedGableWing.instantiate())
 	var mid_2_control: CityPartLib.BasicBuildingPartControl = CityPartLib.BasicBuildingPartControl.new(RoofDoublePitchedSideForkedGableWing.instantiate())
-	var mid_3_control: CityPartLib.BasicBuildingPartControl = CityPartLib.BasicBuildingPartControl.new(RoofDoublePitchedSideForkedGableWing.instantiate())
-	var mid_4_control: CityPartLib.BasicBuildingPartControl = CityPartLib.BasicBuildingPartControl.new(RoofDoublePitchedSideForkedGableWing.instantiate())
+	var _mid_3_control: CityPartLib.BasicBuildingPartControl = CityPartLib.BasicBuildingPartControl.new(RoofDoublePitchedSideForkedGableWing.instantiate())
+	var _mid_4_control: CityPartLib.BasicBuildingPartControl = CityPartLib.BasicBuildingPartControl.new(RoofDoublePitchedSideForkedGableWing.instantiate())
 	
 	# Corners.
 	var corner_1_control: CityPartLib.BasicBuildingPartControl = CityPartLib.BasicBuildingPartControl.new(RoofDoublePitchedCorner.instantiate())
 	var corner_2_control: CityPartLib.BasicBuildingPartControl = CityPartLib.BasicBuildingPartControl.new(RoofDoublePitchedCorner.instantiate())
-	var corner_3_control: CityPartLib.BasicBuildingPartControl = CityPartLib.BasicBuildingPartControl.new(RoofDoublePitchedCorner.instantiate())
-	var corner_4_control: CityPartLib.BasicBuildingPartControl = CityPartLib.BasicBuildingPartControl.new(RoofDoublePitchedCorner.instantiate())
+	var _corner_3_control: CityPartLib.BasicBuildingPartControl = CityPartLib.BasicBuildingPartControl.new(RoofDoublePitchedCorner.instantiate())
+	var _corner_4_control: CityPartLib.BasicBuildingPartControl = CityPartLib.BasicBuildingPartControl.new(RoofDoublePitchedCorner.instantiate())
 	
 	# Facades.
 	var facade_1_control: CityPartLib.BasicFacadePartControl = CityPartLib.BasicFacadePartControl.new(Facade.instantiate())

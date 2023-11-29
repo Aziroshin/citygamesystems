@@ -42,7 +42,9 @@ class ATwoSidedRoof extends AMultiSegment:
 		# TODO: Since this currently only respects 2 vertices and no
 		# subdivisions, this is ineffective right now.
 		p_bottom_back_outline := PackedVector3Array(),
+		p_debug := false
 	):
+		_debug = p_debug
 		# Convention: Variables declared in this method are prefixed with `l_`,
 		# for "local".
 		
@@ -196,7 +198,8 @@ class ATwoSidedRoof extends AMultiSegment:
 			bottom_front_outline,
 			ridge
 		)
-		print("===== BACK =====")
+		if _debug:
+			print("===== BACK =====")
 		back = AFoldedPlane.new(
 			# We invert because the line has to `start` at the bottom outline
 			# and `end` at the ridge, but the left and right back outlines do

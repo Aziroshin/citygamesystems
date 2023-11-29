@@ -28,7 +28,7 @@ func _mess(p_show_debug_overlay) -> Array[Node3D]:
 		RawExport4MeshLib.new_STris_from_file(window_path, to_godot_space)
 	var decor_flat_spikes_surface_tris :=\
 		RawExport4MeshLib.new_STris_from_file(decor_flat_spikes_path, to_godot_space)
-	var decor_nothing_surface_tris :=\
+	var _decor_nothing_surface_tris :=\
 		RawExport4MeshLib.new_STris_from_file(decor_nothing_path, to_godot_space)
 	var decor_crown_surface_tris :=\
 		RawExport4MeshLib.new_STris_from_file(decor_crown_path, to_godot_space)
@@ -47,7 +47,7 @@ func _mess(p_show_debug_overlay) -> Array[Node3D]:
 	window_surface_tris.add(decor_crown_surface_tris)
 			
 	var window_array_mesh_node := window_surface_tris.get_mesh_instance_3d()
-	var decor_crown_mesh_node := decor_crown_surface_tris.get_mesh_instance_3d()
+	var _decor_crown_mesh_node := decor_crown_surface_tris.get_mesh_instance_3d()
 	if p_show_debug_overlay:
 		window_array_mesh_node.add_child(
 			ADebugOverlay.new()

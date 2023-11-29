@@ -156,7 +156,7 @@ class SegmentMutator:
 		Z
 	}
 	
-	static func _swap_vector3_components(
+	func _swap_vector3_components(
 		p_array: PackedVector3Array,
 		p_component_idx_a,
 		p_component_idx_b
@@ -589,7 +589,7 @@ class AVertexTrackingSegment extends ATransformableSegment:
 			
 class Modifier:
 	# @virtual
-	func modify(p_mutator: IndexChangeTrackingSegmentMutator) -> void:
+	func modify(_p_mutator: IndexChangeTrackingSegmentMutator) -> void:
 		# Perform your modifications here.
 		pass
 			
@@ -661,17 +661,16 @@ class ALine extends AModifiableSegment:
 	var start: Vertex
 	var end: Vertex
 	
-	static func create_default_normals(
+	func create_default_normals(
 		p_vertices: PackedVector3Array
 	) -> PackedVector3Array:
 		var normals := PackedVector3Array()
-		var last_vertex := p_vertices[len(p_vertices)-1]
 		for idx in len(p_vertices):
 			# Normals pointing up - can be recalculated to roof slope later.
 			normals.append(Vector3(0, 1, 0))
 		return normals
 			
-	static func create_default_uvs(
+	func create_default_uvs(
 		p_vertices: PackedVector3Array
 	) -> PackedVector2Array:
 			var uvs := PackedVector2Array()
@@ -1018,7 +1017,6 @@ class MInvertSurfaceArrays extends Modifier:
 			
 class MYUp extends Modifier:
 	func modify(p_mutator: IndexChangeTrackingSegmentMutator) -> void:
-		var array_vertex := p_mutator.segment.get_array_vertex()
 		p_mutator.swap_vertex_components(
 			p_mutator.VectorComponentIndex.Y,
 			p_mutator.VectorComponentIndex.Z
@@ -1116,7 +1114,7 @@ class LineVertexArrayChecker:
 		"%s and %s need to be of the same size.%s"
 	var error_messages := PackedStringArray()
 	var error_message:
-		set(value):
+		set(_value):
 			# Read-only.
 			push_warning(
 				"Attempt to set read-only value for `error_message` in "
@@ -1128,7 +1126,7 @@ class LineVertexArrayChecker:
 	var extra_verbose := false
 	var arrays_set := false
 	var is_ok: bool:
-		set(value):
+		set(_value):
 			# Read-only.
 			push_warning("Attempt to set read-only value for `has_error` in"
 				+ " `%s` class (or subclass)." % CLASS_NAME) 
@@ -1415,7 +1413,7 @@ class STris extends Surface:
 		for addee_material_index in p_addee.material_indices:
 			material_indices.append(addee_material_index)
 			
-	static func get_inverted_material_indices(
+	func get_inverted_material_indices(
 		p_material_indices: PackedInt64Array
 	):
 		var inverted_material_indices := PackedInt64Array()

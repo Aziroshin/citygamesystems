@@ -8,7 +8,7 @@ class ADebugOverlay extends Node3D:
 	var _show_vertices := true
 	var _show_normals := true
 	
-	static func create_single_color_material(p_color: Color) -> StandardMaterial3D:
+	func create_single_color_material(p_color: Color) -> StandardMaterial3D:
 		var material := StandardMaterial3D.new()
 		material.albedo_color = p_color
 		material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED

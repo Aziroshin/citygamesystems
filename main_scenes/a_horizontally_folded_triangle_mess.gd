@@ -14,7 +14,7 @@ const ADebugOverlay := MeshDebugLib.ADebugOverlay
 @onready var RoofDoublePitchedSide: Resource = load("res://assets/parts/roof_double_pitched_side.gltf")
 @onready var RoofDoublePitchedCorner: Resource = load("res://assets/parts/roof_double_pitched_corner.gltf")
 @onready var RoofDoublePitchedSideForkedGableWing: Resource = load("res://assets/parts/roof_double_pitched_forked_gable_wing.gltf")
-@onready var FacadeB: Resource = load("res://assets/parts/facade_b.gltf")
+@onready var FacadeB: Resource = load("res://assets/parts/facade_d.gltf")
 
 
 func get_kinked_roof_line_arrays() -> Array:

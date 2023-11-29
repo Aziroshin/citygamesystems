@@ -12,7 +12,7 @@ const HouseSideKinds := CityBuilder.HouseSideKinds
 @onready var RoofDoublePitchedSide: Resource = load("res://assets/parts/roof_double_pitched_side.gltf")
 @onready var RoofDoublePitchedCorner: Resource = load("res://assets/parts/roof_double_pitched_corner.gltf")
 @onready var RoofDoublePitchedSideForkedGableWing: Resource = load("res://assets/parts/roof_double_pitched_forked_gable_wing.gltf")
-@onready var FacadeB: Resource = load("res://assets/parts/facade_b.gltf")
+@onready var FacadeB: Resource = load("res://assets/parts/facade_d.gltf")
 
 
 func _mess_simple_house_assembly() -> Node3D:
@@ -20,14 +20,14 @@ func _mess_simple_house_assembly() -> Node3D:
 	# These values might be sourced from somewhere else at some point.
 	# They represent the specification for parts, a standard. They shouldn't be
 	# understood as defaults (but may coincidentally end up as defaults).
-	var standard_part_length: float = 0.5
-	var standard_part_columns: int = 16
-	var standard_part_rows: int = 16
+	var _standard_part_length: float = 0.5
+	var _standard_part_columns: int = 16
+	var _standard_part_rows: int = 16
 	
 	# Part metadata assumptions.
-	var house_facade_columns: int = 64
+	var _house_facade_columns: int = 64
 	# Semi-basement lowers it by 8.
-	var house_facade_rows: int = 56
+	var _house_facade_rows: int = 56
 	###
 	
 	var house: Node3D = Node3D.new()

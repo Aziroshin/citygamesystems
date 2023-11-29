@@ -81,8 +81,8 @@ class HouseSide:
 	
 	func _init(
 		p_points: PackedVector3Array,
-		p_kind: HouseSideKinds,
-		p_exposedness: HouseSideExposedness
+		_p_kind: HouseSideKinds,
+		_p_exposedness: HouseSideExposedness
 	):
 		assert(len(p_points) >= 2)
 	
@@ -97,7 +97,7 @@ class HouseSide:
 class HouseFrame:
 	var sides: Array[HouseSide]
 	
-	func _init(p_sides: Array[HouseSide]):
+	func _init(_p_sides: Array[HouseSide]):
 		pass
 		# Assert/test/push_error whether the set of points from all the
 		# house sides form a loop (good) or not (bad).
@@ -114,7 +114,7 @@ class SimpleRowHouse extends Building:
 	var frame: HouseFrame
 	
 	func _init(
-		p_frame: HouseFrame
+		_p_frame: HouseFrame
 	):
 		pass
 		
