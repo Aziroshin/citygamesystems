@@ -1194,14 +1194,14 @@ class AHorizontallyFoldedTriangle extends AMultiSegment:
 		p_left_side_vertices: PackedVector3Array,
 		p_right_side_vertices: PackedVector3Array
 	):
-#		self._side_arrays_error.error_if_not_same_size(
-#			self.left_side_vertices,
-#			self.right_side_vertices
-#		)
-#		assert(
-#			self._side_arrays_error.is_ok,
-#			self._side_arrays_error.error_message
-#		)
+		_side_arrays_error.error_if_not_same_size(
+			p_left_side_vertices,
+			p_right_side_vertices
+		)
+		assert(
+			_side_arrays_error.is_ok,
+			_side_arrays_error.error_message
+		)
 		left_line = p_left_side_vertices
 		right_line = p_right_side_vertices
 		
