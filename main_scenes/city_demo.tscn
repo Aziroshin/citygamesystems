@@ -56,7 +56,6 @@ map = NodePath("../Map")
 
 [connection signal="button_up" from="VBoxContainer/street_tool_button/TextureButton" to="street_tool" method="_on_activation_requested" flags=3]
 [connection signal="button_up" from="VBoxContainer/arbiter_test_tool_button/TextureButton" to="arbiter_test_tool" method="_on_activation_requested" flags=3]
-[connection signal="mouse_button" from="Map" to="street_tool" method="_on_map_mouse_button"]
 
 [editable path="VBoxContainer/street_tool_button"]
 [editable path="VBoxContainer/arbiter_test_tool_button"]

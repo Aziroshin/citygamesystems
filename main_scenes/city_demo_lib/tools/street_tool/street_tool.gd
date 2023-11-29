@@ -55,10 +55,12 @@ func _on_ready_sanity_checks(
 
 
 func _activate() -> void:
-	pass
+	map.mouse_button.connect(_on_map_mouse_button)
+	
 	
 func _deactivate() -> void:
-	pass
+	map.mouse_button.disconnect(_on_map_mouse_button)
+
 
 func _ready() -> void:
 	if len(_on_ready_sanity_checks(PackedStringArray())) > 0:
