@@ -1,8 +1,14 @@
 extends CityToolLib.StreetTool
 
-signal request_activation(tool: Node)
-signal activated()
-signal deactivated()
+signal request_activation(p_tool: Node)
+
+enum ActivationState {
+	INACTIVE,
+	WAITING_FOR_ACTIVATION,
+	ACTIVE,
+	DEACTIVATING
+}
+
 @export var arbiter: Node
 # That typing is quite opinionated, of course, and is bound to change as things
 # develop. A better approach would be to have a `street_node_agent` Node
@@ -10,7 +16,7 @@ signal deactivated()
 # for prototyping, and for the purposes of the demo, I feel it'd add quite a bit
 # of overhead to development and slow down experimentation.
 @export var map: PlaneMap
-var active: bool
+var activation_state := ActivationState.INACTIVE
 
 
 func _check_vars_exist(
@@ -72,15 +78,30 @@ func _ready() -> void:
 
 # Button signals and stuff should hook up to this. Hotkeys would probably
 # have to be captured by some node, which then signals here.
-func _on_activation_requested():
-	arbiter.request_granted.connect(_on_request_granted, CONNECT_ONE_SHOT)
-	request_activation.connect(arbiter._on_request_activation, CONNECT_ONE_SHOT)
-	request_activation.emit(self)
+func _on_activation_requested(_p_activator_agent: ToolLibToolActivatorAgent):
+	if activation_state == ActivationState.INACTIVE:
+		print("tool: activation requested. ActivationState: %s" % activation_state)
+		arbiter.request_granted.connect(
+			_on_request_granted,
+			CONNECT_ONE_SHOT
+		)
+		request_activation.connect(
+			arbiter._on_request_activation,
+			CONNECT_ONE_SHOT
+		)
+		request_activation.emit(self)
+
+
+func _on_deactivation_requested(_p_activator_agent: ToolLibToolActivatorAgent):
+	if activation_state == ActivationState.ACTIVE:
+		print("tool: deactivation requested. ActivationState: %s" % activation_state)
+		activation_state = ActivationState.DEACTIVATING
+		_on_deactivate()
 
 
 func _on_request_granted(p_granted: bool):
 	if p_granted:
-		active = true
+		activation_state = ActivationState.ACTIVE
 		_activate()
 		activated.connect(arbiter._on_tool_activated, CONNECT_ONE_SHOT)
 		activated.emit()
@@ -88,12 +109,11 @@ func _on_request_granted(p_granted: bool):
 
 func _on_deactivate():
 	_deactivate()
-	active = false
+	activation_state = ActivationState.INACTIVE
 	deactivated.connect(arbiter._on_tool_deactivated, CONNECT_ONE_SHOT)
 	deactivated.emit()
 
 
-# Make that conditional based on `active` later (connect/disconnect) signal.
 func _on_map_mouse_button(
 	_p_camera: Camera3D,
 	_p_event: InputEvent,

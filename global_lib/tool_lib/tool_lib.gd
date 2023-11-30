@@ -6,7 +6,20 @@ class ToolState extends Resource:
 	pass
 
 
-class StatefulTool extends Node:
+class Tool extends Node:
+	signal activated()
+	signal deactivated()
+	
+	# @virtual
+	func _on_activation_requested(_p_activator_agent: ToolLibToolActivatorAgent):
+		pass
+	
+	# @virtual
+	func _on_deactivation_requested(_p_activator_agent: ToolLibToolActivatorAgent):
+		pass
+
+
+class StatefulTool extends Tool:
 	#func get_class() -> String: return "StatefulTool"
 	signal state_updated()
 	

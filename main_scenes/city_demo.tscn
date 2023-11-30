@@ -1,11 +1,14 @@
-[gd_scene load_steps=7 format=3 uid="uid://e1d4uxeyog88"]
+[gd_scene load_steps=10 format=3 uid="uid://e1d4uxeyog88"]
 
 [ext_resource type="Script" path="res://main_scenes/city_demo.gd" id="1_elgex"]
 [ext_resource type="PackedScene" uid="uid://t6fjyxuaed8g" path="res://world_objects/player_world_interface/player_world_interface.tscn" id="2_16h52"]
 [ext_resource type="PackedScene" uid="uid://1t8u33ggj154" path="res://dev/PlaneMap/PlaneMap.tscn" id="3_44lli"]
+[ext_resource type="PackedScene" uid="uid://cxb3ks7y2k7yb" path="res://global_lib/tool_lib/tool_activator_agents/texture_button_tool_activator_agent.tscn" id="3_dh8bn"]
+[ext_resource type="Texture2D" uid="uid://crukgj4jxx0nk" path="res://icons/street_tool_hover.png" id="4_id00m"]
 [ext_resource type="PackedScene" uid="uid://ijj05fug1chm" path="res://main_scenes/city_demo_lib/ui/hud/street_tool_button.tscn" id="4_jdok4"]
 [ext_resource type="Script" path="res://main_scenes/city_demo_lib/tools/street_tool/tool_arbiter.gd" id="5_ar3lr"]
 [ext_resource type="Script" path="res://main_scenes/city_demo_lib/tools/street_tool/street_tool.gd" id="5_knyav"]
+[ext_resource type="Texture2D" uid="uid://6u6g82nd47ja" path="res://icons/street_tool.png" id="5_mjr6o"]
 
 [node name="raw_export_cube_assembly_mess" type="Node3D"]
 script = ExtResource("1_elgex")
@@ -22,6 +25,15 @@ size_flags_vertical = 3
 
 [node name="street_tool_button" parent="VBoxContainer" instance=ExtResource("4_jdok4")]
 layout_mode = 2
+
+[node name="TextureButton" parent="VBoxContainer/street_tool_button" index="0"]
+texture_hover = null
+
+[node name="texture_button_tool_activator_agent" parent="VBoxContainer/street_tool_button/TextureButton" index="0" node_paths=PackedStringArray("texture_button", "_tool") instance=ExtResource("3_dh8bn")]
+texture_button = NodePath("..")
+active_texture = ExtResource("4_id00m")
+inactive_texture = ExtResource("5_mjr6o")
+_tool = NodePath("../../../../street_tool")
 
 [node name="arbiter_test_tool_button" parent="VBoxContainer" instance=ExtResource("4_jdok4")]
 layout_mode = 2
@@ -54,7 +66,7 @@ script = ExtResource("5_knyav")
 arbiter = NodePath("../tool_arbiter")
 map = NodePath("../Map")
 
-[connection signal="button_up" from="VBoxContainer/street_tool_button/TextureButton" to="street_tool" method="_on_activation_requested" flags=3]
+[connection signal="button_up" from="VBoxContainer/street_tool_button/TextureButton" to="VBoxContainer/street_tool_button/TextureButton/texture_button_tool_activator_agent" method="_on_activator_toggling" flags=3]
 [connection signal="button_up" from="VBoxContainer/arbiter_test_tool_button/TextureButton" to="arbiter_test_tool" method="_on_activation_requested" flags=3]
 
 [editable path="VBoxContainer/street_tool_button"]
