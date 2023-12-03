@@ -11,6 +11,8 @@ class StreetToolState extends ToolState:
 
 
 class StreetTool extends StateDuplicatingUndoableTool:
+	signal curve_changed(p_curve_copy: Curve3D)
+	
 	func _init():
 		_state = StreetToolState.new()
 	
@@ -21,10 +23,6 @@ class StreetTool extends StateDuplicatingUndoableTool:
 		set_base_type_state(p_state)
 		
 	func get_node_count() -> int:
-		# The baked points don't correspond to control nodes in the sense
-		# that we'd want them for streets, so that doesn't work.
-		# What we'd need here is a way to get the points as we've added them.
-		# We might have to make something like a "CurveControl3D".
 		return get_state().curve.point_count
 		
 	func get_last_node_idx() -> int:
@@ -32,5 +30,6 @@ class StreetTool extends StateDuplicatingUndoableTool:
 		
 	func add_node(p_position: Vector3) -> int:
 		get_state().curve.add_point(p_position)
+		curve_changed.emit(get_state().curve.duplicate(true))
 		copy_state_to_undo()
 		return get_last_node_idx()
