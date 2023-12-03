@@ -68,6 +68,7 @@ var action_default_keys := {
 ### Config file anatomy.
 const CONFIG_VALUE_NAME_TRANSFORM := "transform"
 const CONFIG_VALUE_NAME_MOTION_MODE := "motion_mode"
+const CONFIG_VALUE_NAME_CAMERA_TRANSFORM := "camera_transform"
 ###########################################################################
 
 
@@ -208,6 +209,25 @@ func save_transform() -> bool:
 	)
 	
 	
+func save_camera_transform() -> bool:
+	return save_config_value(
+		config_section,
+		CONFIG_VALUE_NAME_CAMERA_TRANSFORM,
+		camera.transform
+	)
+	
+	
+func load_camera_transform() -> NilableTransform3D:
+	var value = load_config_value(
+		config_section,
+		CONFIG_VALUE_NAME_CAMERA_TRANSFORM
+	)
+	if value is Transform3D:
+		return NilableTransform3D.new().set_value(value)
+	else:
+		return NilableTransform3D.new()
+	
+	
 func load_transform() -> NilableTransform3D:
 	var value = load_config_value(
 		config_section,
@@ -257,6 +277,11 @@ func _ready():
 	else:
 		motion_mode = initial_motion_mode
 	
+	# Load camera transform
+	var camera_transform_data_from_config := load_camera_transform()
+	if not camera_transform_data_from_config.is_nil:
+		camera.transform = camera_transform_data_from_config.value
+	
 	ensure_actions_configured(override_existing_actions)
 	
 	
@@ -270,6 +295,7 @@ func _physics_process(p_delta: float) -> void:
 		if OS.has_feature("editor"):
 			save_transform()
 			save_motion_mode()
+			save_camera_transform()
 			if not Engine.is_editor_hint():
 				get_tree().quit()
 	if Input.is_action_pressed(MOVE_LEFT_ACTION):
