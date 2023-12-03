@@ -10,6 +10,9 @@
 [ext_resource type="Script" path="res://main_scenes/city_demo_lib/tools/street_tool/street_tool.gd" id="5_knyav"]
 [ext_resource type="Texture2D" uid="uid://6u6g82nd47ja" path="res://icons/street_tool.png" id="5_mjr6o"]
 [ext_resource type="Texture2D" uid="uid://6u6g82nd47ja" path="res://icons/street_tool.png" id="5_mjr6o"]
+[ext_resource type="PackedScene" uid="uid://dvj7tkpwy5s6u" path="res://dev/curve_debug_visualizer/curve3d_debug_visualizer.tscn" id="8_55k1a"]
+
+[sub_resource type="Curve3D" id="Curve3D_4r2ki"]
 
 [node name="raw_export_cube_assembly_mess" type="Node3D"]
 script = ExtResource("1_elgex")
@@ -54,6 +57,10 @@ resolution = 4
 size = Vector2(256, 256)
 subdivision = Vector2(128, 128)
 
+[node name="debug_visualizer_for_street_tool" parent="Map" instance=ExtResource("8_55k1a")]
+initial_curve = SubResource("Curve3D_4r2ki")
+get_curve_by_signal = true
+
 [node name="tool_arbiter" type="Node" parent="."]
 script = ExtResource("5_ar3lr")
 
@@ -69,6 +76,7 @@ map = NodePath("../Map")
 
 [connection signal="button_up" from="VBoxContainer/street_tool_button/TextureButton" to="VBoxContainer/street_tool_button/TextureButton/texture_button_tool_activator_agent" method="_on_activator_toggling" flags=3]
 [connection signal="button_up" from="VBoxContainer/arbiter_test_tool_button/TextureButton" to="arbiter_test_tool" method="_on_activation_requested" flags=3]
+[connection signal="curve_changed" from="street_tool" to="Map/debug_visualizer_for_street_tool" method="_on_curve_changed" flags=3]
 
 [editable path="VBoxContainer/street_tool_button"]
 [editable path="VBoxContainer/arbiter_test_tool_button"]
