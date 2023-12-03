@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://dvj7tkpwy5s6u"]
+
+[ext_resource type="Script" path="res://dev/curve_debug_visualizer/curve3d_debug_visualizer.gd" id="1_00drd"]
+
+[sub_resource type="Curve3D" id="Curve3D_fx2ba"]
+
+[node name="curve3d_debug_visualizer" type="Node3D"]
+script = ExtResource("1_00drd")
+initial_curve = SubResource("Curve3D_fx2ba")
