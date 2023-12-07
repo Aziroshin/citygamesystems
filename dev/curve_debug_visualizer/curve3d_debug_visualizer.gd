@@ -32,6 +32,10 @@ func _ready() -> void:
 	profile_mesh.path_interval = 0.1
 	_config_profile_mesh(profile_mesh)
 	
+	# TODO [cavedev]: Trying out `ArrayMesh` based curve rendering.
+	var array_mesh_curve := Curve3DMesh.new()
+	add_child(array_mesh_curve)
+	
 
 func _process(_p_delta: float) -> void:
 	if curve_changed:
