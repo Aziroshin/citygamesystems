@@ -12,6 +12,11 @@
 [ext_resource type="PackedScene" uid="uid://dvj7tkpwy5s6u" path="res://dev/curve_debug_visualizer/curve3d_debug_visualizer.tscn" id="8_55k1a"]
 
 [sub_resource type="Curve3D" id="Curve3D_4r2ki"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.01, 0.5, 0.5, 0, 0, 0, 0, 0, 0, 2.6, 2.3, 2, 0, 0, 0, 0, 0, 0, 1.9, 3.7, 3, 0, 0, 0, 0, 0, 0, 3.5, 4.6, 2.2, 0, 0, 0, 0, 0, 0, 1.2, 4.6, 2.2),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0)
+}
+point_count = 6
 
 [node name="raw_export_cube_assembly_mess" type="Node3D"]
 script = ExtResource("1_elgex")

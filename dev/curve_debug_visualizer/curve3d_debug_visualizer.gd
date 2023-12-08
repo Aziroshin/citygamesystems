@@ -23,8 +23,16 @@ func _config_profile_mesh(mesh: CSGPolygon3D):
 
 func _ready() -> void:
 	path.curve = initial_curve
-	add_child(path)
+	path.curve.add_point(Vector3(0.0, 0.0, 0.0))
+	path.curve.add_point(Vector3(0.01, 0.5, 0.5))
+	path.curve.add_point(Vector3(2.6, 2.3, 2.0))
+	path.curve.add_point(Vector3(1.9, 3.7, 3.0))
+	path.curve.add_point(Vector3(3.5, 4.6, 2.2))
+	path.curve.add_point(Vector3(1.2, 4.6, 2.2))
+	
+	#add_child(path)
 	add_child(profile_mesh)
+	
 	profile_mesh.mode = profile_mesh.MODE_PATH
 	profile_mesh.path_node = profile_mesh.get_path_to(path)
 	profile_mesh.path_continuous_u = false
@@ -34,7 +42,15 @@ func _ready() -> void:
 	
 	# TODO [cavedev]: Trying out `ArrayMesh` based curve rendering.
 	var array_mesh_curve := Curve3DMesh.new()
+	# Some pseudo values to see something for now.
+	array_mesh_curve.curve.add_point(Vector3(0.0, 0.0, 0.0))
+	array_mesh_curve.curve.add_point(Vector3(0.01, 0.5, 0.5))
+	array_mesh_curve.curve.add_point(Vector3(2.6, 2.3, 2.0))
+	array_mesh_curve.curve.add_point(Vector3(1.9, 3.7, 3.0))
+	array_mesh_curve.curve.add_point(Vector3(3.5, 4.6, 2.2))
+	array_mesh_curve.curve.add_point(Vector3(1.2, 4.6, 2.2))
 	add_child(array_mesh_curve)
+	print(array_mesh_curve.curve.point_count)
 	
 
 func _process(_p_delta: float) -> void:
