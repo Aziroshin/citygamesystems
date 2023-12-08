@@ -3,6 +3,8 @@ class_name Curve3DMesh
 
 @export var profile3d := PackedVector3Array()
 @export var cap2d := PackedVector2Array()
+# The polygon which will be extruded along the curve. If left empty,
+# it will default to a quad with a side length of 0.1.
 @export var profile2d := PackedVector2Array():
 	set(p_new_profile2d):
 		profile2d = p_new_profile2d
@@ -24,8 +26,8 @@ func get_point_transform(point_idx: int) -> Transform3D:
 			curve.get_point_position(point_idx)
 		)
 	)
-	
-	
+
+
 func get_baked_point_transform(
 	idx: int,
 ) -> Transform3D:
@@ -58,7 +60,7 @@ func get_in_place_transformed(
 	p_vertices: PackedVector3Array,
 	p_transform: Transform3D
 ) -> PackedVector3Array:
-	for i_vertex in range(0, len(p_vertices)):
+	for i_vertex in len(p_vertices):
 		p_vertices[i_vertex]\
 		= p_transform.basis * p_vertices[i_vertex] + p_transform.origin
 		
@@ -95,7 +97,7 @@ func extrude_loop_to_loop(
 	var loop_vertex_count := len(p_from)
 	var vertices := PackedVector3Array([])
 	
-	for i_vertex in range(0, loop_vertex_count):
+	for i_vertex in loop_vertex_count:
 		if i_vertex == loop_vertex_count - 1:
 			i_next_vertex = 0
 		else:
@@ -115,21 +117,10 @@ func extrude_loop_to_loop(
 func update(p_curve: Curve3D) -> void:
 	var point_loops: Array[PackedVector3Array] = []
 	var vertices := PackedVector3Array()
-	
 	var baked_points := p_curve.get_baked_points()
-	# For debug:
-	#var baked_points := PackedVector3Array([
-		#Vector3(0.0, 0.0, 0.0),
-		#Vector3(30.0, 30.0, 30.0),
-	#])
 	
 	# Initialize `point_loops` with loops transformed along the curve.
 	for i_baked in len(baked_points):
-		# var point_transform := Transform3D(transform)
-		#var point_transform := Transform3D(
-			#Basis(),
-			#baked_points[i_baked]
-		#)
 		var point_transform := get_baked_point_transform(i_baked)
 		var current_loop := PackedVector3Array()
 		
@@ -138,23 +129,8 @@ func update(p_curve: Curve3D) -> void:
 			:= point_transform.basis * vertex + point_transform.origin
 			
 			current_loop.append(transformed_vertex)
-			# Debug: Blueish: Point
-			#Cavedig.needle(self, point_transform, Vector3(0.1, 0.1, 1.0), 0.01, 0.0015)
 			
 		point_loops.append(current_loop)
-		
-		# Debug: Reddish: Curve
-		#Cavedig.needle(self, point_transform, Vector3(1.0, 0.1, 0.1), 0.006, 0.002)
-	
-	# Debug: Reddish-long: Base points in curve.
-	for i_point in curve.point_count:
-		Cavedig.needle(
-			self,
-			Transform3D(Basis(), curve.get_point_position(i_point)),
-			Vector3(1.0, 0.1, 0.1),
-			1.6,
-			 0.004
-		)
 	
 	# Make first cap.
 	vertices += get_in_place_transformed(
@@ -162,76 +138,29 @@ func update(p_curve: Curve3D) -> void:
 		get_baked_point_transform(0)
 	)
 	
-	# We're not doing this for the last loop, as this is expecting a "next"
+	# We're skipping the the last loop, as this is expecting a "next"
 	# loop in order to work - the last loop will already have been integrated
-	# by the run pertaining to its previous loop, to which it will have served
-	# as that "next" loop.
-	for i_loop in range(0, len(point_loops) - 1):
+	# by the iteration pertaining to its previous loop.
+	for i_loop in len(point_loops) - 1:
 		vertices\
 		= vertices\
 		+ extrude_loop_to_loop(point_loops[i_loop], point_loops[i_loop+1])
-		
-		#var loop := point_loops[i_loop]
-		## Not doing it for the last point. Same concept as for the loops.
-		#for i_point in range(0, len(loop) - 1):
-			## Tri 1
-			#vertices.append(point_loops[i_loop][i_point])
-			#vertices.append(point_loops[i_loop+1][i_point])
-			#vertices.append(point_loops[i_loop][i_point+1])
-			## Tri 2
-			#vertices.append(point_loops[i_loop][i_point+1])
-			#vertices.append(point_loops[i_loop+1][i_point])
-			#vertices.append(point_loops[i_loop+1][i_point+1])
-			#i_point += 1
-		#i_loop += 1
 	
 	# Make second cap:
 	vertices += get_in_place_transformed(
 		get_cap3d(false),
 		get_baked_point_transform(len(baked_points)-1)
 	)
-		
-	# Debug: Greenish: Final vertices
-	var i_debug := 0
-	for vertex in vertices:
-		if i_debug == 0:
-			Cavedig.needle(self,Transform3D(Basis(), vertex),Vector3(0.0, 1.0, 0.0), 0.13, 0.0012)
-		elif i_debug == 1:
-			Cavedig.needle(self,Transform3D(Basis(), vertex),Vector3(0.4, 0.6, 0.0), 0.16, 0.0010)
-		elif i_debug == 2:
-			Cavedig.needle(self,Transform3D(Basis(), vertex),Vector3(0.0, 0.2, 0.8), 0.19, 0.0008)
-		elif i_debug == 3:
-			Cavedig.needle(self,Transform3D(Basis(), vertex),Vector3(0.8, 0.2, 0.4), 0.22, 0.0006)
-			
-		if i_debug == 3:
-			i_debug = 0
-		else:
-			i_debug += 1
-	#var debug_overlay := MeshDebugLib.ADebugOverlay.new()
-	#debug_overlay.visualize_array_vertex(vertices)
-	#for vertex in vertices:
-		#print(vertex)
-	#add_child(debug_overlay)
+	
 	add_child(get_mesh_instance3d_from_vertices(vertices))
-	#add_child(_static_cube_extrusion_experiment())
+
 
 func _ready() -> void:
-	
-	profile2d = PackedVector2Array([
-		Vector2(0.0, 0.0),
-		Vector2(0.0, 0.2),
-		Vector2(0.2, 0.2),
-		Vector2(0.2, 0.0)
-	])
-	
-	var point_idx := 2
-	print(
-		"Point: idx: %s (coords: %s), transform: %s"\
-		% [
-			point_idx,
-			curve.get_point_position(point_idx),
-			curve.sample_baked_with_rotation(curve.get_closest_offset(curve.get_point_position(point_idx)), false, true)
-		]
-	)
-	
+	if len(profile2d) == 0:
+		profile2d = PackedVector2Array([
+			Vector2(0.0, 0.0),
+			Vector2(0.0, 0.1),
+			Vector2(0., 0.1),
+			Vector2(0.1, 0.0)
+		])
 	update(curve)
