@@ -1,4 +1,4 @@
-extends Node3D
+extends MeshInstance3D
 class_name Curve3DMesh
 
 @export var profile3d := PackedVector3Array()
@@ -67,11 +67,10 @@ func get_in_place_transformed(
 	return p_vertices
 
 
-func get_mesh_instance3d_from_vertices(
+func _update_from_vertices(
 	p_vertices: PackedVector3Array
-) -> MeshInstance3D:
+) -> void:
 	var array_mesh: ArrayMesh = ArrayMesh.new()
-	var mesh_instance: MeshInstance3D = MeshInstance3D.new()
 	var surface_arrays := []
 	surface_arrays.resize(ArrayMesh.ARRAY_MAX)
 	surface_arrays[ArrayMesh.ARRAY_VERTEX] = p_vertices
@@ -80,11 +79,8 @@ func get_mesh_instance3d_from_vertices(
 		Mesh.PRIMITIVE_TRIANGLES,
 		surface_arrays
 	)
-	mesh_instance.mesh = array_mesh
-	mesh_instance.material_override\
-	= load("res://dev/cavedig/cavedig_material.tres")
-	
-	return mesh_instance
+	mesh = array_mesh
+	material_override = load("res://dev/cavedig/cavedig_material.tres")
 
 
 func extrude_loop_to_loop(
@@ -115,9 +111,13 @@ func extrude_loop_to_loop(
 
 
 func update(p_curve: Curve3D) -> void:
+	curve = p_curve
+	if curve.get_baked_length() < 2:
+		return
+	
 	var point_loops: Array[PackedVector3Array] = []
 	var vertices := PackedVector3Array()
-	var baked_points := p_curve.get_baked_points()
+	var baked_points := curve.get_baked_points()
 	
 	# Initialize `point_loops` with loops transformed along the curve.
 	for i_baked in len(baked_points):
@@ -152,7 +152,7 @@ func update(p_curve: Curve3D) -> void:
 		get_baked_point_transform(len(baked_points)-1)
 	)
 	
-	add_child(get_mesh_instance3d_from_vertices(vertices))
+	_update_from_vertices(vertices)
 
 
 func _ready() -> void:
