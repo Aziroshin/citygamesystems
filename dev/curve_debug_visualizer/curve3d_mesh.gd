@@ -22,8 +22,10 @@ class_name Curve3DMesh
 
 # Returns the closest offset to `point_idx` or `0.0` if the offset is `NaN`.
 # If the offset is `NaN`, it will also push an error.
-func get_closest_offset_on_curve_or_zero(point_idx: int) -> float:
-	var offset := curve.get_closest_offset(curve.get_point_position(point_idx))
+func get_closest_offset_on_curve_or_zero(
+	point_position: Vector3
+) -> float:
+	var offset := curve.get_closest_offset(point_position)
 	
 	if is_nan(offset):
 		if curve.point_count >= 2:
@@ -45,13 +47,13 @@ func get_closest_offset_on_curve_or_zero(point_idx: int) -> float:
 
 func get_point_transform(idx: int) -> Transform3D:
 	return curve.sample_baked_with_rotation(
-		get_closest_offset_on_curve_or_zero(idx)
+		get_closest_offset_on_curve_or_zero(curve.get_point_position(idx))
 	)
 
 
 func get_baked_point_transform(idx: int) -> Transform3D:
 	return curve.sample_baked_with_rotation(
-		get_closest_offset_on_curve_or_zero(idx)
+		get_closest_offset_on_curve_or_zero(curve.get_baked_points()[idx])
 	)
 
 
