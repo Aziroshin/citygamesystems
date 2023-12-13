@@ -8,7 +8,6 @@ enum ActivationState {
 	ACTIVE,
 	DEACTIVATING
 }
-
 @export var arbiter: Node
 # That typing is quite opinionated, of course, and is bound to change as things
 # develop. A better approach would be to have a `street_node_agent` Node
@@ -29,7 +28,8 @@ func _check_vars_exist(
 			p_err_msgs.append(err_msg)
 			push_error(err_msg)
 	return p_err_msgs
-	
+
+
 func _on_ready_sanity_checks(
 	# Not having a default forces the site of call to specify an array, making
 	# things more explicit and making it less likely that, by forgetting to
@@ -49,7 +49,7 @@ func _on_ready_sanity_checks(
 		if not map.has_signal("mouse_button"):
 			p_err_msgs.append(
 				"`map` doesn't have a `mouse_button` signal. "
-				+ "Tool activation failed."
+				+ "`%s` won't work." % get_name()
 			)
 			
 	var errors_found := len(p_err_msgs) - initial_err_msg_count > 0
@@ -62,8 +62,8 @@ func _on_ready_sanity_checks(
 
 func _activate() -> void:
 	map.mouse_button.connect(_on_map_mouse_button)
-	
-	
+
+
 func _deactivate() -> void:
 	map.mouse_button.disconnect(_on_map_mouse_button)
 
@@ -127,4 +127,3 @@ func _on_map_mouse_button(
 			map,
 			Transform3D(Basis(), get_state().curve.get_point_position(idx))
 		)
-	
