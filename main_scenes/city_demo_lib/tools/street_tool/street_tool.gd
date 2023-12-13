@@ -116,14 +116,15 @@ func _on_deactivate():
 
 func _on_map_mouse_button(
 	_p_camera: Camera3D,
-	_p_event: InputEvent,
+	p_event: InputEventMouseButton,
 	p_mouse_position: Vector3,
 	_p_normal: Vector3,
 	_p_shape: int
 ) -> void:
-	var idx := add_node(p_mouse_position)
-	Cavedig.needle(
-		map,
-		Transform3D(Basis(), get_state().curve.get_point_position(idx))
-	)
+	if p_event.pressed:
+		var idx := add_node(p_mouse_position)
+		Cavedig.needle(
+			map,
+			Transform3D(Basis(), get_state().curve.get_point_position(idx))
+		)
 	
