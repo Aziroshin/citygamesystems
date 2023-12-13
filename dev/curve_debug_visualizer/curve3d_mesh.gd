@@ -129,7 +129,7 @@ func extrude_loop_to_loop(
 
 func update(p_curve: Curve3D) -> void:
 	curve = p_curve
-	if curve.get_baked_length() < 2:
+	if curve.point_count < 2:
 		return
 	
 	var point_loops: Array[PackedVector3Array] = []
