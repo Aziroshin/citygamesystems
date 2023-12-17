@@ -1,9 +1,13 @@
-[gd_scene load_steps=3 format=3 uid="uid://dvj7tkpwy5s6u"]
+[gd_scene load_steps=4 format=3 uid="uid://dvj7tkpwy5s6u"]
 
 [ext_resource type="Script" path="res://dev/curve_debug_visualizer/curve3d_debug_visualizer.gd" id="1_00drd"]
 
 [sub_resource type="Curve3D" id="Curve3D_4r485"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2cxkf"]
+
 [node name="curve3d_debug_visualizer" type="Node3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 15, 0)
 script = ExtResource("1_00drd")
 curve = SubResource("Curve3D_4r485")
+tangent_material = SubResource("StandardMaterial3D_2cxkf")

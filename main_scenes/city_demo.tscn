@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://e1d4uxeyog88"]
+[gd_scene load_steps=13 format=3 uid="uid://e1d4uxeyog88"]
 
 [ext_resource type="Script" path="res://main_scenes/city_demo.gd" id="1_elgex"]
 [ext_resource type="PackedScene" uid="uid://t6fjyxuaed8g" path="res://world_objects/player_world_interface/player_world_interface.tscn" id="2_16h52"]
@@ -12,6 +12,10 @@
 [ext_resource type="PackedScene" uid="uid://dvj7tkpwy5s6u" path="res://dev/curve_debug_visualizer/curve3d_debug_visualizer.tscn" id="8_55k1a"]
 
 [sub_resource type="Curve3D" id="Curve3D_ogyrv"]
+
+[sub_resource type="Material" id="Material_x1w2e"]
+resource_local_to_scene = false
+resource_name = ""
 
 [node name="raw_export_cube_assembly_mess" type="Node3D"]
 script = ExtResource("1_elgex")
@@ -57,7 +61,9 @@ size = Vector2(256, 256)
 subdivision = Vector2(128, 128)
 
 [node name="debug_visualizer_for_street_tool" parent="Map" instance=ExtResource("8_55k1a")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 curve = SubResource("Curve3D_ogyrv")
+curve_material = SubResource("Material_x1w2e")
 get_curve_by_signal = true
 
 [node name="tool_arbiter" type="Node" parent="."]

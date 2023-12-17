@@ -23,7 +23,7 @@ class_name Curve3DDebugMesh
 		for idx in Geometry2D.triangulate_polygon(p_new_profile2d):
 			cap2d_ro.append(p_new_profile2d[idx])
 # Material for the curve mesh.
-@export var material := Material
+@export var material := Material.new()
 # Curve to use for the mesh.
 # NOTE: This curve will be overwritten by the curve passed to `.update`, so,
 # depending on what you do, setting the curve here might not do anything.
@@ -54,21 +54,11 @@ func get_cap3d(p_inverted: bool) -> PackedVector3Array:
 func _update_from_vertices(
 	p_vertices: PackedVector3Array
 ) -> void:
-	var array_mesh: ArrayMesh = ArrayMesh.new()
-	var surface_arrays := []
-	surface_arrays.resize(ArrayMesh.ARRAY_MAX)
-	surface_arrays[ArrayMesh.ARRAY_VERTEX] = p_vertices
-	
-	array_mesh.add_surface_from_arrays(
-		Mesh.PRIMITIVE_TRIANGLES,
-		surface_arrays
-	)
-	mesh = array_mesh
-	material_override = load("res://dev/cavedig/cavedig_material.tres")
+	mesh = Curve3DDebugFuncs.create_array_mesh(p_vertices)
+	mesh.surface_set_material(0, material)
 
 
-func update(p_curve: Curve3D) -> void:
-	curve = p_curve
+func update() -> void:
 	if curve.point_count < 2:
 		return
 	
@@ -88,7 +78,7 @@ func update(p_curve: Curve3D) -> void:
 		point_loops.append(current_loop)
 	
 	# Make first cap.
-	vertices += Curve3DDebugFuncs.get_in_place_transformed(
+	vertices += Curve3DDebugFuncs.to_transformed(
 		get_cap3d(true),
 		Curve3DDebugFuncs.get_baked_point_transform(curve, 0)
 	)
@@ -97,18 +87,28 @@ func update(p_curve: Curve3D) -> void:
 	# loop in order to work - the last loop will already have been integrated
 	# by the iteration pertaining to its previous loop.
 	for i_loop in len(point_loops) - 1:
-		vertices = vertices + Curve3DDebugFuncs.extrude_loop_to_loop(
+		vertices = vertices + Curve3DDebugFuncs.get_loop_to_loop_extruded(
 			point_loops[i_loop],
 			point_loops[i_loop+1]
 		)
 	
 	# Make second cap:
-	vertices += Curve3DDebugFuncs.get_in_place_transformed(
+	vertices += Curve3DDebugFuncs.to_transformed(
 		get_cap3d(false),
 		Curve3DDebugFuncs.get_baked_point_transform(curve, len(baked_points)-1)
 	)
+	#Curve3DDebugFuncs.translate(vertices, transform.origin)
+	#Curve3DDebugFuncs.localize_to_node(vertices, self)
+	
+	#for i_vertex in len(vertices):
+		#vertices[i_vertex] = vertices[i_vertex] - global_transform.origin
 	
 	_update_from_vertices(vertices)
+
+
+func update_from_curve(p_curve: Curve3D) -> void:
+	curve = p_curve
+	update()
 
 
 func _ready() -> void:
@@ -119,4 +119,4 @@ func _ready() -> void:
 			Vector2(0., 0.1),
 			Vector2(0.1, 0.0)
 		])
-	update(curve)
+	update()
