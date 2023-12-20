@@ -13,7 +13,7 @@ config_version=5
 config/name="citygamesystems"
 run/main_scene="res://main_scenes/root.tscn"
 config/features=PackedStringArray("4.2")
-config/icon="res://icon.png"
+config/icon="res://icon.svg"
 
 [input]
 
