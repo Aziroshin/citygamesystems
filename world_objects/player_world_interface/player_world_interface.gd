@@ -325,13 +325,13 @@ func _physics_process(p_delta: float) -> void:
 		forces.append(-transform.basis.y)
 		
 	if Input.is_action_pressed(ROTATE_LEFT_ACTION):
-		transform = transform.rotated(
+		transform = transform.rotated_local(
 			Vector3(0, 1, 0),
 			default_rotation_speed * p_delta
 		)
 		
 	if Input.is_action_pressed(ROTATE_RIGHT_ACTION):
-		transform = transform.rotated(
+		transform = transform.rotated_local(
 			Vector3(0, 1, 0),
 			default_rotation_speed * p_delta * -1
 		)
