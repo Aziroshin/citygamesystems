@@ -2,12 +2,15 @@
 extends StaticBody3D
 class_name PlaneMap
 
-var noise = preload("res://dev/PlaneMap/PlaneMapNoise.tres")
-var material = preload("res://dev/PlaneMap/MapMaterial.tres")
+const default_noise = preload("res://dev/PlaneMap/PlaneMapNoise.tres")
+const default_material = preload("res://dev/PlaneMap/MapMaterial.tres")
 
 @export var resolution := 10
 @export var size := Vector2(10, 10)
 @export var subdivision := Vector2(100, 100)
+@export var alpha := 1.0
+@export var noise := default_noise
+@export var material := default_material
 
 signal mouse_motion(
 	p_camera: Camera3D,
@@ -23,6 +26,11 @@ signal mouse_button(
 	p_click_normal: Vector3,
 	p_shape: int
 )
+
+
+func _set_up_material() -> void:
+	material.set_shader_parameter("alpha", alpha)
+
 
 # With some helpful input from Digital KI's post:
 #   https://digitalki.net/2018/04/25/alter-a-plane-mesh-programmatically-with-godot-3-0-2/
@@ -55,10 +63,12 @@ func create_mesh() -> Mesh:
 	#   https://godotengine.org/qa/69339/regenerate-normals-after-meshdatatool-vertex-adjustments
 	
 	st.generate_normals()
+	_set_up_material()
 	st.set_material(material)
 	var mesh = st.commit()
 	
 	return mesh
+
 
 func _ready():
 	var mesh_instance := MeshInstance3D.new()
@@ -70,7 +80,8 @@ func _ready():
 	static_body.connect("input_event", _on_mouse_event)
 	
 	add_child(mesh_instance)
-	
+
+
 func _on_mouse_event(
 	p_camera: Camera3D,
 	p_event: InputEvent,

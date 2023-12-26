@@ -29,7 +29,7 @@ class StatefulTool extends Tool:
 	# to type-cast the return value to the appropriate `ToolState` sub-class.
 	# One convention could be for sub-classes to have their own `get_state`
 	# method, which returns, for example, `self._state as WhateverToolState`.
-	# (To make room for that convention, this method isn't named `get_state`.)
+	# (To make room for that convfention, this method isn't named `get_state`.)
 	# 
 	# This method exists for situations where that's not practical. Of course,
 	# the type-cast would then have to be done at the site of call.

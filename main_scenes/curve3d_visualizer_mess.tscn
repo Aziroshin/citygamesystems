@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=3 uid="uid://xjpawx5cdq54"]
+
+[ext_resource type="Script" path="res://main_scenes/curve3d_visualizer_mess.gd" id="1_huj3g"]
+[ext_resource type="PackedScene" uid="uid://dvj7tkpwy5s6u" path="res://dev/curve_debug_visualizer/curve3d_debug_visualizer.tscn" id="2_57o3w"]
+[ext_resource type="PackedScene" uid="uid://dsosiwktl112u" path="res://dev/sphere_map/sphere_map.tscn" id="4_xm07t"]
+[ext_resource type="PackedScene" uid="uid://t6fjyxuaed8g" path="res://world_objects/player_world_interface/player_world_interface.tscn" id="5_7iut4"]
+
+[node name="Curve3dVisualizerMess" type="Node3D"]
+script = ExtResource("1_huj3g")
+
+[node name="curve3d_debug_visualizer" parent="." instance=ExtResource("2_57o3w")]
+get_curve_by_signal = true
+
+[node name="Map" parent="." instance=ExtResource("4_xm07t")]
+alpha = 0.5
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.3065, 15.8951, 15.1031)
+omni_range = 60.0
+omni_attenuation = 0.435275
+
+[node name="PlayerWorldInterface" parent="." instance=ExtResource("5_7iut4")]
+transform = Transform3D(-0.911662, 0, 0.410942, 0, 1, 0, -0.410942, 0, -0.911662, 0, -9.96289, 3.67882)
+override_existing_actions = true
+enable_integration_warnings = false
+
+[connection signal="curve_changed" from="." to="curve3d_debug_visualizer" method="_on_curve_changed"]
+[connection signal="mouse_button" from="Map" to="." method="_on_map_mouse_button" flags=3]
+[connection signal="mouse_motion" from="Map" to="." method="_on_map_mouse_motion" flags=3]

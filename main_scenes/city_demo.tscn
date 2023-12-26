@@ -10,12 +10,9 @@
 [ext_resource type="Script" path="res://main_scenes/city_demo_lib/tools/street_tool/street_tool.gd" id="5_knyav"]
 [ext_resource type="Texture2D" uid="uid://6u6g82nd47ja" path="res://icons/street_tool.png" id="5_mjr6o"]
 [ext_resource type="PackedScene" uid="uid://dvj7tkpwy5s6u" path="res://dev/curve_debug_visualizer/curve3d_debug_visualizer.tscn" id="8_55k1a"]
+[ext_resource type="Material" uid="uid://bqywgg0jxxs4q" path="res://dev/curve_debug_visualizer/tangent_material.tres" id="9_kyia3"]
 
 [sub_resource type="Curve3D" id="Curve3D_ogyrv"]
-
-[sub_resource type="Material" id="Material_x1w2e"]
-resource_local_to_scene = false
-resource_name = ""
 
 [node name="raw_export_cube_assembly_mess" type="Node3D"]
 script = ExtResource("1_elgex")
@@ -59,11 +56,14 @@ shadow_enabled = true
 resolution = 4
 size = Vector2(256, 256)
 subdivision = Vector2(128, 128)
+alpha = 1.0
 
 [node name="debug_visualizer_for_street_tool" parent="Map" instance=ExtResource("8_55k1a")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
 curve = SubResource("Curve3D_ogyrv")
-curve_material = SubResource("Material_x1w2e")
+in_handle_material = ExtResource("9_kyia3")
+out_handle_material = ExtResource("9_kyia3")
+tangent_material = ExtResource("9_kyia3")
 get_curve_by_signal = true
 
 [node name="tool_arbiter" type="Node" parent="."]

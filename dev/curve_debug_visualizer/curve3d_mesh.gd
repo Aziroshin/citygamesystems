@@ -4,11 +4,12 @@ class_name Curve3DDebugMesh
 ### Dependencies:
 # - Curve3DDebugFuncs
 
+const default_curve_material := preload("res://dev/curve_debug_visualizer/curve_material.tres")
 # 3D version of `profile2d`. Set when `profile2d` is set. Treat as readonly.
-@onready var profile3d_ro := PackedVector3Array()
+var profile3d_ro := PackedVector3Array()
 # Triangulated 2D version of the cap. Set when `profil2d` is set.
 # Treat as readonly.
-@onready var cap2d_ro := PackedVector2Array()
+var cap2d_ro := PackedVector2Array()
 # The polygon which will be extruded along the curve. If left empty,
 # it will default to a quad with a side length of 0.1.
 @export var profile2d := PackedVector2Array():
@@ -23,7 +24,12 @@ class_name Curve3DDebugMesh
 		for idx in Geometry2D.triangulate_polygon(p_new_profile2d):
 			cap2d_ro.append(p_new_profile2d[idx])
 # Material for the curve mesh.
-@export var material := Material.new()
+@export var material := default_curve_material:
+	get:
+		if not material:
+			return default_curve_material
+		else:
+			return material
 # Curve to use for the mesh.
 # NOTE: This curve will be overwritten by the curve passed to `.update`, so,
 # depending on what you do, setting the curve here might not do anything.
@@ -114,9 +120,9 @@ func update_from_curve(p_curve: Curve3D) -> void:
 func _ready() -> void:
 	if len(profile2d) == 0:
 		profile2d = PackedVector2Array([
-			Vector2(0.0, 0.0),
-			Vector2(0.0, 0.1),
-			Vector2(0., 0.1),
-			Vector2(0.1, 0.0)
+			Vector2(0.1, 0.1),
+			Vector2(0.1, -0.1),
+			Vector2(-0.1, -0.1),
+			Vector2(-0.1, 0.1)
 		])
 	update()

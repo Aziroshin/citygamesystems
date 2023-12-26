@@ -1,4 +1,10 @@
-[gd_resource type="ShaderMaterial" load_steps=8 format=3 uid="uid://dxaa0fb7c3gi4"]
+[gd_resource type="ShaderMaterial" load_steps=9 format=3 uid="uid://dxaa0fb7c3gi4"]
+
+[sub_resource type="VisualShaderNodeFloatParameter" id="VisualShaderNodeFloatParameter_1bm28"]
+parameter_name = "alpha"
+hint = 1
+default_value_enabled = true
+default_value = 1.0
 
 [sub_resource type="VisualShaderNodeColorConstant" id="1"]
 constant = Color(0.22657, 0.75, 0.196289, 1)
@@ -22,6 +28,7 @@ default_input_values = [2, false, 3, 1.2]
 code = "shader_type spatial;
 render_mode blend_mix, depth_draw_opaque, cull_back, diffuse_lambert, specular_schlick_ggx;
 
+uniform float alpha : hint_range(0, 1) = 1;
 
 
 
@@ -48,6 +55,10 @@ void fragment() {
 	vec3 n_out5p0 = mix(vec3(n_out2p0.xyz), vec3(n_out3p0.xyz), n_out7p2);
 
 
+// FloatParameter:10
+	float n_out10p0 = alpha;
+
+
 // Fresnel:9
 	float n_in9p3 = 1.20000;
 	float n_out9p0 = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), n_in9p3);
@@ -55,6 +66,7 @@ void fragment() {
 
 // Output:0
 	ALBEDO = n_out5p0;
+	ALPHA = n_out10p0;
 	NORMAL = n_out6p0;
 	NORMAL_MAP_DEPTH = n_out7p1;
 	RIM = n_out9p0;
@@ -64,7 +76,6 @@ void fragment() {
 
 }
 "
-graph_offset = Vector2(-984.484, 87.319)
 nodes/fragment/0/position = Vector2(860, 140)
 nodes/fragment/2/node = SubResource("1")
 nodes/fragment/2/position = Vector2(360, 100)
@@ -78,8 +89,11 @@ nodes/fragment/7/node = SubResource("6")
 nodes/fragment/7/position = Vector2(240, 320)
 nodes/fragment/9/node = SubResource("7")
 nodes/fragment/9/position = Vector2(500, 540)
-nodes/fragment/connections = PackedInt32Array(2, 0, 5, 0, 3, 0, 5, 1, 5, 0, 0, 0, 6, 0, 7, 0, 7, 2, 5, 2, 6, 0, 0, 16, 7, 0, 0, 12, 9, 0, 0, 11, 7, 1, 0, 10, 6, 0, 0, 8)
+nodes/fragment/10/node = SubResource("VisualShaderNodeFloatParameter_1bm28")
+nodes/fragment/10/position = Vector2(-60, 140)
+nodes/fragment/connections = PackedInt32Array(2, 0, 5, 0, 3, 0, 5, 1, 5, 0, 0, 0, 6, 0, 7, 0, 7, 2, 5, 2, 6, 0, 0, 16, 7, 0, 0, 12, 9, 0, 0, 11, 7, 1, 0, 10, 6, 0, 0, 8, 10, 0, 0, 1)
 
 [resource]
 render_priority = 0
 shader = SubResource("2")
+shader_parameter/alpha = 0.5

@@ -6,12 +6,32 @@ enum TangentPointIndexes {
 	POINT_OF_TANGENCY,
 	OUT
 }
+const default_in_handle_material := preload("res://dev/curve_debug_visualizer/in_handle_material.tres")
+const default_out_handle_material := preload("res://dev/curve_debug_visualizer/out_handle_material.tres")
+const default_tangent_material := preload("res://dev/curve_debug_visualizer/tangent_material.tres")
+var in_handle_material := default_in_handle_material:
+	get:
+		if not in_handle_material:
+			return default_in_handle_material
+		else:
+			return in_handle_material
+var out_handle_material := default_out_handle_material:
+	get:
+		if not out_handle_material:
+			return default_out_handle_material
+		else:
+			return out_handle_material
+var tangent_material := default_tangent_material:
+	get:
+		if not tangent_material:
+			return default_tangent_material
+		else:
+			return tangent_material
 var tangent_meshes: Array[MeshInstance3D] = []
 var in_handle_meshes: Array[MeshInstance3D] = []
 var out_handle_meshes: Array[MeshInstance3D] = []
 var in_point_multi_mesh := MultiMeshInstance3D.new()
 var out_point_multi_mesh := MultiMeshInstance3D.new()
-var tangent_material := StandardMaterial3D.new()
 ## If true, the handle visualization will get updated.
 @export var curve_changed := true
 @export var curve := Curve3D.new():
@@ -27,22 +47,57 @@ var tangent_material := StandardMaterial3D.new()
 @export var visualized_indexes := [-1]
 
 
-func _create_handle_distal_point_mesh() -> MeshInstance3D:
+#func _get_tangent_profile2d() -> PackedVector2Array:
+	#return PackedVector2Array([
+		#Vector2(0.0, 0.1),
+		#Vector2(0.0107844, 0.0260358),
+		#Vector2(0.0260358, 0.0107844),
+		#Vector2(0.1, 0.0),
+		#Vector2(0.0260358, -0.0107844),
+		#Vector2(0.0107844, -0.0260358),
+		#Vector2(0.0, -0.1),
+		#Vector2(-0.0107844, -0.0260358),
+		#Vector2(-0.0260358, -0.0107844),
+		#Vector2(-0.1, 0.0),
+		#Vector2(-0.0260358, 0.0107844),
+		#Vector2(-0.0107844, 0.0260358),
+	#])
+
+
+func _get_tangent_profile2d() -> PackedVector2Array:
+	return PackedVector2Array([
+		Vector2(0.0, 0.2),
+		Vector2(0.005, 0.005),
+		Vector2(0.2, 0.0),
+		Vector2(0.005, -0.005),
+		Vector2(0.0, -0.2),
+		Vector2(-0.005, -0.005),
+		Vector2(-0.2, 0.0),
+		Vector2(-0.005, 0.005),
+	])
+
+
+func _create_handle_distal_point_mesh(
+	p_radius: float,
+	p_height: float,
+	p_points: int,
+	p_material: StandardMaterial3D
+) -> MeshInstance3D:
 	var mesh_instance3d := MeshInstance3D.new()
-	var cylinder := Curve3DDebugFuncs.get_cylinder(3.0, 2.0, 8, true)
+	var cylinder := Curve3DDebugFuncs.get_cylinder(p_radius, p_height, p_points, true)
 	Curve3DDebugFuncs.align_forward(cylinder, Vector3.UP)
 	Curve3DDebugFuncs.scale(cylinder, 0.1)
 	mesh_instance3d.mesh = Curve3DDebugFuncs.create_array_mesh(cylinder)
-	mesh_instance3d.mesh.surface_set_material(0, tangent_material)
+	mesh_instance3d.mesh.surface_set_material(0, p_material)
 	return mesh_instance3d
 
 
 func _create_handle_out_point_mesh() -> MeshInstance3D:
-	return _create_handle_distal_point_mesh()
+	return _create_handle_distal_point_mesh(3.0, 2.0, 8, out_handle_material)
 
 
 func _create_handle_in_point_mesh() -> MeshInstance3D:
-	return _create_handle_distal_point_mesh()
+	return _create_handle_distal_point_mesh(1.2, 4.0, 4, in_handle_material)
 
 
 ## Returns the number of elements in `.visualized_indexes`, or the value of
@@ -85,12 +140,11 @@ func _add_tangent_mesh(tangent_mesh: MeshInstance3D) -> void:
 	tangent_meshes.append(tangent_mesh)
 	add_child(tangent_mesh)
 
-
 func _update_visualization() -> void:
 	curve_changed = false
 	remove_all_meshes()
 	
-	if curve.point_count < 2:
+	if curve.point_count < 1:
 		return
 	
 	for idx in get_visualized_indexes_count():
@@ -98,22 +152,35 @@ func _update_visualization() -> void:
 			continue
 		
 		var tangent_mesh := Curve3DDebugMesh.new()
+		# Since the tangent handle is not expected to bend, let's cut down its
+		# resolution somewhat.
+		tangent_mesh.curve.bake_interval = 100.0
+		tangent_mesh.profile2d = _get_tangent_profile2d()
 		_add_tangent_mesh(tangent_mesh)
 		
-		# Tangent.
+		#------------
+		#--- Tangent.
+		var point_of_tangency: Vector3
+		# Point "in" of `curve`.
 		tangent_mesh.curve.add_point(curve.get_point_position(idx) + curve.get_point_in(idx))
-		var point_of_tangency := curve.sample_baked_with_rotation(
+		if curve.point_count == 1:
+			point_of_tangency = curve.get_point_position(0)
+		else:
+			point_of_tangency = curve.sample_baked_with_rotation(
 				Curve3DDebugFuncs.get_closest_offset_on_curve_or_zero(
 					curve,
 					curve.get_point_position(idx)
 				)
 			).origin
+		# Point of `curve`.
 		tangent_mesh.curve.add_point(point_of_tangency)
+		# Point "out" of `curve`.
 		tangent_mesh.curve.add_point(curve.get_point_position(idx) + curve.get_point_out(idx))
 		tangent_mesh.update()
-		tangent_mesh.material = tangent_material
+		tangent_mesh.mesh.surface_set_material(0, tangent_material)
 		
-		# In point.
+		#-------------
+		#--- In point.
 		var handle_in_point_mesh := _create_handle_in_point_mesh()
 		handle_in_point_mesh.transform = Curve3DDebugFuncs.get_point_transform(
 			tangent_mesh.curve,
@@ -122,7 +189,8 @@ func _update_visualization() -> void:
 		in_handle_meshes.append(handle_in_point_mesh)
 		add_child(handle_in_point_mesh)
 		
-		# Out point.
+		#--------------
+		#--- Out point.
 		var handle_out_point_mesh := _create_handle_out_point_mesh()
 		handle_out_point_mesh.transform = Curve3DDebugFuncs.get_point_transform(
 			tangent_mesh.curve,

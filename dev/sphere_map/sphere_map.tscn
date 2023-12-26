@@ -1,14 +1,12 @@
-[gd_scene load_steps=3 format=3 uid="uid://1t8u33ggj154"]
+[gd_scene load_steps=3 format=3 uid="uid://dsosiwktl112u"]
 
-[ext_resource type="Script" path="res://dev/PlaneMap/Map.gd" id="1"]
+[ext_resource type="Script" path="res://dev/sphere_map/sphere_map.gd" id="1_m8hvu"]
 
 [sub_resource type="BoxShape3D" id="1"]
 size = Vector3(4.2823, 0.0825164, 3.51038)
 
 [node name="Map" type="StaticBody3D"]
-script = ExtResource("1")
-resolution = 20
-size = Vector2(20, 20)
+script = ExtResource("1_m8hvu")
 alpha = null
 
 [node name="CollisionShape" type="CollisionShape3D" parent="."]

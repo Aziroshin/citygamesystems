@@ -62,10 +62,12 @@ func _on_ready_sanity_checks(
 
 func _activate() -> void:
 	map.mouse_button.connect(_on_map_mouse_button)
+	map.mouse_motion.connect(_on_map_mouse_motion)
 
 
 func _deactivate() -> void:
 	map.mouse_button.disconnect(_on_map_mouse_button)
+	map.mouse_motion.disconnect(_on_map_mouse_motion)
 
 
 func _ready() -> void:
@@ -80,7 +82,6 @@ func _ready() -> void:
 # have to be captured by some node, which then signals here.
 func _on_activation_requested(_p_activator_agent: ToolLibToolActivatorAgent):
 	if activation_state == ActivationState.INACTIVE:
-		print("tool: activation requested. ActivationState: %s" % activation_state)
 		arbiter.request_granted.connect(
 			_on_request_granted,
 			CONNECT_ONE_SHOT
@@ -94,7 +95,6 @@ func _on_activation_requested(_p_activator_agent: ToolLibToolActivatorAgent):
 
 func _on_deactivation_requested(_p_activator_agent: ToolLibToolActivatorAgent):
 	if activation_state == ActivationState.ACTIVE:
-		print("tool: deactivation requested. ActivationState: %s" % activation_state)
 		activation_state = ActivationState.DEACTIVATING
 		_on_deactivate()
 
@@ -121,9 +121,37 @@ func _on_map_mouse_button(
 	_p_normal: Vector3,
 	_p_shape: int
 ) -> void:
-	if p_event.pressed:
-		var idx := add_node(p_mouse_position)
-		Cavedig.needle(
-			map,
-			Transform3D(Basis(), get_state().curve.get_point_position(idx))
+	# TODO: This will need to be properly tied into actions, but also in
+	# a way modular enough that it won't be a pain to integrate the tool into
+	# other codebases.
+	if p_event.button_index == MOUSE_BUTTON_LEFT and p_event.pressed:
+		if is_in_node_adding_mode():
+			var idx := add_node(p_mouse_position, true)
+			Cavedig.needle(
+				map,
+				Transform3D(Basis(), get_state().curve.get_point_position(idx))
+			)
+		else:
+			#get_state().node_metadata[get_last_node_idx()].out_point_finalized = true
+			#get_state().node_finalizations[get_last_node_idx()].handle_out = FINALIZED
+			set_node_handle_out_point(
+				get_last_node_idx(),
+				p_mouse_position - get_state().curve.get_point_position(get_last_node_idx()),
+				FINALIZED
+			)
+
+func _on_map_mouse_motion(
+	_p_camera: Camera3D,
+	_p_event: InputEvent,
+	p_mouse_position: Vector3,
+	_p_normal: Vector3,
+	_p_shape: int
+) -> void:
+	if\
+	get_node_count() > 0\
+	and not get_state().node_finalizations[get_last_node_idx()].handle_out:
+		set_node_handle_out_point(
+			get_last_node_idx(),
+			p_mouse_position - get_state().curve.get_point_position(get_last_node_idx()),
+			UNFINALIZED
 		)
