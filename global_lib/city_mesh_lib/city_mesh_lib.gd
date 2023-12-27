@@ -255,6 +255,6 @@ class ATwoSidedRoof extends AMultiSegment:
 				if _debug:
 					print("not found in:", key)
 		
-	func get_segments() -> Array[AVertexTrackingSegment]:
+	func get_segments() -> Array[AModifiableSegment]:
 		#return [front]
 		return [front, back]
