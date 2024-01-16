@@ -80,7 +80,7 @@ func _ready() -> void:
 
 # Button signals and stuff should hook up to this. Hotkeys would probably
 # have to be captured by some node, which then signals here.
-func _on_activation_requested(_p_activator_agent: ToolLibToolActivatorAgent):
+func _on_activation_requested(_p_activator_agent: ToolLibToolActivatorAgent) -> void:
 	if activation_state == ActivationState.INACTIVE:
 		arbiter.request_granted.connect(
 			_on_request_granted,
@@ -107,7 +107,7 @@ func _on_request_granted(p_granted: bool):
 		activated.emit()
 
 
-func _on_deactivate():
+func _on_deactivate() -> void:
 	_deactivate()
 	activation_state = ActivationState.INACTIVE
 	deactivated.connect(arbiter._on_tool_deactivated, CONNECT_ONE_SHOT)
@@ -139,6 +139,7 @@ func _on_map_mouse_button(
 				p_mouse_position - get_state().curve.get_point_position(get_last_node_idx()),
 				FINALIZED
 			)
+
 
 func _on_map_mouse_motion(
 	_p_camera: Camera3D,

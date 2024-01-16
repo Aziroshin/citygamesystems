@@ -52,11 +52,7 @@ func _on_tool_deactivated() -> void:
 
 
 func _ready():
-	request_tool_activation.connect(
-		tool._on_activation_requested,
-	)
-	request_tool_deactivation.connect(
-		tool._on_deactivation_requested,
-	)
+	request_tool_activation.connect(tool._on_activation_requested)
+	request_tool_deactivation.connect(tool._on_deactivation_requested)
 	tool.activated.connect(_on_tool_activated)
 	tool.deactivated.connect(_on_tool_deactivated)
