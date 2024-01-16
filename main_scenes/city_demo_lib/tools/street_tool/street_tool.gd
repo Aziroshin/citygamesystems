@@ -93,13 +93,17 @@ func _on_activation_requested(_p_activator_agent: ToolLibToolActivatorAgent) -> 
 		request_activation.emit(self)
 
 
-func _on_deactivation_requested(_p_activator_agent: ToolLibToolActivatorAgent):
+func _start_deactivating() -> void:
 	if activation_state == ActivationState.ACTIVE:
 		activation_state = ActivationState.DEACTIVATING
 		_on_deactivate()
 
 
-func _on_request_granted(p_granted: bool):
+func _on_deactivation_requested(_p_activator_agent: ToolLibToolActivatorAgent) -> void:
+	_start_deactivating()
+
+
+func _on_request_granted(p_granted: bool) -> void:
 	if p_granted:
 		activation_state = ActivationState.ACTIVE
 		_activate()
@@ -156,3 +160,23 @@ func _on_map_mouse_motion(
 			p_mouse_position - get_state().curve.get_point_position(get_last_node_idx()),
 			UNFINALIZED
 		)
+
+
+func _create_street() -> MeshInstance3D:
+	return StreetMesh.create_street_mesh()
+
+
+func _add_street_to_map(street_mesh: MeshInstance3D) -> void:
+	map.add_child(street_mesh)
+
+
+func _on_request_build_street() -> void:
+	print("street_tool.gd._on_request_build_street signaled.")
+	
+	#----- Build Street
+	_add_street_to_map(_create_street(
+		# TODO
+	))
+	
+	#----- Deactivate Tool
+	_start_deactivating()
