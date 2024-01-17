@@ -33,7 +33,6 @@ shadow_enabled = true
 resolution = 4
 size = Vector2(256, 256)
 subdivision = Vector2(128, 128)
-alpha = 1.0
 
 [node name="debug_visualizer_for_street_tool" parent="Map" instance=ExtResource("8_55k1a")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)

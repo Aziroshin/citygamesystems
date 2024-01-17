@@ -9,7 +9,6 @@ size = Vector3(4.2823, 0.0825164, 3.51038)
 script = ExtResource("1")
 resolution = 20
 size = Vector2(20, 20)
-alpha = null
 
 [node name="CollisionShape" type="CollisionShape3D" parent="."]
 shape = SubResource("1")

@@ -172,7 +172,14 @@ func _on_request_build_street() -> void:
 
 
 func _on_result_map_points(p_map_points: PackedVector3Array) -> void:
-	print(p_map_points)
+	for point in p_map_points:
+		Cavedig.needle(
+			map,
+			Transform3D(Basis(), point),
+			Vector3(0.85, 0.1, 0.75),
+			0.7,
+			0.05
+		)
 	_build_street(p_map_points)
 
 
