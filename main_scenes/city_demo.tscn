@@ -12,29 +12,9 @@
 [ext_resource type="PackedScene" uid="uid://dvj7tkpwy5s6u" path="res://dev/curve_debug_visualizer/curve3d_debug_visualizer.tscn" id="8_55k1a"]
 [ext_resource type="Texture2D" uid="uid://dxovxwyj5arqf" path="res://icon.svg" id="8_btgyr"]
 [ext_resource type="Material" uid="uid://bqywgg0jxxs4q" path="res://dev/curve_debug_visualizer/tangent_material.tres" id="9_kyia3"]
+[ext_resource type="PackedScene" uid="uid://dv7hpxefaw1ni" path="res://main_scenes/city_demo_lib/tools/street_tool/street_tool_map_ray_caster.tscn" id="13_ot6hf"]
 
 [sub_resource type="Curve3D" id="Curve3D_ogyrv"]
-
-[sub_resource type="GDScript" id="GDScript_5c72b"]
-script/source = "extends VBoxContainer
-
-var delta_elapsed := 0.0
-var interval_size := 0.5
-@onready var street_tool := $\"../../../../street_tool\"
-
-func _on_activated():
-	pass#show()
-
-func _on_deactivated():
-	pass#hide()
-
-func _process(delta: float) -> void:
-	delta_elapsed += delta
-	if delta_elapsed >= interval_size:
-		#print(\"street_tool_sub_bar_signal_debug.gd: Visible: \", visible)
-		#print(\"BuildStreetButton_signal_Debug:\", street_tool.get_signal_connection_list(\"activated\"))
-		delta_elapsed = 0.0
-"
 
 [node name="city_demo" type="Node3D"]
 script = ExtResource("1_elgex")
@@ -66,10 +46,11 @@ get_curve_by_signal = true
 [node name="tool_arbiter" type="Node" parent="."]
 script = ExtResource("5_ar3lr")
 
-[node name="street_tool" type="Node" parent="." node_paths=PackedStringArray("arbiter", "map")]
+[node name="street_tool" type="Node" parent="." node_paths=PackedStringArray("arbiter", "map", "map_ray_caster")]
 script = ExtResource("5_knyav")
 arbiter = NodePath("../tool_arbiter")
 map = NodePath("../Map")
+map_ray_caster = NodePath("../StreetToolMapRayCaster")
 
 [node name="arbiter_test_tool" type="Node" parent="." node_paths=PackedStringArray("arbiter", "map")]
 script = ExtResource("5_knyav")
@@ -97,7 +78,6 @@ visible = false
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
-script = SubResource("GDScript_5c72b")
 
 [node name="BuildStreetButton" type="TextureButton" parent="ButtonBar/SubButtonBarsBar/StreetToolSubBar"]
 custom_minimum_size = Vector2(48, 48)
@@ -128,12 +108,16 @@ _tool = NodePath("../../../../../street_tool")
 [node name="arbiter_test_tool_button" parent="ButtonBar/MainButtonBar" instance=ExtResource("4_jdok4")]
 layout_mode = 2
 
+[node name="StreetToolMapRayCaster" parent="." instance=ExtResource("13_ot6hf")]
+
 [connection signal="activated" from="street_tool" to="ButtonBar/SubButtonBarsBar/StreetToolSubBar" method="show"]
 [connection signal="curve_changed" from="street_tool" to="Map/debug_visualizer_for_street_tool" method="_on_curve_changed" flags=3]
 [connection signal="deactivated" from="street_tool" to="ButtonBar/SubButtonBarsBar/StreetToolSubBar" method="hide"]
+[connection signal="request_map_points" from="street_tool" to="StreetToolMapRayCaster" method="_on_request_map_points" flags=3]
 [connection signal="button_up" from="ButtonBar/SubButtonBarsBar/StreetToolSubBar/BuildStreetButton" to="street_tool" method="_on_request_build_street" flags=3]
 [connection signal="button_up" from="ButtonBar/MainButtonBar/street_tool_button/TextureButton" to="ButtonBar/MainButtonBar/street_tool_button/TextureButton/texture_button_tool_activator_agent" method="_on_activator_toggling" flags=3]
 [connection signal="button_up" from="ButtonBar/MainButtonBar/arbiter_test_tool_button/TextureButton" to="arbiter_test_tool" method="_on_activation_requested" flags=3]
+[connection signal="result_map_points" from="StreetToolMapRayCaster" to="street_tool" method="_on_result_map_points" flags=3]
 
 [editable path="ButtonBar/MainButtonBar/street_tool_button"]
 [editable path="ButtonBar/MainButtonBar/arbiter_test_tool_button"]

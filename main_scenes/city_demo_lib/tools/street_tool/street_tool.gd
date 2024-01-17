@@ -1,6 +1,8 @@
 extends CityToolLib.StreetTool
 
 signal request_activation(p_tool: Node)
+# Used to get the actual corresponding map points to our curve points.
+signal request_map_points(source_points: PackedVector3Array)
 
 enum ActivationState {
 	INACTIVE,
@@ -15,6 +17,7 @@ enum ActivationState {
 # for prototyping, and for the purposes of the demo, I feel it'd add quite a bit
 # of overhead to development and slow down experimentation.
 @export var map: PlaneMap
+@export var map_ray_caster: StreetToolMapRayCaster
 var activation_state := ActivationState.INACTIVE
 
 
@@ -162,21 +165,33 @@ func _on_map_mouse_motion(
 		)
 
 
-func _create_street() -> MeshInstance3D:
-	return StreetMesh.create_street_mesh()
-
-
-func _add_street_to_map(street_mesh: MeshInstance3D) -> void:
-	map.add_child(street_mesh)
-
-
 func _on_request_build_street() -> void:
+	request_map_points.emit(get_state().curve.get_baked_points())
+	# Now it's up to `StreetToolMapRayCaster` to answer back. Once it does,
+	# `_on_result_map_points` below will be kicked off.
+
+
+func _on_result_map_points(p_map_points: PackedVector3Array) -> void:
+	print(p_map_points)
+	_build_street(p_map_points)
+
+
+func _build_street(p_map_points: PackedVector3Array) -> void:
 	print("street_tool.gd._on_request_build_street signaled.")
 	
 	#----- Build Street
 	_add_street_to_map(_create_street(
-		# TODO
+		p_map_points
 	))
 	
 	#----- Deactivate Tool
 	_start_deactivating()
+
+
+func _create_street(_p_map_points: PackedVector3Array) -> MeshInstance3D:
+	return StreetMesh.create_street_mesh()
+
+
+func _add_street_to_map(p_street_mesh: MeshInstance3D) -> void:
+	map.add_child(p_street_mesh)
+

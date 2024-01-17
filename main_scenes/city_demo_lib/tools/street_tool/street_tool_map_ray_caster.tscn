@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dv7hpxefaw1ni"]
+
+[ext_resource type="Script" path="res://main_scenes/city_demo_lib/tools/street_tool/street_tool_map_ray_caster.gd" id="1_2gq84"]
+
+[node name="StreetToolMapRayCaster" type="RayCast3D"]
+script = ExtResource("1_2gq84")
