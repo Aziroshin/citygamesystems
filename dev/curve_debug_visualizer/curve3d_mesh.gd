@@ -4,7 +4,7 @@ class_name Curve3DDebugMesh
 ### Dependencies:
 # - Curve3DDebugFuncs
 
-const default_curve_material := preload("res://dev/curve_debug_visualizer/curve_material.tres")
+const default_curve_material := preload("./curve_material.tres")
 # 3D version of `profile2d`. Set when `profile2d` is set. Treat as readonly.
 var profile3d_ro := PackedVector3Array()
 # Triangulated 2D version of the cap. Set when `profil2d` is set.
@@ -24,12 +24,7 @@ var cap2d_ro := PackedVector2Array()
 		for idx in Geometry2D.triangulate_polygon(p_new_profile2d):
 			cap2d_ro.append(p_new_profile2d[idx])
 # Material for the curve mesh.
-@export var material := default_curve_material:
-	get:
-		if not material:
-			return default_curve_material
-		else:
-			return material
+@export var material := default_curve_material.duplicate()
 # Curve to use for the mesh.
 # NOTE: This curve will be overwritten by the curve passed to `.update`, so,
 # depending on what you do, setting the curve here might not do anything.

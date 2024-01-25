@@ -9,24 +9,9 @@ enum TangentPointIndexes {
 const default_in_handle_material := preload("./in_handle_material.tres")
 const default_out_handle_material := preload("./out_handle_material.tres")
 const default_tangent_material := preload("./tangent_material.tres")
-var in_handle_material := default_in_handle_material:
-	get:
-		if not in_handle_material:
-			return default_in_handle_material
-		else:
-			return in_handle_material
-var out_handle_material := default_out_handle_material:
-	get:
-		if not out_handle_material:
-			return default_out_handle_material
-		else:
-			return out_handle_material
-var tangent_material := default_tangent_material:
-	get:
-		if not tangent_material:
-			return default_tangent_material
-		else:
-			return tangent_material
+var in_handle_material := default_in_handle_material.duplicate()
+var out_handle_material := default_out_handle_material.duplicate()
+var tangent_material := default_tangent_material.duplicate()
 var tangent_meshes: Array[MeshInstance3D] = []
 var in_handle_meshes: Array[MeshInstance3D] = []
 var out_handle_meshes: Array[MeshInstance3D] = []

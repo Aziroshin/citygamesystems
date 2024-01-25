@@ -1,14 +1,40 @@
-[gd_scene load_steps=5 format=3 uid="uid://xjpawx5cdq54"]
+[gd_scene load_steps=8 format=3 uid="uid://xjpawx5cdq54"]
 
 [ext_resource type="Script" path="res://main_scenes/curve3d_visualizer_mess.gd" id="1_huj3g"]
 [ext_resource type="PackedScene" uid="uid://dvj7tkpwy5s6u" path="res://dev/curve_debug_visualizer/curve3d_debug_visualizer.tscn" id="2_57o3w"]
 [ext_resource type="PackedScene" uid="uid://dsosiwktl112u" path="res://dev/sphere_map/sphere_map.tscn" id="4_xm07t"]
 [ext_resource type="PackedScene" uid="uid://t6fjyxuaed8g" path="res://world_objects/player_world_interface/player_world_interface.tscn" id="5_7iut4"]
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_457ea"]
+shading_mode = 0
+specular_mode = 2
+disable_ambient_light = true
+disable_fog = true
+albedo_color = Color(0.6, 0.482353, 0.858824, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_j10og"]
+shading_mode = 0
+specular_mode = 2
+disable_ambient_light = true
+disable_fog = true
+albedo_color = Color(0.705882, 0.760784, 0.45098, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3pbm7"]
+transparency = 4
+shading_mode = 0
+specular_mode = 2
+disable_ambient_light = true
+disable_fog = true
+albedo_color = Color(0.403922, 0.890196, 0.309804, 0.533333)
+disable_receive_shadows = true
+
 [node name="Curve3dVisualizerMess" type="Node3D"]
 script = ExtResource("1_huj3g")
 
 [node name="curve3d_debug_visualizer" parent="." instance=ExtResource("2_57o3w")]
+in_handle_material = SubResource("StandardMaterial3D_457ea")
+out_handle_material = SubResource("StandardMaterial3D_j10og")
+tangent_material = SubResource("StandardMaterial3D_3pbm7")
 get_curve_by_signal = true
 
 [node name="Map" parent="." instance=ExtResource("4_xm07t")]
