@@ -22,14 +22,14 @@ var curve_changed := false
 		curve_mesh.material = p_value
 @export var in_handle_material: StandardMaterial3D:
 	get:
-		return handle_visualizer.tangent_material
+		return handle_visualizer.in_handle_material
 	set(p_value):
-		handle_visualizer.tangent_material = p_value
+		handle_visualizer.in_handle_material = p_value
 @export var out_handle_material: StandardMaterial3D:
 	get:
-		return handle_visualizer.tangent_material
+		return handle_visualizer.out_handle_material
 	set(p_value):
-		handle_visualizer.tangent_material = p_value
+		handle_visualizer.out_handle_material = p_value
 @export var tangent_material: StandardMaterial3D:
 	get:
 		return handle_visualizer.tangent_material
