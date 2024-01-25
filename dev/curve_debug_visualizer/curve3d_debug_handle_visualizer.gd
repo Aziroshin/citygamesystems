@@ -6,9 +6,9 @@ enum TangentPointIndexes {
 	POINT_OF_TANGENCY,
 	OUT
 }
-const default_in_handle_material := preload("res://dev/curve_debug_visualizer/in_handle_material.tres")
-const default_out_handle_material := preload("res://dev/curve_debug_visualizer/out_handle_material.tres")
-const default_tangent_material := preload("res://dev/curve_debug_visualizer/tangent_material.tres")
+const default_in_handle_material := preload("./in_handle_material.tres")
+const default_out_handle_material := preload("./out_handle_material.tres")
+const default_tangent_material := preload("./tangent_material.tres")
 var in_handle_material := default_in_handle_material:
 	get:
 		if not in_handle_material:
