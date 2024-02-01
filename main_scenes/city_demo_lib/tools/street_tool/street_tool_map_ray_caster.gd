@@ -1,17 +1,36 @@
 extends RayCast3D
 class_name StreetToolMapRayCaster
 
-enum State {
-	IDLE,
-	PROCESSING_REQUEST
-}
 ## Offset around the point of origin of the raycast. Will cast from the offset
 ## point in the direction of the negative of the offset point (casting through
 ## the point of origin).
 @export var cast_offset := Vector3(0.0, 100.0, 0.0)
-var state: State = State.IDLE
-signal result_map_points(p_points: PackedVector3Array)
-var source_points := PackedVector3Array()
+signal result_map_points(p_result: Result)
+var requests: Array[Request] = []
+
+
+class Request:
+	var id: int
+	var source_points: PackedVector3Array
+	
+	func _init(
+		p_id: int,
+		p_source_points: PackedVector3Array
+	):
+		id = p_id
+		source_points = p_source_points
+
+
+class Result:
+	var id: int
+	var map_points: PackedVector3Array
+
+	func _init(
+		p_id: int,
+		p_map_points: PackedVector3Array
+	):
+		id = p_id
+		map_points = p_map_points
 
 
 func cast(
@@ -28,22 +47,25 @@ func cast(
 
 
 func _physics_process(_p_delta: float) -> void:
-	if state == State.PROCESSING_REQUEST:
+	if len(requests) > 0:
 		var map_points := PackedVector3Array()
 		var space_state := get_world_3d().direct_space_state
+		var request: Request = requests.pop_back()
 		
-		for point in source_points:
+		for point in request.source_points:
 			var result := cast(point, cast_offset, -cast_offset, space_state)
 			if result.has("position"):
 				map_points.append(result["position"])
 			else:
 				push_error("Street tool ray cast failed to collide with map.")
 		
-		result_map_points.emit(map_points)
-		source_points = PackedVector3Array()  # Clear reference.
-		state = State.IDLE
+		result_map_points.emit(
+			Result.new(
+				request.id,
+				map_points
+			)
+		)
 
 
-func _on_request_map_points(p_source_points: PackedVector3Array) -> void:
-	source_points = p_source_points
-	state = State.PROCESSING_REQUEST
+func _on_request_map_points(p_request) -> void:
+	requests.append(p_request)

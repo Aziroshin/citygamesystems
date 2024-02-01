@@ -10,6 +10,9 @@ enum ActivationState {
 	ACTIVE,
 	DEACTIVATING
 }
+enum StreetToolMapRayCasterRequestTypeId{
+	CURVE_POINTS
+}
 @export var arbiter: Node
 # That typing is quite opinionated, of course, and is bound to change as things
 # develop. A better approach would be to have a `street_node_agent` Node
@@ -166,13 +169,17 @@ func _on_map_mouse_motion(
 
 
 func _on_request_build_street() -> void:
-	request_map_points.emit(get_state().curve.get_baked_points())
+	request_map_points.emit(
+		StreetToolMapRayCaster.Request.new(
+			StreetToolMapRayCasterRequestTypeId.CURVE_POINTS,
+			get_state().curve.get_baked_points()
+		)
+	)
 	# Now it's up to `StreetToolMapRayCaster` to answer back. Once it does,
 	# `_on_result_map_points` below will be kicked off.
 
-
-func _on_result_map_points(p_map_points: PackedVector3Array) -> void:
-	for point in p_map_points:
+func _on_result_map_points(p_result: StreetToolMapRayCaster.Result) -> void:
+	for point in p_result.map_points:
 		Cavedig.needle(
 			map,
 			Transform3D(Basis(), point),
@@ -180,16 +187,18 @@ func _on_result_map_points(p_map_points: PackedVector3Array) -> void:
 			0.7,
 			0.05
 		)
-	_build_street(p_map_points)
+	_build_street(p_result.map_points)
 
 
 func _build_street(p_map_points: PackedVector3Array) -> void:
 	print("street_tool.gd._on_request_build_street signaled.")
 	
 	#----- Build Street
-	_add_street_to_map(_create_street(
-		p_map_points
-	))
+	_add_street_to_map(
+		_create_street(
+			p_map_points
+		)
+	)
 	
 	#----- Deactivate Tool
 	_start_deactivating()
