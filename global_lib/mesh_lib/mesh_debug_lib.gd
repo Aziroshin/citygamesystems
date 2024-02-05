@@ -5,8 +5,12 @@ class_name MeshDebugLib
 class ADebugOverlay extends Node3D:
 	const ROTATION_90_DEG = 2 * PI / 4
 	var default_font_size := 8
+	var labels: Array[Label3D] = []
+	var vertex_indicators: Array[CSGBox3D] = []
 	var _show_vertices := true
 	var _show_normals := true
+	var _show_labels := true
+	var _show_vertex_indicators := false
 	
 	func create_single_color_material(p_color: Color) -> StandardMaterial3D:
 		var material := StandardMaterial3D.new()
@@ -26,6 +30,39 @@ class ADebugOverlay extends Node3D:
 		_show_normals = p_flag
 		return self
 	
+	func show_labels(p_flag: bool) -> ADebugOverlay:
+		var old_flag := _show_labels
+		_show_labels = p_flag
+		if not _show_labels == old_flag:
+			for label in labels:
+				if _show_labels:
+					label.show()
+				else:
+					label.hide()
+		return self
+		
+	func show_vertex_indicators(p_flag: bool) -> ADebugOverlay:
+		_show_vertex_indicators = p_flag
+		return self
+	
+	func add_vertex_indicator(p_vert_xyz: Vector3) -> ADebugOverlay:
+		var indicator := CSGBox3D.new()
+		var color := Color(0.9, 0.0, 0.5)
+		
+		indicator.size = Vector3(0.01, 0.01, 0.01)
+		indicator.translate(p_vert_xyz)
+		indicator.material_override = create_single_color_material(color)
+		
+		vertex_indicators.append(indicator)
+		add_child(indicator)
+		
+		# Just in case this function isn't always gated behind and if-statement
+		# checking for this.
+		if not _show_vertex_indicators:
+			indicator.hide()
+		
+		return self
+	
 	func add_label(
 		title: String,
 		xyz: Vector3,
@@ -41,7 +78,11 @@ class ADebugOverlay extends Node3D:
 		else:
 			label.font_size = default_font_size
 		
+		labels.append(label)
 		add_child(label)
+		if not _show_labels:
+			label.hide()
+		
 		return self
 		
 	func add_normal_indicator(
@@ -109,6 +150,8 @@ class ADebugOverlay extends Node3D:
 		for vert_xyz in p_arrays[ArrayMesh.ARRAY_VERTEX]:
 			if _show_vertices:
 				add_label("%s" % idx, vert_xyz)
+				if _show_vertex_indicators:
+					add_vertex_indicator(vert_xyz)
 			
 			if _show_normals and has_normals:
 				var normal_xyz: Vector3 = p_arrays[ArrayMesh.ARRAY_NORMAL][idx]
