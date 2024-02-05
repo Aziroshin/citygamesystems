@@ -11,7 +11,9 @@ enum ActivationState {
 	DEACTIVATING
 }
 enum StreetToolMapRayCasterRequestTypeId{
-	CURVE_POINTS
+	CURVE,
+	LEFT_SIDE,
+	RIGHT_SIDE
 }
 @export var arbiter: Node
 # That typing is quite opinionated, of course, and is bound to change as things
@@ -171,7 +173,7 @@ func _on_map_mouse_motion(
 func _on_request_build_street() -> void:
 	request_map_points.emit(
 		StreetToolMapRayCaster.Request.new(
-			StreetToolMapRayCasterRequestTypeId.CURVE_POINTS,
+			StreetToolMapRayCasterRequestTypeId.CURVE,
 			get_state().curve.get_baked_points()
 		)
 	)
@@ -179,19 +181,18 @@ func _on_request_build_street() -> void:
 	# `_on_result_map_points` below will be kicked off.
 
 func _on_result_map_points(p_result: StreetToolMapRayCaster.Result) -> void:
-	for point in p_result.map_points:
-		Cavedig.needle(
-			map,
-			Transform3D(Basis(), point),
-			Vector3(0.85, 0.1, 0.75),
-			0.7,
-			0.05
-		)
+	#for point in p_result.map_points:
+		#Cavedig.needle(
+			#map,
+			#Transform3D(Basis(), point),
+			#Vector3(0.85, 0.1, 0.75),
+			#0.3,
+			#0.02
+		#)
 	_build_street(p_result.map_points)
 
 
 func _build_street(p_map_points: PackedVector3Array) -> void:
-	print("street_tool.gd._on_request_build_street signaled.")
 	
 	#----- Build Street
 	_add_street_to_map(
@@ -204,8 +205,28 @@ func _build_street(p_map_points: PackedVector3Array) -> void:
 	_start_deactivating()
 
 
-func _create_street(_p_map_points: PackedVector3Array) -> MeshInstance3D:
-	return StreetMesh.create_street_mesh()
+func _create_street(p_map_points: PackedVector3Array) -> MeshInstance3D:
+	var profile2d := PackedVector2Array([
+		Vector2(0.5, 0.1),
+		Vector2(0.5, -0.1),
+		Vector2(-0.5, -0.1),
+		Vector2(-0.5, 0.1)
+	])
+	var transforms: Array[Transform3D] = []
+	
+	for i_map_point in range(len(p_map_points)):
+		transforms.append(
+			Transform3D(
+				GeoFoo.get_baked_point_transform(get_state().curve, i_map_point).basis,
+				p_map_points[i_map_point]
+			)
+		)
+	
+	return StreetMesh.create_network_segment(
+		p_map_points,
+		transforms,
+		profile2d
+	)
 
 
 func _add_street_to_map(p_street_mesh: MeshInstance3D) -> void:
