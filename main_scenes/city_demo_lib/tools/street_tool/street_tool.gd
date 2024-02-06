@@ -200,9 +200,6 @@ func _build_street(p_map_points: PackedVector3Array) -> void:
 			p_map_points
 		)
 	)
-	
-	#----- Deactivate Tool
-	_start_deactivating()
 
 
 func _create_street(p_map_points: PackedVector3Array) -> MeshInstance3D:
