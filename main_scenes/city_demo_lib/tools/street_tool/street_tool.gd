@@ -1,7 +1,7 @@
 extends CityToolLib.StreetTool
 
 signal request_activation(p_tool: Node)
-# Used to get the actual corresponding map points to our curve points.
+## Used to get the actual corresponding map points to our curve points.
 signal request_map_points(source_points: PackedVector3Array)
 
 enum ActivationState {
@@ -10,7 +10,7 @@ enum ActivationState {
 	ACTIVE,
 	DEACTIVATING
 }
-enum StreetToolMapRayCasterRequestTypeId{
+enum StreetToolMapRayCasterRequestTypeId {
 	CURVE,
 	LEFT_SIDE,
 	RIGHT_SIDE
@@ -41,8 +41,8 @@ func _check_vars_exist(
 func _on_ready_sanity_checks(
 	# Not having a default forces the site of call to specify an array, making
 	# things more explicit and making it less likely that, by forgetting to
-	# specify an array, a new array is returned by accident, which could lead
-	# to confusing bugs in error reporting.
+	# specify an array, a new array is returned by accident (in scenarios where
+	# the array is passed to more than one sanity-check-style function), whichcould lead to confusing bugs in error reporting.
 	p_err_msgs: PackedStringArray,
 	p_with_asserts := true
 ) -> PackedStringArray:
@@ -86,8 +86,8 @@ func _ready() -> void:
 		)
 
 
-# Button signals and stuff should hook up to this. Hotkeys would probably
-# have to be captured by some node, which then signals here.
+## Button signals and stuff should hook up to this. Hotkeys would probably
+## have to be captured by some node, which then signals here.
 func _on_activation_requested(_p_activator_agent: ToolLibToolActivatorAgent) -> void:
 	if activation_state == ActivationState.INACTIVE:
 		arbiter.request_granted.connect(

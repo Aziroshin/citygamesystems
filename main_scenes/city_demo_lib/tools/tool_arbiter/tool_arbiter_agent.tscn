@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c7wtxtgp78lw5"]
+
+[ext_resource type="Script" path="res://main_scenes/city_demo_lib/tools/tool_arbiter/tool_arbiter_agent.gd" id="1_nb0rh"]
+
+[node name="ToolArbiterAgent" type="Node"]
+script = ExtResource("1_nb0rh")
