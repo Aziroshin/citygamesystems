@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://ijj05fug1chm"]
 
-[ext_resource type="Texture2D" uid="uid://6u6g82nd47ja" path="res://icons/street_tool.png" id="1_jg1vk"]
-[ext_resource type="Texture2D" uid="uid://crukgj4jxx0nk" path="res://icons/street_tool_hover.png" id="2_rrxmf"]
+[ext_resource type="Texture2D" uid="uid://nlo1mp2v1tqu" path="res://assets/icons/icon_base_street_tool.png" id="1_mp04t"]
+[ext_resource type="Texture2D" uid="uid://bh8cdt022plf6" path="res://assets/icons/icon_inactive.png" id="1_pt0an"]
 
 [node name="street_tool_button" type="AspectRatioContainer"]
 anchors_preset = 1
@@ -12,7 +12,10 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 stretch_mode = 0
 
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 2
+texture = ExtResource("1_mp04t")
+
 [node name="TextureButton" type="TextureButton" parent="."]
 layout_mode = 2
-texture_normal = ExtResource("1_jg1vk")
-texture_hover = ExtResource("2_rrxmf")
+texture_normal = ExtResource("1_pt0an")

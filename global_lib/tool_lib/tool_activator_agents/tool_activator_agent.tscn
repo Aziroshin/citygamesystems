@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://d4h1jolt3m8yl"]
+
+[ext_resource type="Script" path="res://global_lib/tool_lib/tool_activator_agents/tool_activator_agent.gd" id="1_5rytu"]
+
+[node name="ToolActivatorAgent" type="Node"]
+script = ExtResource("1_5rytu")

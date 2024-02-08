@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cyuhwi4quaawd"]
+
+[ext_resource type="Script" path="res://main_scenes/city_demo_lib/ui/hud/texture_button_with_static_background.gd" id="1_1q786"]
+
+[node name="TextureButtonWithStaticBackground" type="TextureButton"]
+script = ExtResource("1_1q786")

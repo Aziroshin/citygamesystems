@@ -12,8 +12,8 @@ enum State {
 	TOOL_INACTIVE
 }
 var state: State = State.TOOL_INACTIVE
-# Only assign `Tool` or sub-classes of it here.
-# The inspector doesn't seem to accept sub-classes of `Tool`
+# Only assign `ToolArbiterAgent` or sub-classes of it here.
+# The inspector doesn't seem to accept sub-classes of `ToolArbiterAgent`
 # (maybe godot bug?). To work around that it accepts any `Node` for now.
 # Don't interact with this variable in any other way. Use `tool` instead.
 @export var _arbiter_agent: Node
