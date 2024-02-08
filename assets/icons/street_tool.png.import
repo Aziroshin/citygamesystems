@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://crukgj4jxx0nk"
-path="res://.godot/imported/street_tool_hover.png-4319032dc65468f512141b8419659141.ctex"
+uid="uid://6u6g82nd47ja"
+path="res://.godot/imported/street_tool.png-8660bf7ff78479af56e090bd99043c51.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://icons/street_tool_hover.png"
-dest_files=["res://.godot/imported/street_tool_hover.png-4319032dc65468f512141b8419659141.ctex"]
+source_file="res://assets/icons/street_tool.png"
+dest_files=["res://.godot/imported/street_tool.png-8660bf7ff78479af56e090bd99043c51.ctex"]
 
 [params]
 
