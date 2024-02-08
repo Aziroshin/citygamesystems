@@ -1,11 +1,61 @@
 extends Node
+class_name ToolArbiterAgent
+
+signal request_activation(p_tool: Node)
+@export var arbiter: Node
+@onready var tool := $".."
+enum ActivationState {
+	INACTIVE,
+	WAITING_FOR_ACTIVATION,
+	ACTIVE,
+	DEACTIVATING
+}
+var activation_state := ActivationState.INACTIVE
 
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.
+## Button signals and stuff should hook up to this. Hotkeys would probably
+## have to be captured by some node, which then signals here.
+func _on_activation_requested(_p_activator_agent: ToolLibToolActivatorAgent) -> void:
+	if activation_state == ActivationState.INACTIVE:
+		arbiter.request_granted.connect(
+			_on_request_granted,
+			CONNECT_ONE_SHOT
+		)
+		request_activation.connect(
+			arbiter._on_request_activation,
+			CONNECT_ONE_SHOT
+		)
+		request_activation.emit(self)
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
+func _start_deactivating() -> void:
+	if activation_state == ActivationState.ACTIVE:
+		activation_state = ActivationState.DEACTIVATING
+		_on_deactivate()
+
+
+func _on_deactivation_requested(_p_activator_agent: ToolLibToolActivatorAgent) -> void:
+	_start_deactivating()
+
+
+func _activate_tool() -> void:
+	print("activate tool on tool arbiter agent called")
+	tool.activated.connect(arbiter._on_tool_activated, CONNECT_ONE_SHOT)
+	tool.activate()
+
+
+func _deactivate_tool() -> void:
+	tool.deactivated.connect(arbiter._on_tool_deactivated, CONNECT_ONE_SHOT)
+	tool.deactivate()
+
+
+func _on_request_granted(p_granted: bool) -> void:
+	if p_granted:
+		activation_state = ActivationState.ACTIVE
+		_activate_tool()
+
+
+func _on_deactivate() -> void:
+	_deactivate_tool()
+	activation_state = ActivationState.INACTIVE
+	

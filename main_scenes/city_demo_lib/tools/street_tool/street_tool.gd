@@ -1,21 +1,13 @@
 extends CityToolLib.StreetTool
 
-signal request_activation(p_tool: Node)
 ## Used to get the actual corresponding map points to our curve points.
 signal request_map_points(source_points: PackedVector3Array)
 
-enum ActivationState {
-	INACTIVE,
-	WAITING_FOR_ACTIVATION,
-	ACTIVE,
-	DEACTIVATING
-}
 enum StreetToolMapRayCasterRequestTypeId {
 	CURVE,
 	LEFT_SIDE,
 	RIGHT_SIDE
 }
-@export var arbiter: Node
 # That typing is quite opinionated, of course, and is bound to change as things
 # develop. A better approach would be to have a `street_node_agent` Node
 # between the tool and the map which deals with the map-specific things, but
@@ -23,7 +15,6 @@ enum StreetToolMapRayCasterRequestTypeId {
 # of overhead to development and slow down experimentation.
 @export var map: PlaneMap
 @export var map_ray_caster: StreetToolMapRayCaster
-var activation_state := ActivationState.INACTIVE
 
 
 func _check_vars_exist(
@@ -49,7 +40,7 @@ func _on_ready_sanity_checks(
 	var initial_err_msg_count := len(p_err_msgs)
 	_check_vars_exist(
 		p_err_msgs,
-		{"arbiter": arbiter, "map": map}
+		{"map": map}
 	)
 	
 	# In anticipation of changes to the map setup and type, let's be sure.
@@ -68,12 +59,14 @@ func _on_ready_sanity_checks(
 	return p_err_msgs
 
 
-func _activate() -> void:
+func activate() -> void:
+	super()
 	map.mouse_button.connect(_on_map_mouse_button)
 	map.mouse_motion.connect(_on_map_mouse_motion)
 
 
-func _deactivate() -> void:
+func deactivate() -> void:
+	super()
 	map.mouse_button.disconnect(_on_map_mouse_button)
 	map.mouse_motion.disconnect(_on_map_mouse_motion)
 
@@ -86,44 +79,7 @@ func _ready() -> void:
 		)
 
 
-## Button signals and stuff should hook up to this. Hotkeys would probably
-## have to be captured by some node, which then signals here.
-func _on_activation_requested(_p_activator_agent: ToolLibToolActivatorAgent) -> void:
-	if activation_state == ActivationState.INACTIVE:
-		arbiter.request_granted.connect(
-			_on_request_granted,
-			CONNECT_ONE_SHOT
-		)
-		request_activation.connect(
-			arbiter._on_request_activation,
-			CONNECT_ONE_SHOT
-		)
-		request_activation.emit(self)
 
-
-func _start_deactivating() -> void:
-	if activation_state == ActivationState.ACTIVE:
-		activation_state = ActivationState.DEACTIVATING
-		_on_deactivate()
-
-
-func _on_deactivation_requested(_p_activator_agent: ToolLibToolActivatorAgent) -> void:
-	_start_deactivating()
-
-
-func _on_request_granted(p_granted: bool) -> void:
-	if p_granted:
-		activation_state = ActivationState.ACTIVE
-		_activate()
-		activated.connect(arbiter._on_tool_activated, CONNECT_ONE_SHOT)
-		activated.emit()
-
-
-func _on_deactivate() -> void:
-	_deactivate()
-	activation_state = ActivationState.INACTIVE
-	deactivated.connect(arbiter._on_tool_deactivated, CONNECT_ONE_SHOT)
-	deactivated.emit()
 
 
 func _on_map_mouse_button(

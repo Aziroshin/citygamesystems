@@ -10,6 +10,12 @@ class Tool extends Node:
 	signal activated()
 	signal deactivated()
 	
+	func activate() -> void:
+		activated.emit()
+	
+	func deactivate() -> void:
+		deactivated.emit()
+	
 	# @virtual
 	func _on_activation_requested(_p_activator_agent: ToolLibToolActivatorAgent):
 		pass

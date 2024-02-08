@@ -16,12 +16,12 @@ var state: State = State.TOOL_INACTIVE
 # The inspector doesn't seem to accept sub-classes of `Tool`
 # (maybe godot bug?). To work around that it accepts any `Node` for now.
 # Don't interact with this variable in any other way. Use `tool` instead.
-@export var _tool: Node
-var tool: Tool:
+@export var _arbiter_agent: Node
+var arbiter_agent: ToolArbiterAgent:
 	get:
-		return _tool as Tool
+		return _arbiter_agent as ToolArbiterAgent
 	set(p_value):
-		tool = p_value
+		arbiter_agent = p_value
 
 
 # @virtual
@@ -42,6 +42,7 @@ func _on_activator_toggling() -> void:
 
 
 func _on_tool_activated() -> void:
+	print("tool_activator_agent.gd._on_tool_activated called.")
 	state = State.TOOL_ACTIVE
 	_set_activator_to_active()
 
@@ -52,7 +53,7 @@ func _on_tool_deactivated() -> void:
 
 
 func _ready():
-	request_tool_activation.connect(tool._on_activation_requested)
-	request_tool_deactivation.connect(tool._on_deactivation_requested)
-	tool.activated.connect(_on_tool_activated)
-	tool.deactivated.connect(_on_tool_deactivated)
+	request_tool_activation.connect(arbiter_agent._on_activation_requested)
+	request_tool_deactivation.connect(arbiter_agent._on_deactivation_requested)
+	arbiter_agent.tool.activated.connect(_on_tool_activated)
+	arbiter_agent.tool.deactivated.connect(_on_tool_deactivated)
