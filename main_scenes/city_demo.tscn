@@ -46,6 +46,14 @@ out_handle_material = ExtResource("9_kyia3")
 tangent_material = ExtResource("9_kyia3")
 get_curve_by_signal = true
 
+[node name="debug_visualizer_for_layout_tool" parent="Map" instance=ExtResource("8_55k1a")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+curve = SubResource("Curve3D_ogyrv")
+in_handle_material = ExtResource("9_kyia3")
+out_handle_material = ExtResource("9_kyia3")
+tangent_material = ExtResource("9_kyia3")
+get_curve_by_signal = true
+
 [node name="tool_arbiter" type="Node" parent="."]
 script = ExtResource("5_ar3lr")
 
@@ -129,10 +137,15 @@ _arbiter_agent = NodePath("../../../../LayoutTool/LayoutToolArbiterAgent")
 
 [node name="StreetToolMapRayCaster" parent="." instance=ExtResource("13_ot6hf")]
 
+[connection signal="activated" from="street_tool" to="Map/debug_visualizer_for_street_tool" method="show" flags=3]
 [connection signal="activated" from="street_tool" to="ButtonBar/SubButtonBarsBar/StreetToolSubBar" method="show"]
 [connection signal="curve_changed" from="street_tool" to="Map/debug_visualizer_for_street_tool" method="_on_curve_changed" flags=3]
+[connection signal="deactivated" from="street_tool" to="Map/debug_visualizer_for_street_tool" method="hide" flags=3]
 [connection signal="deactivated" from="street_tool" to="ButtonBar/SubButtonBarsBar/StreetToolSubBar" method="hide"]
 [connection signal="request_map_points" from="street_tool" to="StreetToolMapRayCaster" method="_on_request_map_points" flags=3]
+[connection signal="activated" from="LayoutTool" to="Map/debug_visualizer_for_layout_tool" method="show" flags=3]
+[connection signal="curve_changed" from="LayoutTool" to="Map/debug_visualizer_for_layout_tool" method="_on_curve_changed" flags=3]
+[connection signal="deactivated" from="LayoutTool" to="Map/debug_visualizer_for_layout_tool" method="hide" flags=3]
 [connection signal="button_up" from="ButtonBar/SubButtonBarsBar/StreetToolSubBar/BuildStreetButton" to="street_tool" method="_on_request_build_street" flags=3]
 [connection signal="button_up" from="ButtonBar/MainButtonBar/street_tool_button/TextureButton" to="ButtonBar/MainButtonBar/street_tool_button/TextureButton/texture_button_tool_activator_agent" method="_on_activator_toggling" flags=3]
 [connection signal="button_up" from="ButtonBar/MainButtonBar/arbiter_test_tool_button/TextureButton" to="arbiter_test_tool" method="_on_activation_requested" flags=3]
