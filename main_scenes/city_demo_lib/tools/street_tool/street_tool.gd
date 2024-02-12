@@ -79,9 +79,6 @@ func _ready() -> void:
 		)
 
 
-
-
-
 func _on_map_mouse_button(
 	_p_camera: Camera3D,
 	p_event: InputEventMouseButton,

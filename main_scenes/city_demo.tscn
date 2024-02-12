@@ -57,7 +57,8 @@ map_ray_caster = NodePath("../StreetToolMapRayCaster")
 [node name="StreetToolArbiterAgent" parent="street_tool" node_paths=PackedStringArray("arbiter") instance=ExtResource("8_egxbx")]
 arbiter = NodePath("../../tool_arbiter")
 
-[node name="LayoutTool" parent="." instance=ExtResource("9_0jihv")]
+[node name="LayoutTool" parent="." node_paths=PackedStringArray("map") instance=ExtResource("9_0jihv")]
+map = NodePath("../Map")
 
 [node name="LayoutToolArbiterAgent" parent="LayoutTool" node_paths=PackedStringArray("arbiter") instance=ExtResource("8_egxbx")]
 arbiter = NodePath("../../tool_arbiter")

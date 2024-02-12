@@ -126,7 +126,7 @@ class StreetTool extends CurveTool:
 		_set_curve_tool_type_state(p_state)
 
 
-class LayoutToolState extends CurveToolState:
+class CurveLayoutToolState extends CurveToolState:
 	var max_height: float
 	var snap_nodes: bool
 	var snap_curve: bool
@@ -140,14 +140,27 @@ class LayoutToolState extends CurveToolState:
 		snap_curve = true
 
 
-class LayoutTool extends CurveTool:
+class PolygonLayoutToolState extends ToolState:
+	pass
+
+
+class CurveLayoutTool extends CurveTool:
 	func _init():
-		_state = LayoutToolState.new()
+		_state = CurveLayoutToolState.new()
 
-	func get_state() -> LayoutToolState:
-		return _get_curve_tool_type_state() as LayoutToolState
+	func get_state() -> CurveLayoutToolState:
+		return _get_curve_tool_type_state() as CurveLayoutToolState
 
-	func set_state(p_state: LayoutToolState) -> void:
+	func set_state(p_state: CurveLayoutToolState) -> void:
 		_set_curve_tool_type_state(p_state)
-		
-	
+
+
+class PolygonLayoutTool extends StateDuplicatingUndoableTool:
+	func _init():
+		_state = CurveLayoutToolState.new()
+
+	func get_state() -> PolygonLayoutToolState:
+		return get_base_type_state() as PolygonLayoutToolState
+
+	func set_state(p_state: PolygonLayoutToolState) -> void:
+		set_base_type_state(p_state)

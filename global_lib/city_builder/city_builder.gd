@@ -119,6 +119,63 @@ class SimpleRowHouse extends Building:
 		pass
 		
 		
+class LayoutDistalOutline extends Resource:
+	var layout: Layout
+	var offset_magnitude: float
+	var offset_direction: Vector3
+	
+	func _init(
+		p_layout: Layout,
+		p_offset_magnitude := 1.0,
+		p_offset_direction := Vector3.UP
+	):
+		layout = p_layout
+		offset_magnitude = p_offset_magnitude
+		offset_direction = p_offset_direction
+		
+	func get_offset() -> Vector3:
+		return offset_direction * offset_magnitude
+		
+	func calculate_distal_points():
+		pass
+		
+	func get_points() -> PackedVector3Array:
+		var points := PackedVector3Array()
+		var distal_offset := get_offset()
+		for proximal_point in layout.proximal_outline_points:
+			points.append(proximal_point + distal_offset)
+		return points
+		 
+		
+## A 3D-space bounded by a proximal and a distal set of points, with two
+## resolutions: Corner points and outline points, whereas corner points are
+## among the outline points.
+##
+## In your typical city game, proximal would probably refer to the ground, and
+## distal to the upper bounding curve. A game with buildings hanging from a
+## cavern ceiling or branches, with code that generates buildings from top to
+## bottom, this could be different, however.
+##
+## Corner points are useful to denote the edges of straight facades, whereas
+## the curve points may lend themselves to fancier facade designs as well as
+## other kinds of plot layouts, such as gardens, plazas or street filler parts,
+## whilst still using the corner information to determine, for example, which
+## sides are the "busy" type.
+class Layout extends Node3D:
+	var proximal_outline_points: PackedVector3Array
+	var corner_indexes: PackedVector3Array
+	var distal_outline: LayoutDistalOutline
+	
+	func _init(
+		p_proximal_outline_points := PackedVector3Array(),
+		p_corner_indexes := PackedVector3Array(),
+		p_distal_outline := LayoutDistalOutline.new(self)
+	):
+		proximal_outline_points = p_proximal_outline_points
+		corner_indexes = p_corner_indexes
+		distal_outline = p_distal_outline
+
+
 func generate_simple_row_house(
 	
 ) -> Building:
