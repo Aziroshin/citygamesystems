@@ -42,8 +42,8 @@ class HouseSideFeatures:
 		func set_adjacent(p_value: bool) -> HouseSideFeatures:
 			adjacent = p_value
 			return delegator
-		
-		
+	
+	
 	class Exposedness:
 		var delegator: HouseSideFeatures
 		var busy = false
@@ -62,8 +62,8 @@ class HouseSideFeatures:
 	func _init():
 		kind = Kind.new(self)
 		exposedness = Exposedness.new(self)
-		
-		
+
+
 # Note: The points of a house side describe a 3D line, whereas `y` will need
 # special consideration in generators regarding ground-level and sous-de-terre
 # facade bits.
@@ -85,8 +85,8 @@ class HouseSide:
 		_p_exposedness: HouseSideExposedness
 	):
 		assert(len(p_points) >= 2)
-	
-	
+
+
 # TODO: Holds all `HouseSide` objects for a house and includes sanity
 #  checks to make sure the sides fit in a way it makes sense for a house.
 #  Might also include arrays for various outlines across all the sides, e.g.
@@ -101,15 +101,15 @@ class HouseFrame:
 		pass
 		# Assert/test/push_error whether the set of points from all the
 		# house sides form a loop (good) or not (bad).
-	
-	
+
+
 # Idea-stub & basic "interface" for lowest-common-denominator type erasure
 # for "Building" classes. Time will tell what functionality it'll have, if
 # any.
 class Building:
 	pass
-	
-	
+
+
 class SimpleRowHouse extends Building:
 	var frame: HouseFrame
 	
@@ -117,8 +117,8 @@ class SimpleRowHouse extends Building:
 		_p_frame: HouseFrame
 	):
 		pass
-		
-		
+
+
 class LayoutDistalOutline extends Resource:
 	var layout: Layout
 	var offset_magnitude: float
@@ -145,8 +145,8 @@ class LayoutDistalOutline extends Resource:
 		for proximal_point in layout.proximal_outline_points:
 			points.append(proximal_point + distal_offset)
 		return points
-		 
-		
+
+
 ## A 3D-space bounded by a proximal and a distal set of points, with two
 ## resolutions: Corner points and outline points, whereas corner points are
 ## among the outline points.
@@ -154,7 +154,7 @@ class LayoutDistalOutline extends Resource:
 ## In your typical city game, proximal would probably refer to the ground, and
 ## distal to the upper bounding curve. A game with buildings hanging from a
 ## cavern ceiling or branches, with code that generates buildings from top to
-## bottom, this could be different, however.
+## bottom, this could beg different, however.
 ##
 ## Corner points are useful to denote the edges of straight facades, whereas
 ## the curve points may lend themselves to fancier facade designs as well as

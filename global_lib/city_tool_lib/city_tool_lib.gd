@@ -42,6 +42,7 @@ class CurveTool extends StateDuplicatingUndoableTool:
 		return\
 		get_node_count() == 0\
 		or _get_curve_tool_type_state().node_finalizations[get_last_node_idx()].handle_out
+
 	func get_node_count() -> int:
 		return _get_curve_tool_type_state().curve.point_count
 
