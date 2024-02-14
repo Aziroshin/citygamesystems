@@ -12,11 +12,20 @@ const default_material = preload("res://dev/PlaneMap/MapMaterial.tres")
 @export var noise := default_noise
 @export var material := default_material
 
+var last_mouse_position := Vector3()
+
 signal mouse_motion(
 	p_camera: Camera3D,
 	p_event: InputEventMouseMotion,
-	p_click_position: Vector3,
-	p_click_normal: Vector3,
+	p_position: Vector3,
+	p_normal: Vector3,
+	p_shape: int
+)
+signal mouse_position_change(
+	p_camera: Camera3D,
+	p_event: InputEventMouseMotion,
+	p_position: Vector3,
+	p_normal: Vector3,
 	p_shape: int
 )
 signal mouse_button(
@@ -97,6 +106,14 @@ func _on_mouse_event(
 			p_normal,
 			p_shape
 		)
+		if not p_mouse_position == last_mouse_position:
+			mouse_position_change.emit(
+				p_camera,
+				p_event,
+				p_mouse_position,
+				p_normal,
+				p_shape
+			)
 	if p_event is InputEventMouseButton:
 		mouse_button.emit(
 			p_camera,
@@ -105,5 +122,5 @@ func _on_mouse_event(
 			p_normal,
 			p_shape
 		)
-	
+	last_mouse_position = p_mouse_position
 

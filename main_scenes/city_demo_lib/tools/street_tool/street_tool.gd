@@ -62,13 +62,13 @@ func _on_ready_sanity_checks(
 func activate() -> void:
 	super()
 	map.mouse_button.connect(_on_map_mouse_button)
-	map.mouse_motion.connect(_on_map_mouse_motion)
+	map.mouse_position_change.connect(_on_map_mouse_position_change)
 
 
 func deactivate() -> void:
 	super()
 	map.mouse_button.disconnect(_on_map_mouse_button)
-	map.mouse_motion.disconnect(_on_map_mouse_motion)
+	map.mouse_position_change.disconnect(_on_map_mouse_position_change)
 
 
 func _ready() -> void:
@@ -106,7 +106,7 @@ func _on_map_mouse_button(
 			)
 
 
-func _on_map_mouse_motion(
+func _on_map_mouse_position_change(
 	_p_camera: Camera3D,
 	_p_event: InputEvent,
 	p_mouse_position: Vector3,
