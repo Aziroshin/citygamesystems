@@ -84,7 +84,7 @@ func update() -> void:
 		Curve3DDebugFuncs.get_baked_point_transform(curve, 0)
 	)
 	
-	# We're skipping the the last loop, as this is expecting a "next"
+	# We're skipping the last loop, as this is expecting a "next"
 	# loop in order to work - the last loop will already have been integrated
 	# by the iteration pertaining to its previous loop.
 	for i_loop in len(point_loops) - 1:
