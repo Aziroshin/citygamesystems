@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bmooq3eqguv8d"]
+
+[ext_resource type="Script" path="res://dev/PlaneMap/tool_lib_map_agent/tool_lib_plane_map_agent.gd" id="1_qm0o5"]
+
+[node name="PlaneMapAgent" type="Node"]
+script = ExtResource("1_qm0o5")

@@ -13,7 +13,7 @@ enum StreetToolMapRayCasterRequestTypeId {
 # between the tool and the map which deals with the map-specific things, but
 # for prototyping, and for the purposes of the demo, I feel it'd add quite a bit
 # of overhead to development and slow down experimentation.
-@export var map: PlaneMap
+@export var map_agent: ToolLibMapAgent
 @export var map_ray_caster: StreetToolMapRayCaster
 
 
@@ -40,17 +40,9 @@ func _on_ready_sanity_checks(
 	var initial_err_msg_count := len(p_err_msgs)
 	_check_vars_exist(
 		p_err_msgs,
-		{"map": map}
+		{}
 	)
 	
-	# In anticipation of changes to the map setup and type, let's be sure.
-	if "map" in self:
-		if not map.has_signal("mouse_button"):
-			p_err_msgs.append(
-				"`map` doesn't have a `mouse_button` signal. "
-				+ "`%s` won't work." % get_name()
-			)
-			
 	var errors_found := len(p_err_msgs) - initial_err_msg_count > 0
 	assert(
 		!(p_with_asserts and errors_found),
@@ -61,14 +53,14 @@ func _on_ready_sanity_checks(
 
 func activate() -> void:
 	super()
-	map.mouse_button.connect(_on_map_mouse_button)
-	map.mouse_position_change.connect(_on_map_mouse_position_change)
+	map_agent.mouse_button.connect(_on_map_mouse_button)
+	map_agent.mouse_position_change.connect(_on_map_mouse_position_change)
 
 
 func deactivate() -> void:
 	super()
-	map.mouse_button.disconnect(_on_map_mouse_button)
-	map.mouse_position_change.disconnect(_on_map_mouse_position_change)
+	map_agent.mouse_button.disconnect(_on_map_mouse_button)
+	map_agent.mouse_position_change.disconnect(_on_map_mouse_position_change)
 
 
 func _ready() -> void:
@@ -93,7 +85,7 @@ func _on_map_mouse_button(
 		if is_in_node_adding_mode():
 			var idx := add_node(p_mouse_position, true)
 			Cavedig.needle(
-				map,
+				map_agent.get_map_node(),
 				Transform3D(Basis(), get_state().curve.get_point_position(idx))
 			)
 		else:
@@ -180,5 +172,5 @@ func _create_street(p_map_points: PackedVector3Array) -> MeshInstance3D:
 
 
 func _add_street_to_map(p_street_mesh: MeshInstance3D) -> void:
-	map.add_child(p_street_mesh)
+	map_agent.get_map_node().add_child(p_street_mesh)
 

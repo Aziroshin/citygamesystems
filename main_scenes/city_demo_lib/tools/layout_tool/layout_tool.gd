@@ -1,18 +1,23 @@
 extends CityToolLib.CurveLayoutTool
 
-@export var map: PlaneMap
+## "Imports": CityToolLib
+const CurveCursor = CityToolLib.CurveCursor
+
+@onready var cursor := CurveCursor.new(_get_curve_tool_type_state().curve)
+@onready var last_mouse_position := Vector3()
+@export var map_agent: ToolLibMapAgent
 
 
 func activate() -> void:
 	super()
-	map.mouse_button.connect(_on_map_mouse_button)
-	map.mouse_motion.connect(_on_map_mouse_motion)
+	map_agent.mouse_button.connect(_on_map_mouse_button)
+	map_agent.mouse_position_change.connect(_on_map_mouse_position_change)
 
 
 func deactivate() -> void:
 	super()
-	map.mouse_button.disconnect(_on_map_mouse_button)
-	map.mouse_motion.disconnect(_on_map_mouse_motion)
+	map_agent.mouse_button.disconnect(_on_map_mouse_button)
+	map_agent.mouse_position_change.disconnect(_on_map_mouse_position_change)
 
 
 func _on_map_mouse_button(
@@ -31,7 +36,7 @@ func _on_map_mouse_button(
 		if get_node_count() >= 2:
 			cursor.current_idx = add_node(p_mouse_position, UNFINALIZED)
 		Cavedig.needle(
-			map,
+			map_agent.get_map_node(),
 			Transform3D(Basis(), get_state().curve.get_point_position(cursor.current_idx))
 		)
 
