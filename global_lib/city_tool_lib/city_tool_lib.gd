@@ -17,6 +17,43 @@ class CurveToolState extends ToolState:
 	var node_finalizations: Array[NodeFinalization] = []
 
 
+class CurveCursor extends RefCounted:
+	const READ_ONLY_ERR := "Attempted to set read-only property."
+	var _curve: Curve3D
+	var current_idx := 0
+	
+	
+	var previous_idx_ro: int:
+		get:
+			return current_idx - 1
+		set(p_value):
+			push_error(READ_ONLY_ERR)
+	var next_idx_ro: int:
+		get:
+			return current_idx + 1
+		set(p_value):
+			push_error(READ_ONLY_ERR)
+	var previous_position_ro: Vector3:
+		get:
+			return _curve.get_point_position(previous_idx_ro)
+		set(p_value):
+			push_error(READ_ONLY_ERR)
+	var current_position_ro: Vector3:
+		get:
+			return _curve.get_point_position(current_idx)
+		set(p_value):
+			push_error(READ_ONLY_ERR)
+	var next_position_ro: Vector3:
+		get:
+			return _curve.get_point_position(next_idx_ro)
+		set(p_value):
+			push_error(READ_ONLY_ERR)
+		
+	
+	func _init(p_curve: Curve3D):
+		_curve = p_curve
+	
+
 class CurveTool extends StateDuplicatingUndoableTool:
 	# Since the idea of one atomic change is different for the tool than
 	# it is for `Curve3D`, instead of the curve's signal we use our own.
@@ -28,6 +65,8 @@ class CurveTool extends StateDuplicatingUndoableTool:
 	# nodes extending this here class.
 	const UNFINALIZED := false
 	const FINALIZED := true
+	var first_in_point_position_default := Vector3(5.0, 0.0, 5.0)
+	var first_out_point_position_default := -Vector3(5.0, 0.0, 5.0)
 
 	func _get_curve_tool_type_state() -> CurveToolState:
 		return get_base_type_state() as CurveToolState
@@ -54,15 +93,15 @@ class CurveTool extends StateDuplicatingUndoableTool:
 
 	func add_node(
 		p_position: Vector3,
-		p_finalized: bool
+		p_finalized: bool,
 	) -> int:
 		var state := _get_curve_tool_type_state()
 		_get_curve_tool_type_state().curve.add_point(p_position)
 		var idx := get_last_node_idx()
 		
 		if idx == 0:
-			_get_curve_tool_type_state().curve.set_point_in(idx, Vector3(5.0, 0.0, 5.0))
-			_get_curve_tool_type_state().curve.set_point_out(idx, -Vector3(5.0, 0.0, 5.0))
+			_get_curve_tool_type_state().curve.set_point_in(idx, first_in_point_position_default)
+			_get_curve_tool_type_state().curve.set_point_out(idx, first_out_point_position_default)
 		else:
 			var in_point_position\
 			:= state.curve.get_point_out(idx - 1)\
@@ -105,7 +144,7 @@ class CurveTool extends StateDuplicatingUndoableTool:
 		p_position: Vector3,
 		p_finalized: bool
 	) -> void:
-		_get_curve_tool_type_state().curve.set_point_out(p_idx, p_position)
+		_get_curve_tool_type_state().curve.set_point_in(p_idx, p_position)
 		_get_curve_tool_type_state().node_finalizations[p_idx].handle_in = p_finalized
 		emit_curve_changed()
 		if p_finalized:

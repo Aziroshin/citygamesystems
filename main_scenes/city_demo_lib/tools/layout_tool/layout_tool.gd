@@ -26,32 +26,46 @@ func _on_map_mouse_button(
 	# a way modular enough that it won't be a pain to integrate the tool into
 	# other codebases.
 	if p_event.button_index == MOUSE_BUTTON_LEFT and p_event.pressed:
-		if is_in_node_adding_mode():
-			var idx := add_node(p_mouse_position, true)
-			Cavedig.needle(
-				map,
-				Transform3D(Basis(), get_state().curve.get_point_position(idx))
-			)
-		else:
-			set_node_handle_out_point(
-				get_last_node_idx(),
-				p_mouse_position - get_state().curve.get_point_position(get_last_node_idx()),
-				FINALIZED
-			)
+		if get_node_count() == 0:
+			cursor.current_idx = add_node(p_mouse_position, UNFINALIZED)
+		if get_node_count() >= 2:
+			cursor.current_idx = add_node(p_mouse_position, UNFINALIZED)
+		Cavedig.needle(
+			map,
+			Transform3D(Basis(), get_state().curve.get_point_position(cursor.current_idx))
+		)
 
 
-func _on_map_mouse_motion(
+func _on_map_mouse_position_change(
 	_p_camera: Camera3D,
 	_p_event: InputEvent,
 	p_mouse_position: Vector3,
 	_p_normal: Vector3,
 	_p_shape: int
 ) -> void:
-	if\
-	get_node_count() > 0\
-	and not get_state().node_finalizations[get_last_node_idx()].handle_out:
+	if get_node_count() == 1 and not p_mouse_position == cursor.current_position_ro:
+		cursor.current_idx = add_node(p_mouse_position, FINALIZED)
+	if get_node_count() >= 2:
+		if p_mouse_position == cursor.previous_position_ro:
+			return
+		set_node_position(cursor.current_idx, p_mouse_position, false)
+		
+		var current_node_in_point := cursor.previous_position_ro - cursor.current_position_ro
+		var current_node_out_point := -(cursor.previous_position_ro - cursor.current_position_ro)
+		var previous_node_out_point := cursor.current_position_ro - cursor.previous_position_ro
+		
+		set_node_handle_in_point(
+			cursor.current_idx,
+			current_node_in_point,
+			UNFINALIZED
+		)
 		set_node_handle_out_point(
-			get_last_node_idx(),
-			p_mouse_position - get_state().curve.get_point_position(get_last_node_idx()),
+			cursor.current_idx,
+			current_node_out_point,
+			UNFINALIZED
+		)
+		set_node_handle_out_point(
+			cursor.previous_idx_ro,
+			previous_node_out_point,
 			UNFINALIZED
 		)
