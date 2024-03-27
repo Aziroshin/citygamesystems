@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://e1d4uxeyog88"]
+[gd_scene load_steps=24 format=3 uid="uid://e1d4uxeyog88"]
 
 [ext_resource type="Script" path="res://main_scenes/city_demo.gd" id="1_elgex"]
 [ext_resource type="PackedScene" uid="uid://t6fjyxuaed8g" path="res://world_objects/player_world_interface/player_world_interface.tscn" id="2_16h52"]
@@ -7,6 +7,8 @@
 [ext_resource type="PackedScene" uid="uid://ijj05fug1chm" path="res://main_scenes/city_demo_lib/ui/hud/street_tool_button.tscn" id="4_jdok4"]
 [ext_resource type="Script" path="res://main_scenes/city_demo_lib/tools/tool_arbiter/tool_arbiter.gd" id="5_ar3lr"]
 [ext_resource type="Script" path="res://main_scenes/city_demo_lib/tools/street_tool/street_tool.gd" id="5_knyav"]
+[ext_resource type="PackedScene" uid="uid://4eosp6wvjrgl" path="res://main_scenes/city_demo_lib/world_object_lib/life_cyclers/life_cyclers.tscn" id="6_07ip7"]
+[ext_resource type="Script" path="res://main_scenes/city_demo_lib/world_objects/city_game_life_cyclers.gd" id="7_njors"]
 [ext_resource type="PackedScene" uid="uid://dvj7tkpwy5s6u" path="res://dev/curve_debug_visualizer/curve3d_debug_visualizer.tscn" id="8_55k1a"]
 [ext_resource type="Texture2D" uid="uid://dxovxwyj5arqf" path="res://icon.svg" id="8_btgyr"]
 [ext_resource type="PackedScene" uid="uid://c7wtxtgp78lw5" path="res://main_scenes/city_demo_lib/tools/tool_arbiter/tool_arbiter_agent.tscn" id="8_egxbx"]
@@ -14,10 +16,12 @@
 [ext_resource type="Material" uid="uid://bqywgg0jxxs4q" path="res://dev/curve_debug_visualizer/tangent_material.tres" id="9_kyia3"]
 [ext_resource type="PackedScene" uid="uid://bmooq3eqguv8d" path="res://dev/PlaneMap/tool_lib_map_agent/tool_lib_plane_map_agent.tscn" id="9_yqsrf"]
 [ext_resource type="PackedScene" uid="uid://cyuhwi4quaawd" path="res://main_scenes/city_demo_lib/ui/hud/texture_button_with_static_background.tscn" id="10_e8jwe"]
+[ext_resource type="PackedScene" uid="uid://b2rj4ji58dbdf" path="res://main_scenes/city_demo_lib/tools/layout_tool/layout_tool_snap_positioner/layout_tool_snap_positioner.tscn" id="11_651x8"]
 [ext_resource type="Texture2D" uid="uid://b4vbnol4k35wg" path="res://assets/icons/icon_base_layout_tool.png" id="11_knyq5"]
 [ext_resource type="Texture2D" uid="uid://cwcos0loiwidy" path="res://assets/icons/icon_active.png" id="12_eg83g"]
 [ext_resource type="Texture2D" uid="uid://bh8cdt022plf6" path="res://assets/icons/icon_inactive.png" id="13_4mrrs"]
 [ext_resource type="PackedScene" uid="uid://dv7hpxefaw1ni" path="res://main_scenes/city_demo_lib/tools/street_tool/street_tool_map_ray_caster.tscn" id="13_ot6hf"]
+[ext_resource type="PackedScene" uid="uid://bg0qc18ksumc7" path="res://main_scenes/city_demo_lib/collider_manager/collider_manager.tscn" id="21_r70eu"]
 
 [sub_resource type="Curve3D" id="Curve3D_ogyrv"]
 
@@ -55,6 +59,12 @@ out_handle_material = ExtResource("9_kyia3")
 tangent_material = ExtResource("9_kyia3")
 get_curve_by_signal = true
 
+[node name="ColliderManager" parent="." instance=ExtResource("21_r70eu")]
+
+[node name="LifeCyclers" parent="." node_paths=PackedStringArray("collider_manager") instance=ExtResource("6_07ip7")]
+script = ExtResource("7_njors")
+collider_manager = NodePath("../ColliderManager")
+
 [node name="tool_arbiter" type="Node" parent="."]
 script = ExtResource("5_ar3lr")
 
@@ -69,14 +79,18 @@ arbiter = NodePath("../../tool_arbiter")
 [node name="PlaneMapAgent" parent="street_tool" node_paths=PackedStringArray("map") instance=ExtResource("9_yqsrf")]
 map = NodePath("../../Map")
 
-[node name="LayoutTool" parent="." node_paths=PackedStringArray("map_agent") instance=ExtResource("9_0jihv")]
+[node name="LayoutTool" parent="." node_paths=PackedStringArray("map_agent", "life_cyclers") instance=ExtResource("9_0jihv")]
 map_agent = NodePath("PlaneMapAgent")
+life_cyclers = NodePath("../LifeCyclers")
 
 [node name="LayoutToolArbiterAgent" parent="LayoutTool" node_paths=PackedStringArray("arbiter") instance=ExtResource("8_egxbx")]
 arbiter = NodePath("../../tool_arbiter")
 
 [node name="PlaneMapAgent" parent="LayoutTool" node_paths=PackedStringArray("map") instance=ExtResource("9_yqsrf")]
 map = NodePath("../../Map")
+
+[node name="ToolSnapPositioner" parent="LayoutTool/PlaneMapAgent" node_paths=PackedStringArray("map_agent") instance=ExtResource("11_651x8")]
+map_agent = NodePath("..")
 
 [node name="arbiter_test_tool" type="Node" parent="."]
 script = ExtResource("5_knyav")
@@ -104,6 +118,19 @@ size_flags_horizontal = 0
 size_flags_vertical = 0
 
 [node name="BuildStreetButton" type="TextureButton" parent="ButtonBar/SubButtonBarsBar/StreetToolSubBar"]
+custom_minimum_size = Vector2(48, 48)
+layout_mode = 2
+size_flags_vertical = 3
+texture_normal = ExtResource("8_btgyr")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="LayoutToolSubBar" type="VBoxContainer" parent="ButtonBar/SubButtonBarsBar"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="BuildLayoutButton" type="TextureButton" parent="ButtonBar/SubButtonBarsBar/LayoutToolSubBar"]
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 size_flags_vertical = 3
@@ -143,6 +170,8 @@ _arbiter_agent = NodePath("../../../../LayoutTool/LayoutToolArbiterAgent")
 
 [node name="StreetToolMapRayCaster" parent="." instance=ExtResource("13_ot6hf")]
 
+[node name="LayoutToolMapRayCaster" parent="." instance=ExtResource("13_ot6hf")]
+
 [connection signal="activated" from="street_tool" to="Map/debug_visualizer_for_street_tool" method="show" flags=3]
 [connection signal="activated" from="street_tool" to="ButtonBar/SubButtonBarsBar/StreetToolSubBar" method="show"]
 [connection signal="curve_changed" from="street_tool" to="Map/debug_visualizer_for_street_tool" method="_on_curve_changed" flags=3]
@@ -152,11 +181,14 @@ _arbiter_agent = NodePath("../../../../LayoutTool/LayoutToolArbiterAgent")
 [connection signal="activated" from="LayoutTool" to="Map/debug_visualizer_for_layout_tool" method="show" flags=3]
 [connection signal="curve_changed" from="LayoutTool" to="Map/debug_visualizer_for_layout_tool" method="_on_curve_changed" flags=3]
 [connection signal="deactivated" from="LayoutTool" to="Map/debug_visualizer_for_layout_tool" method="hide" flags=3]
+[connection signal="request_map_points" from="LayoutTool" to="LayoutToolMapRayCaster" method="_on_request_map_points" flags=3]
 [connection signal="button_up" from="ButtonBar/SubButtonBarsBar/StreetToolSubBar/BuildStreetButton" to="street_tool" method="_on_request_build_street" flags=3]
+[connection signal="button_up" from="ButtonBar/SubButtonBarsBar/LayoutToolSubBar/BuildLayoutButton" to="LayoutTool" method="_on_request_build_layout" flags=3]
 [connection signal="button_up" from="ButtonBar/MainButtonBar/street_tool_button/TextureButton" to="ButtonBar/MainButtonBar/street_tool_button/TextureButton/texture_button_tool_activator_agent" method="_on_activator_toggling" flags=3]
 [connection signal="button_up" from="ButtonBar/MainButtonBar/arbiter_test_tool_button/TextureButton" to="arbiter_test_tool" method="_on_activation_requested" flags=3]
 [connection signal="button_up" from="ButtonBar/MainButtonBar/LayoutToolButton" to="ButtonBar/MainButtonBar/LayoutToolButton/LayoutToolButtonActivator" method="_on_activator_toggling" flags=3]
 [connection signal="result_map_points" from="StreetToolMapRayCaster" to="street_tool" method="_on_result_map_points" flags=3]
+[connection signal="result_map_points" from="LayoutToolMapRayCaster" to="LayoutTool" method="_on_result_map_points" flags=3]
 
 [editable path="ButtonBar/MainButtonBar/street_tool_button"]
 [editable path="ButtonBar/MainButtonBar/arbiter_test_tool_button"]

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bg0qc18ksumc7"]
+
+[ext_resource type="Script" path="res://main_scenes/city_demo_lib/collider_manager/collider_manager.gd" id="1_3bt6x"]
+
+[node name="ColliderManager" type="Node"]
+script = ExtResource("1_3bt6x")

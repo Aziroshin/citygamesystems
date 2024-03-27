@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://bn3jdv45ra2v0"]
+
+[ext_resource type="Script" path="res://global_lib/tool_lib/tool_positioners/tool_colliding_positioner.gd" id="1_5ekyb"]
+
+[node name="ToolCollidingPositioner" type="Node"]
+script = ExtResource("1_5ekyb")
+default_collider_radius = null

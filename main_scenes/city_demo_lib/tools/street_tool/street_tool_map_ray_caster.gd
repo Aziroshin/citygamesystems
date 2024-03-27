@@ -1,5 +1,5 @@
 extends RayCast3D
-class_name StreetToolMapRayCaster
+class_name ToolMapRayCaster
 
 ## Offset around the point of origin of the raycast. Will cast from the offset
 ## point in the direction of the negative of the offset point (casting through

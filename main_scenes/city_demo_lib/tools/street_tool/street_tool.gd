@@ -8,13 +8,8 @@ enum StreetToolMapRayCasterRequestTypeId {
 	LEFT_SIDE,
 	RIGHT_SIDE
 }
-# That typing is quite opinionated, of course, and is bound to change as things
-# develop. A better approach would be to have a `street_node_agent` Node
-# between the tool and the map which deals with the map-specific things, but
-# for prototyping, and for the purposes of the demo, I feel it'd add quite a bit
-# of overhead to development and slow down experimentation.
 @export var map_agent: ToolLibMapAgent
-@export var map_ray_caster: StreetToolMapRayCaster
+@export var map_ray_caster: ToolMapRayCaster
 
 
 func _check_vars_exist(
@@ -117,7 +112,7 @@ func _on_map_mouse_position_change(
 
 func _on_request_build_street() -> void:
 	request_map_points.emit(
-		StreetToolMapRayCaster.Request.new(
+		ToolMapRayCaster.Request.new(
 			StreetToolMapRayCasterRequestTypeId.CURVE,
 			get_state().curve.get_baked_points()
 		)
@@ -125,10 +120,11 @@ func _on_request_build_street() -> void:
 	# Now it's up to `StreetToolMapRayCaster` to answer back. Once it does,
 	# `_on_result_map_points` below will be kicked off.
 
-func _on_result_map_points(p_result: StreetToolMapRayCaster.Result) -> void:
+
+func _on_result_map_points(p_result: ToolMapRayCaster.Result) -> void:
 	#for point in p_result.map_points:
 		#Cavedig.needle(
-			#map,
+			#map_agent.get_map_node(),
 			#Transform3D(Basis(), point),
 			#Vector3(0.85, 0.1, 0.75),
 			#0.3,

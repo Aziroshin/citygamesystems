@@ -6,6 +6,7 @@ class_name ToolPlaneMapAgent
 
 
 func _ready() -> void:
+	super()
 	map.mouse_motion.connect(_on_mouse_motion)
 	map.mouse_position_change.connect(_on_mouse_position_change)
 	map.mouse_button.connect(_on_mouse_button)

@@ -25,6 +25,20 @@ static func create_array_mesh(
 	return array_mesh
 
 
+static func get_closest_point(
+	p_reference_point: Vector3,
+	p_points: PackedVector3Array
+) -> Vector3:
+	var closest_point_candidates_by_length: Dictionary = {}
+	
+	for closest_point_candidate in p_points:
+		closest_point_candidates_by_length[
+			(closest_point_candidate - p_reference_point).length()
+		] = closest_point_candidate
+	
+	return closest_point_candidates_by_length[min(closest_point_candidates_by_length.keys())]
+
+
 ## Returns the closest offset to `point_idx` or `0.0` if the offset is `NaN`.
 ## If the offset is `NaN`, it will also push an error.
 static func get_closest_offset_on_curve_or_zero(

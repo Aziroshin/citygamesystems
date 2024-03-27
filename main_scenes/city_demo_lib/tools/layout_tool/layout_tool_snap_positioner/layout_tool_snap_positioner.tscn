@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://b2rj4ji58dbdf"]
+
+[ext_resource type="Script" path="res://main_scenes/city_demo_lib/tools/layout_tool/layout_tool_snap_positioner/layout_tool_snap_positioner.gd" id="1_ufcf8"]
+
+[node name="ToolSnapPositioner" type="Node"]
+script = ExtResource("1_ufcf8")

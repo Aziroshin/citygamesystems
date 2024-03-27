@@ -1,6 +1,12 @@
 extends Node
 class_name ToolLibMapAgent
 
+# Dependencies:
+# - ToolLibToolMapPositioner
+
+var positioner := ToolLibToolMapPositioner.new()
+
+
 signal mouse_motion(
 	p_camera: Camera3D,
 	p_event: InputEventMouseMotion,
@@ -22,6 +28,12 @@ signal mouse_button(
 	p_click_normal: Vector3,
 	p_shape: int
 )
+
+
+func _ready():
+	for child in get_children():
+		if child is ToolLibToolMapPositioner:
+			positioner = child
 
 
 # Override in sub-class.
@@ -62,3 +74,7 @@ func _on_mouse_button(
 	p_shape: int
 ) -> void:
 	mouse_button.emit(p_camera, p_event, p_click_position, p_click_normal, p_shape)
+
+
+func get_position(p_reference_position: Vector3) -> Vector3:
+	return positioner.get_position(p_reference_position)
