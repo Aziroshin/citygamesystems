@@ -21,14 +21,14 @@ var position := Vector3()
 class CollisionObjects:
 	var _objects: Dictionary = {}
 	
-	func add(object: CollisionObject3D) -> CollisionObject3D:
-		_objects[object.get_instance_id()] = object
-		return object
+	func add(p_object: CollisionObject3D) -> CollisionObject3D:
+		_objects[p_object.get_instance_id()] = p_object
+		return p_object
 	
 	
-	func remove(object: CollisionObject3D) -> CollisionObject3D:
-		_objects.erase(object.get_instance_id())
-		return object
+	func remove(p_object: CollisionObject3D) -> CollisionObject3D:
+		_objects.erase(p_object.get_instance_id())
+		return p_object
 	
 	
 	func get_all() -> Array[CollisionObject3D]:
@@ -47,9 +47,9 @@ func _create_default_shape_3d() -> Shape3D:
 	return shape
 
 
-func _create_collision_shape_3d(shape: Shape3D) -> CollisionShape3D:
+func _create_collision_shape_3d(p_shape: Shape3D) -> CollisionShape3D:
 	var collision_shape_3d := CollisionShape3D.new()
-	collision_shape_3d.shape = shape
+	collision_shape_3d.shape = p_shape
 	return collision_shape_3d
 
 
