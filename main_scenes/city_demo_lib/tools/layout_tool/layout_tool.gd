@@ -102,7 +102,17 @@ func _on_map_mouse_position_change(
 		
 		if tool_position == cursor.previous_position_ro:
 			return
-		
+			
+		for i_node in get_state().curve.point_count:
+			var node_position := get_state().curve.get_point_position(i_node)
+			if\
+			not i_node == 0\
+			and not i_node == get_last_node_idx()\
+			and tool_position == node_position:
+				# TODO: Give proper (visual) feedback.
+				print("[LayoutTool] Can't place new corner on an existing one.")
+				return
+			
 		set_node_position(cursor.current_idx, tool_position, UNFINALIZED)
 		
 		var current_node_in_point := cursor.previous_position_ro - cursor.current_position_ro
