@@ -49,18 +49,23 @@ func _on_map_mouse_button(
 	_p_normal: Vector3,
 	_p_shape: int
 ) -> void:
+	var tool_position := map_agent.get_position(p_mouse_position)
+	
+	if tool_position == cursor.previous_position_ro:
+		return
+		
 	# TODO: This will need to be properly tied into actions, but also in
 	# a way modular enough that it won't be a pain to integrate the tool into
 	# other codebases.
 	if p_event.button_index == MOUSE_BUTTON_LEFT and p_event.pressed:
 		if get_node_count() == 0:
 			cursor.current_idx = add_node_with_collider(
-				map_agent.get_position(p_mouse_position),
+				tool_position,
 				UNFINALIZED
 			)
 		if get_node_count() >= 2:
 			cursor.current_idx = add_node_with_collider(
-				map_agent.get_position(p_mouse_position),
+				tool_position,
 				UNFINALIZED
 			)
 		
@@ -85,6 +90,7 @@ func _on_map_mouse_position_change(
 	if get_node_count() == 1 and not p_mouse_position == cursor.current_position_ro:
 		cursor.current_idx = add_node(p_mouse_position, FINALIZED)
 	if get_node_count() >= 2:
+		
 		if tool_position == cursor.previous_position_ro:
 			return
 		
