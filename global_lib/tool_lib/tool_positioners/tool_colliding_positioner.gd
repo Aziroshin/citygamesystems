@@ -67,29 +67,19 @@ func _ready() -> void:
 
 func get_position(p_reference_position: Vector3) -> Vector3:
 	update_reference_position(p_reference_position)
-	print("tool_colliding_positioner.gd: POSITION: %s" % position)
 	return position
 
 
 func update_reference_position(p_position: Vector3) -> void:
-	print("tool_colliding_positioner.gd: refpos")
 	reference_position = p_position
 	_update_position()
-	#if len(colliding_objects.get_all()) == 0:
-		#position = reference_position
 
 
 # Override.
 func _update_position() -> void:
 	if len(colliding_objects.get_all()) > 0:
-		print("tool_colliding_positioner.gd: _update_position, colliding objects are there.")
-		# TODO [bug]: It is taking the position of the object the collider collides with
-		# just fine, but somehow the curve still ends up getting positioned at what seems
-		# to be the beginning point of the collision.
-		print(collider.transform.origin, " || ", colliding_objects.get_all()[0].transform.origin)
 		position = colliding_objects.get_all()[0].transform.origin
 	else:
-		print("tool_colliding_positioner.gd: _update_position: no colliding objects.")
 		position = collider.transform.origin
 
 
@@ -113,12 +103,10 @@ func _on_reference_position_change(p_position: Vector3) -> void:
 
 
 func _on_area_entered(p_area: Area3D) -> void:
-	print("indexed_area_tool_collider: _on_area_entered")
 	_add_colliding_object(p_area)
 
 
 func _on_area_exited(p_area: Area3D) -> void:
-	print("indexed_area_tool_collider: _on_area_exited")
 	_remove_colliding_object(p_area)
 
 
