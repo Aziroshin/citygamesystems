@@ -54,6 +54,15 @@ func _on_map_mouse_button(
 	if tool_position == cursor.previous_position_ro:
 		return
 		
+	if get_node_count() >= 3:
+		var second_previous_position := get_state().curve.get_point_position(cursor.current_idx-2)
+		var previous_to_second_previous := second_previous_position - cursor.previous_position_ro
+		var previous_to_current :=  cursor.current_position_ro - cursor.previous_position_ro
+		if previous_to_second_previous.normalized().dot(previous_to_current.normalized()) > 0.9:
+			# TODO: Give proper (visual) feedback.
+			print("[Layout Tool]: Angle too narrow.")
+			return
+		
 	# TODO: This will need to be properly tied into actions, but also in
 	# a way modular enough that it won't be a pain to integrate the tool into
 	# other codebases.
