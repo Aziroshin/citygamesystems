@@ -94,7 +94,7 @@ func _on_map_mouse_position_change(
 		if tool_position == cursor.previous_position_ro:
 			return
 		
-		set_node_position(cursor.current_idx, tool_position, false)
+		set_node_position(cursor.current_idx, tool_position, UNFINALIZED)
 		
 		var current_node_in_point := cursor.previous_position_ro - cursor.current_position_ro
 		var current_node_out_point := -(cursor.previous_position_ro - cursor.current_position_ro)
