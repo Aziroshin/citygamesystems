@@ -54,9 +54,15 @@ func _on_map_mouse_button(
 	# other codebases.
 	if p_event.button_index == MOUSE_BUTTON_LEFT and p_event.pressed:
 		if get_node_count() == 0:
-			cursor.current_idx = add_node_with_collider(p_mouse_position, UNFINALIZED)
+			cursor.current_idx = add_node_with_collider(
+				map_agent.get_position(p_mouse_position),
+				UNFINALIZED
+			)
 		if get_node_count() >= 2:
-			cursor.current_idx = add_node_with_collider(p_mouse_position, UNFINALIZED)
+			cursor.current_idx = add_node_with_collider(
+				map_agent.get_position(p_mouse_position),
+				UNFINALIZED
+			)
 		
 		Cavedig.needle(
 			map_agent.get_map_node(),
