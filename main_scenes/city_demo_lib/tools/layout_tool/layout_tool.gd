@@ -27,6 +27,14 @@ func deactivate() -> void:
 	map_agent.mouse_position_change.disconnect(_on_map_mouse_position_change)
 
 
+func add_node(
+	p_position: Vector3,
+	p_finalized: bool,
+) -> int:
+	cursor.current_idx = super(p_position, p_finalized)
+	return cursor.current_idx
+
+
 func add_node_with_collider(
 		p_position: Vector3,
 		p_finalized: bool,
@@ -68,12 +76,12 @@ func _on_map_mouse_button(
 	# other codebases.
 	if p_event.button_index == MOUSE_BUTTON_LEFT and p_event.pressed:
 		if get_node_count() == 0:
-			cursor.current_idx = add_node_with_collider(
+			add_node_with_collider(
 				tool_position,
 				UNFINALIZED
 			)
 		if get_node_count() >= 2:
-			cursor.current_idx = add_node_with_collider(
+			add_node_with_collider(
 				tool_position,
 				UNFINALIZED
 			)
