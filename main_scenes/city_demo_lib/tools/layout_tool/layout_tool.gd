@@ -11,9 +11,14 @@ enum LayoutToolMapRayCasterRequestTypeId {
 }
 @export var map_agent: ToolLibMapAgent
 @export var life_cyclers: WorldObjectLifeCyclers
+## Used for the colliders the tool uses to detect the boundary and corners of
+## the area it's working with. Not related to the colliders of the layout
+## objects themselves.
+@export var collision_radius := 1.0
 @onready var cursor := CurveCursor.new(_get_curve_tool_type_state().curve)
 @onready var last_mouse_position := Vector3()
 var corner_colliders: Array[IndexedAreaToolCollider] = []
+var boundary_colliders: Array[IndexedAreaToolCollider] = []
 
 func activate() -> void:
 	super()
@@ -40,14 +45,45 @@ func add_node_with_collider(
 		p_finalized: bool,
 	) -> int:
 		var idx := add_node(p_position, p_finalized)
-		var collider := IndexedAreaToolCollider.new(
+		
+		var node_shape := SphereShape3D.new()
+		node_shape.radius = collision_radius
+		var node_collider := IndexedAreaToolCollider.new(
 			self,
+			node_shape,
 			idx
 		)
-		map_agent.get_map_node().add_child(collider)
-		collider.transform.origin = p_position
-		collider.input_ray_pickable = false
-		corner_colliders.append(collider)
+		map_agent.get_map_node().add_child(node_collider)
+		node_collider.transform.origin = p_position
+		node_collider.input_ray_pickable = false
+		corner_colliders.append(node_collider)
+		
+		if idx > 0:
+			var position_a := get_state().curve.get_point_position(idx - 2)
+			var position_b := get_state().curve.get_point_position(idx - 1)
+			
+			var edge_shape := CylinderShape3D.new()
+			edge_shape.radius = collision_radius
+			edge_shape.height = (position_a - position_b).length()
+			var boundary_collider := IndexedAreaToolCollider.new(
+				self,
+				edge_shape,
+				idx - 2
+			)
+			map_agent.get_map_node().add_child(boundary_collider)
+			
+			var z_at := (position_b - position_a).normalized()
+			var x_at := Vector3.UP.cross(z_at).normalized()
+			var y_at := z_at.cross(x_at).normalized()
+			var basis_at := Basis(x_at, z_at, y_at)
+			boundary_collider.transform = Transform3D(
+				basis_at,
+				position_a.lerp(position_b, 0.5)
+			)
+			
+			boundary_collider.input_ray_pickable = false
+			boundary_colliders.append(boundary_collider)
+		
 		return idx
 
 func _on_map_mouse_button(
@@ -120,6 +156,32 @@ func _on_map_mouse_position_change(
 				# TODO: Give proper (visual) feedback.
 				print("[LayoutTool] Can't place new corner on an existing one.")
 				return
+		
+		var first_node_position := get_state().curve.get_point_position(0)
+		var current_segment_node_a := cursor.previous_position_ro
+		var current_segment_node_b := tool_position
+		
+		for i_node in get_state().curve.point_count - 3:
+			var other_segment_node_a := get_state().curve.get_point_position(i_node)
+			var other_segment_node_b := get_state().curve.get_point_position(i_node+1)
+			 
+			# [UNSAFE: BEGIN]
+			# Returns Variant: null or Vector2
+			#match Geometry2D.segment_intersects_segment(
+				#Vector2(current_segment_node_a.x, current_segment_node_a.z),
+				#Vector2(current_segment_node_b.x, current_segment_node_b.z),
+				#Vector2(other_segment_node_a.x, other_segment_node_a.z),
+				#Vector2(other_segment_node_b.x, other_segment_node_b.z)
+			#):
+				#null:
+					#pass
+				#var intersection_point_vector2:
+					#if not tool_position == first_node_position:
+						## TODO: Give proper (visual) feedback.
+						#print("[LayoutTool] Layout boundary can't intersect itself.")
+						#return
+			# [UNSAFE: END]
+			
 			
 		set_node_position(cursor.current_idx, tool_position, UNFINALIZED)
 		
