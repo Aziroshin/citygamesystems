@@ -21,5 +21,5 @@ func _init(p_collider_manager: ColliderManager):
 
 func _ready() -> void:
 	if not collider_manager:
-		collider_manager = get_node(CityGameDefaults.COLLIDER_MANAGER_NAME)
+		collider_manager = get_node(CityGameGlobals.NodeNames.CGS_COLLIDER_MANAGER)
 	push_warning(collider_manager, "There is no collider manager.")
