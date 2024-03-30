@@ -20,6 +20,11 @@ var position := Vector3()
 
 class CollisionObjects:
 	var _objects: Dictionary = {}
+	var count_ro: int:
+		get:
+			return len(_objects.values())
+		set(p_value):
+			push_error("Tried setting read-only value.")
 	
 	func add(p_object: CollisionObject3D) -> CollisionObject3D:
 		_objects[p_object.get_instance_id()] = p_object
@@ -39,6 +44,17 @@ class CollisionObjects:
 		for object in _objects.values():
 			typed_objects.append(object)
 		return typed_objects
+		
+		
+	func get_first() -> CollisionObject3D:
+		return _objects.values()[0]
+
+
+func is_colliding() -> bool:
+	if colliding_objects.count_ro > 0:
+		return true
+	else:
+		return false
 
 
 func _create_default_shape_3d() -> Shape3D:
@@ -77,8 +93,8 @@ func update_reference_position(p_position: Vector3) -> void:
 
 # Override.
 func _update_position() -> void:
-	if len(colliding_objects.get_all()) > 0:
-		position = colliding_objects.get_all()[0].transform.origin
+	if is_colliding():
+		position = colliding_objects.get_first().transform.origin
 	else:
 		position = collider.transform.origin
 

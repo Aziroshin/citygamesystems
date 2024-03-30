@@ -16,7 +16,7 @@
 [ext_resource type="Material" uid="uid://bqywgg0jxxs4q" path="res://dev/curve_debug_visualizer/tangent_material.tres" id="9_kyia3"]
 [ext_resource type="PackedScene" uid="uid://bmooq3eqguv8d" path="res://dev/PlaneMap/tool_lib_map_agent/tool_lib_plane_map_agent.tscn" id="9_yqsrf"]
 [ext_resource type="PackedScene" uid="uid://cyuhwi4quaawd" path="res://main_scenes/city_demo_lib/ui/hud/texture_button_with_static_background.tscn" id="10_e8jwe"]
-[ext_resource type="PackedScene" uid="uid://b2rj4ji58dbdf" path="res://main_scenes/city_demo_lib/tools/layout_tool/layout_tool_snap_positioner/layout_tool_snap_positioner.tscn" id="11_651x8"]
+[ext_resource type="PackedScene" uid="uid://b2rj4ji58dbdf" path="res://main_scenes/city_demo_lib/tools/positioners/tool_corner_snap_positioner/tool_corner_snap_positioner.tscn" id="11_651x8"]
 [ext_resource type="Texture2D" uid="uid://b4vbnol4k35wg" path="res://assets/icons/icon_base_layout_tool.png" id="11_knyq5"]
 [ext_resource type="Texture2D" uid="uid://cwcos0loiwidy" path="res://assets/icons/icon_active.png" id="12_eg83g"]
 [ext_resource type="Texture2D" uid="uid://bh8cdt022plf6" path="res://assets/icons/icon_inactive.png" id="13_4mrrs"]
