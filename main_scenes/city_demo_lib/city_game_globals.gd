@@ -50,14 +50,14 @@ class_name CityGameGlobals
 ## one.
 class NodeGroups:
 	# Single node groups.
-	const CGS_COLLIDER_MANAGER := "CGS_COLLIDER_MANAGER"
+	const CGS_COLLIDER_MANAGER := &"CGS_COLLIDER_MANAGER"
 	
 	# Collider groups.
-	const CGS_CORNER_COLLIDERS := "CGS_CORNER_COLLIDERS"
-	const CGS_BOUNDARY_COLLIDERS := "CGS_BOUNDARY_COLLIDERS"
-	const CGS_TOOL_COLLIDERS := "CGS_TOOL_COLLIDERS"
+	const CGS_CORNER_COLLIDERS := &"CGS_CORNER_COLLIDERS"
+	const CGS_BOUNDARY_COLLIDERS := &"CGS_BOUNDARY_COLLIDERS"
+	const CGS_TOOL_COLLIDERS := &"CGS_TOOL_COLLIDERS"
 
 
 ## Special node names used in the city game.
 class NodeNames:
-	const CGS_COLLIDER_MANAGER := "ColliderManager"
+	const CGS_COLLIDER_MANAGER := &"ColliderManager"
