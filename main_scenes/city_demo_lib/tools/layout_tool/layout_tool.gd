@@ -20,6 +20,13 @@ enum LayoutToolMapRayCasterRequestTypeId {
 var corner_colliders: Array[IndexedAreaToolCollider] = []
 var boundary_colliders: Array[IndexedAreaToolCollider] = []
 
+
+# Experiment with RayCast3D to detect boundaries.
+var ray := RayCast3D.new()
+func _ready() -> void:
+	map_agent.get_map_node().add_child(ray)
+
+
 func activate() -> void:
 	super()
 	map_agent.mouse_button.connect(_on_map_mouse_button)
@@ -56,11 +63,13 @@ func add_node_with_collider(
 		map_agent.get_map_node().add_child(node_collider)
 		node_collider.transform.origin = p_position
 		node_collider.input_ray_pickable = false
+		node_collider.add_to_group(CityGameGlobals.NodeGroups.CGS_CORNER_COLLIDERS, true)
+		node_collider.add_to_group(CityGameGlobals.NodeGroups.CGS_TOOL_COLLIDERS, true)
 		corner_colliders.append(node_collider)
 		
-		if idx > 0:
-			var position_a := get_state().curve.get_point_position(idx - 2)
-			var position_b := get_state().curve.get_point_position(idx - 1)
+		if idx >= 3:
+			var position_a := get_state().curve.get_point_position(idx - 3)
+			var position_b := get_state().curve.get_point_position(idx - 2)
 			
 			var edge_shape := CylinderShape3D.new()
 			edge_shape.radius = collision_radius
@@ -68,7 +77,7 @@ func add_node_with_collider(
 			var boundary_collider := IndexedAreaToolCollider.new(
 				self,
 				edge_shape,
-				idx - 2
+				idx - 3
 			)
 			map_agent.get_map_node().add_child(boundary_collider)
 			
@@ -82,6 +91,8 @@ func add_node_with_collider(
 			)
 			
 			boundary_collider.input_ray_pickable = false
+			boundary_collider.add_to_group(CityGameGlobals.NodeGroups.CGS_BOUNDARY_COLLIDERS, true)
+			boundary_collider.add_to_group(CityGameGlobals.NodeGroups.CGS_TOOL_COLLIDERS, true)
 			boundary_colliders.append(boundary_collider)
 		
 		return idx
@@ -132,6 +143,38 @@ func _on_map_mouse_button(
 			_on_request_build_layout()
 
 
+func get_boundary_clipped_position(p_reference_position: Vector3) -> Vector3:
+	var position := p_reference_position
+	ray.transform.origin = cursor.previous_position_ro
+	ray.target_position =  p_reference_position - cursor.previous_position_ro
+	ray.collide_with_areas = true
+	ray.force_update_transform()
+	ray.force_raycast_update()
+	
+	# Reference, with suggestion from SIsilicon, including potential caveats
+	# in the comments:
+	# https://forum.godotengine.org/t/possible-to-detect-multiple-collisions-with-raycast2d/27326
+	var colliding_objects: Array = []
+	while ray.is_colliding():
+		var collider := ray.get_collider()
+		if [
+		CityGameGlobals.NodeGroups.CGS_CORNER_COLLIDERS,
+		CityGameGlobals.NodeGroups.CGS_TOOL_COLLIDERS
+		].all(func(group): return collider.is_in_group(group))\
+		or [
+		CityGameGlobals.NodeGroups.CGS_BOUNDARY_COLLIDERS,
+		CityGameGlobals.NodeGroups.CGS_TOOL_COLLIDERS
+		].all(func(group): return collider.is_in_group(group)):
+			position = ray.get_collision_point()
+			break
+		ray.add_exception(collider)
+		colliding_objects.append(collider)
+		ray.force_raycast_update()
+	for colliding_object in colliding_objects:
+		ray.remove_exception(colliding_object)
+	return position
+
+
 func _on_map_mouse_position_change(
 	_p_camera: Camera3D,
 	_p_event: InputEvent,
@@ -140,6 +183,7 @@ func _on_map_mouse_position_change(
 	_p_shape: int
 ) -> void:
 	var tool_position := map_agent.get_position(p_mouse_position)
+	
 	if get_node_count() == 1 and not p_mouse_position == cursor.current_position_ro:
 		cursor.current_idx = add_node(p_mouse_position, FINALIZED)
 	if get_node_count() >= 2:
@@ -147,41 +191,19 @@ func _on_map_mouse_position_change(
 		if tool_position == cursor.previous_position_ro:
 			return
 			
-		for i_node in get_state().curve.point_count:
-			var node_position := get_state().curve.get_point_position(i_node)
-			if\
-			not i_node == 0\
-			and not i_node == get_last_node_idx()\
-			and tool_position == node_position:
-				# TODO: Give proper (visual) feedback.
-				print("[LayoutTool] Can't place new corner on an existing one.")
-				return
+		#for i_node in get_state().curve.point_count:
+			#var node_position := get_state().curve.get_point_position(i_node)
+			#if\
+			#not i_node == 0\
+			#and not i_node == get_last_node_idx()\
+			#and tool_position == node_position:
+				## TODO: Give proper (visual) feedback.
+				#print("[LayoutTool] Can't place new corner on an existing one.")
+				#return
 		
 		var first_node_position := get_state().curve.get_point_position(0)
-		var current_segment_node_a := cursor.previous_position_ro
-		var current_segment_node_b := tool_position
-		
-		for i_node in get_state().curve.point_count - 3:
-			var other_segment_node_a := get_state().curve.get_point_position(i_node)
-			var other_segment_node_b := get_state().curve.get_point_position(i_node+1)
-			 
-			# [UNSAFE: BEGIN]
-			# Returns Variant: null or Vector2
-			#match Geometry2D.segment_intersects_segment(
-				#Vector2(current_segment_node_a.x, current_segment_node_a.z),
-				#Vector2(current_segment_node_b.x, current_segment_node_b.z),
-				#Vector2(other_segment_node_a.x, other_segment_node_a.z),
-				#Vector2(other_segment_node_b.x, other_segment_node_b.z)
-			#):
-				#null:
-					#pass
-				#var intersection_point_vector2:
-					#if not tool_position == first_node_position:
-						## TODO: Give proper (visual) feedback.
-						#print("[LayoutTool] Layout boundary can't intersect itself.")
-						#return
-			# [UNSAFE: END]
-			
+		if not tool_position == first_node_position:
+			tool_position = get_boundary_clipped_position(p_mouse_position)
 			
 		set_node_position(cursor.current_idx, tool_position, UNFINALIZED)
 		

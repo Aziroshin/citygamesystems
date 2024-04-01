@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://e1d4uxeyog88"]
+[gd_scene load_steps=25 format=3 uid="uid://e1d4uxeyog88"]
 
 [ext_resource type="Script" path="res://main_scenes/city_demo.gd" id="1_elgex"]
 [ext_resource type="PackedScene" uid="uid://t6fjyxuaed8g" path="res://world_objects/player_world_interface/player_world_interface.tscn" id="2_16h52"]
@@ -22,6 +22,7 @@
 [ext_resource type="Texture2D" uid="uid://bh8cdt022plf6" path="res://assets/icons/icon_inactive.png" id="13_4mrrs"]
 [ext_resource type="PackedScene" uid="uid://dv7hpxefaw1ni" path="res://main_scenes/city_demo_lib/tools/street_tool/street_tool_map_ray_caster.tscn" id="13_ot6hf"]
 [ext_resource type="PackedScene" uid="uid://bg0qc18ksumc7" path="res://main_scenes/city_demo_lib/collider_manager/collider_manager.tscn" id="21_r70eu"]
+[ext_resource type="PackedScene" uid="uid://dbuatv41ho7fq" path="res://main_scenes/city_demo_lib/tools/ray_casters/collision_ray_caster/collision_ray_caster.tscn" id="23_ukjo4"]
 
 [sub_resource type="Curve3D" id="Curve3D_ogyrv"]
 
@@ -171,6 +172,8 @@ _arbiter_agent = NodePath("../../../../LayoutTool/LayoutToolArbiterAgent")
 [node name="StreetToolMapRayCaster" parent="." instance=ExtResource("13_ot6hf")]
 
 [node name="LayoutToolMapRayCaster" parent="." instance=ExtResource("13_ot6hf")]
+
+[node name="CollisionRayCaster" parent="." instance=ExtResource("23_ukjo4")]
 
 [connection signal="activated" from="street_tool" to="Map/debug_visualizer_for_street_tool" method="show" flags=3]
 [connection signal="activated" from="street_tool" to="ButtonBar/SubButtonBarsBar/StreetToolSubBar" method="show"]
