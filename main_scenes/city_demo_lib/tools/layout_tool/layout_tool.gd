@@ -10,7 +10,7 @@ enum LayoutToolMapRayCasterRequestTypeId {
 	CURVE,
 }
 @export var map_agent: ToolLibMapAgent
-@export var life_cyclers: WorldObjectLifeCyclers
+@export var life_cyclers: CityGameWorldObjectLifeCyclers
 ## Used for the colliders the tool uses to detect the boundary and corners of
 ## the area it's working with. Not related to the colliders of the layout
 ## objects themselves.
@@ -236,27 +236,30 @@ func _unhandled_input(event: InputEvent):
 			# made, or a layout got edited might be an alternative to consider?
 			# It would decouple the tool a little bit more, but also add
 			# indirection in turn.
-			_spawn_new_layout_object(_create_corner_only_layout_object())
+			_create_and_spawn_corner_only_layout_object()
 			# TODO [bug]: This is also disabling the street tool when it's
 			# active. However, the layout tool shouldn't be able to do that
 			# when its its deactivation routine is triggered.
 			deactivate()
 
 
-func _create_corner_only_layout_object() -> LayoutWorldObject:
+func _create_and_spawn_corner_only_layout_object() -> LayoutWorldObject:
 	var corner_points := PackedVector3Array()
 	for i_point in get_state().curve.point_count:
 		corner_points.append(get_state().curve.get_point_position(i_point))
-	return life_cyclers.layout.create_from_corner_points(corner_points)
+	
+	#TODO: Snap the centroid to the map on the y-axis.
+	var centroid := GeoFoo.get_centroid_3d(corner_points)
+	GeoFoo.translate(corner_points, -centroid)
+	var layout_object = life_cyclers.layout.create_from_corner_points(corner_points)
 
-
-func _spawn_new_layout_object(layout_object: LayoutWorldObject) -> void:
 	map_agent.get_map_node().add_child(layout_object)
-	layout_object.transform.origin = map_agent.get_position(last_mouse_position)
+	layout_object.transform.origin = centroid
+	return layout_object
 
 
 func _on_request_build_layout() -> void:
-	_spawn_new_layout_object(_create_corner_only_layout_object())
+	_create_and_spawn_corner_only_layout_object()
 
 	
 	# StreetMesh based verification that the basic layout chain-of-call works

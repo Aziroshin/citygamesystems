@@ -283,3 +283,16 @@ static func get_cylinder(
 	if z_centered:
 		translate(vertices, top_position/2)
 	return vertices
+
+
+## Returns the centroid (average) of the specified vertices.
+## Returns `Vector2()` if no vertices are specified.
+static func get_centroid_3d(p_vertices: PackedVector3Array) -> Vector3:
+	if len(p_vertices) == 0:
+		return Vector3()
+		
+	var centroid := Vector3()
+	for vertex in p_vertices:
+		centroid += vertex
+	centroid /= len(p_vertices)
+	return centroid
