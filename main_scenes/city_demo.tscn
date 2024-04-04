@@ -127,6 +127,7 @@ ignore_texture_size = true
 stretch_mode = 0
 
 [node name="LayoutToolSubBar" type="VBoxContainer" parent="ButtonBar/SubButtonBarsBar"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
@@ -182,8 +183,10 @@ _arbiter_agent = NodePath("../../../../LayoutTool/LayoutToolArbiterAgent")
 [connection signal="deactivated" from="street_tool" to="ButtonBar/SubButtonBarsBar/StreetToolSubBar" method="hide"]
 [connection signal="request_map_points" from="street_tool" to="StreetToolMapRayCaster" method="_on_request_map_points" flags=3]
 [connection signal="activated" from="LayoutTool" to="Map/debug_visualizer_for_layout_tool" method="show" flags=3]
+[connection signal="activated" from="LayoutTool" to="ButtonBar/SubButtonBarsBar/LayoutToolSubBar" method="show" flags=3]
 [connection signal="curve_changed" from="LayoutTool" to="Map/debug_visualizer_for_layout_tool" method="_on_curve_changed" flags=3]
 [connection signal="deactivated" from="LayoutTool" to="Map/debug_visualizer_for_layout_tool" method="hide" flags=3]
+[connection signal="deactivated" from="LayoutTool" to="ButtonBar/SubButtonBarsBar/LayoutToolSubBar" method="hide" flags=3]
 [connection signal="request_map_points" from="LayoutTool" to="LayoutToolMapRayCaster" method="_on_request_map_points" flags=3]
 [connection signal="button_up" from="ButtonBar/SubButtonBarsBar/StreetToolSubBar/BuildStreetButton" to="street_tool" method="_on_request_build_street" flags=3]
 [connection signal="button_up" from="ButtonBar/SubButtonBarsBar/LayoutToolSubBar/BuildLayoutButton" to="LayoutTool" method="_on_request_build_layout" flags=3]

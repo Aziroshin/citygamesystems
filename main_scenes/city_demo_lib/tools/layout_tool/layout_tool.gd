@@ -1,7 +1,8 @@
 extends CityToolLib.CurveLayoutTool
 
 ## "Imports": CityToolLib
-const CurveCursor = CityToolLib.CurveCursor
+const CurveCursor := CityToolLib.CurveCursor
+const CurveLayoutToolState := CityToolLib.CurveLayoutToolState
 
 ## Used to get the actual corresponding map points to our curve points.
 signal request_map_points(source_points: PackedVector3Array)
@@ -15,13 +16,12 @@ enum LayoutToolMapRayCasterRequestTypeId {
 ## the area it's working with. Not related to the colliders of the layout
 ## objects themselves.
 @export var collision_radius := 1.0
-@onready var cursor := CurveCursor.new(_get_curve_tool_type_state().curve)
+@onready var cursor := CurveCursor.new(get_state().curve)
 @onready var last_mouse_position := Vector3()
 var corner_colliders: Array[IndexedAreaToolCollider] = []
 var boundary_colliders: Array[IndexedAreaToolCollider] = []
 
 
-# Experiment with RayCast3D to detect boundaries.
 var ray := RayCast3D.new()
 func _ready() -> void:
 	map_agent.get_map_node().add_child(ray)
@@ -96,6 +96,7 @@ func add_node_with_collider(
 			boundary_colliders.append(boundary_collider)
 		
 		return idx
+
 
 func _on_map_mouse_button(
 	_p_camera: Camera3D,
@@ -190,16 +191,6 @@ func _on_map_mouse_position_change(
 		
 		if tool_position == cursor.previous_position_ro:
 			return
-			
-		#for i_node in get_state().curve.point_count:
-			#var node_position := get_state().curve.get_point_position(i_node)
-			#if\
-			#not i_node == 0\
-			#and not i_node == get_last_node_idx()\
-			#and tool_position == node_position:
-				## TODO: Give proper (visual) feedback.
-				#print("[LayoutTool] Can't place new corner on an existing one.")
-				#return
 		
 		var first_node_position := get_state().curve.get_point_position(0)
 		if not tool_position == first_node_position:
@@ -252,73 +243,64 @@ func _create_and_spawn_corner_only_layout_object() -> LayoutWorldObject:
 	var centroid := GeoFoo.get_centroid_3d(corner_points)
 	GeoFoo.translate(corner_points, -centroid)
 	var layout_object = life_cyclers.layout.create_from_corner_points(corner_points)
-
+	
 	map_agent.get_map_node().add_child(layout_object)
 	layout_object.transform.origin = centroid
 	return layout_object
 
 
 func _on_request_build_layout() -> void:
+	_do_and_finish()
+
+
+#==========================================================================
+# BEGIN: Reset functions
+# They get called when the tool is getting reset to a blank
+# state.
+# The existence of these things here is a prototyping fragment, as
+# ideally, they would be a part of the tool state.
+#==========================================================================
+
+func _reset_helper_nodes() -> void:
+	for node3d_array in [
+		corner_colliders,
+		boundary_colliders
+	]:
+		for untyped_node3d in node3d_array:
+			# For the lack of nested collection types in GDScript.
+			var node: Node3D = untyped_node3d
+			map_agent.get_map_node().remove_child(node)
+			node.queue_free()
+	corner_colliders = []
+	boundary_colliders = []
+
+
+## Initializes a blank state.
+## Not the same as the `reset` signal on the state.
+func _reset_state() -> void:
+	set_state(CurveLayoutToolState.new())
+	emit_curve_changed()
+
+
+func _reset() -> void:
+	_reset_helper_nodes()
+	_reset_state()
+	cursor = CurveCursor.new(get_state().curve)
+	last_mouse_position = Vector3()
+	corner_colliders = []
+	boundary_colliders = []
+
+# END: Reset functions
+#==========================================================================
+
+func _finish() -> void:
+	deactivate()
+
+
+func _do_and_finish() -> void:
 	_create_and_spawn_corner_only_layout_object()
-
-	
-	# StreetMesh based verification that the basic layout chain-of-call works
-	# for debugging and stuff. Can be removed later.
-	#request_map_points.emit(
-		#ToolMapRayCaster.Request.new(
-			#LayoutToolMapRayCasterRequestTypeId.CURVE,
-			#get_state().curve.get_baked_points()
-		#)
-	#)
-	# Now it's up to `ToolMapRayCaster` to answer back. Once it does,
-	# `_on_result_map_points` below will be kicked off.
+	_reset()
+	_finish()
 
 
-func _on_result_map_points(p_result: ToolMapRayCaster.Result) -> void:
-	for point in p_result.map_points:
-		Cavedig.needle(
-			map_agent.get_map_node(),
-			Transform3D(Basis(), point),
-			Vector3(0.85, 0.1, 0.75),
-			0.3,
-			0.02
-		)
-	_build_layout(p_result.map_points)
 
-
-func _build_layout(p_map_points: PackedVector3Array) -> void:
-	
-	#----- Build Layout
-	_add_layout_to_map(
-		_create_layout(
-			p_map_points
-		)
-	)
-
-
-func _create_layout(p_map_points: PackedVector3Array) -> MeshInstance3D:
-	var profile2d := PackedVector2Array([
-		Vector2(0.5, 0.1),
-		Vector2(0.5, -0.1),
-		Vector2(-0.5, -0.1),
-		Vector2(-0.5, 0.1)
-	])
-	var transforms: Array[Transform3D] = []
-	
-	for i_map_point in range(len(p_map_points)):
-		transforms.append(
-			Transform3D(
-				GeoFoo.get_baked_point_transform(get_state().curve, i_map_point).basis,
-				p_map_points[i_map_point]
-			)
-		)
-	
-	return StreetMesh.create_network_segment(
-		p_map_points,
-		transforms,
-		profile2d
-	)
-
-
-func _add_layout_to_map(p_street_mesh: MeshInstance3D) -> void:
-	map_agent.get_map_node().add_child(p_street_mesh)
