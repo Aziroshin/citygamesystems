@@ -42,10 +42,11 @@ func _activate_tool() -> void:
 	print("activate tool on tool arbiter agent called")
 	tool.activated.connect(arbiter._on_tool_activated, CONNECT_ONE_SHOT)
 	tool.activate()
+	tool.deactivated.connect(arbiter._on_tool_deactivated, CONNECT_ONE_SHOT)
+	tool.deactivated.connect(_on_tool_deactivated, CONNECT_ONE_SHOT)
 
 
 func _deactivate_tool() -> void:
-	tool.deactivated.connect(arbiter._on_tool_deactivated, CONNECT_ONE_SHOT)
 	tool.deactivate()
 
 
@@ -57,5 +58,7 @@ func _on_request_granted(p_granted: bool) -> void:
 
 func _on_deactivate() -> void:
 	_deactivate_tool()
-	activation_state = ActivationState.INACTIVE
 	
+
+func _on_tool_deactivated() -> void:
+	activation_state = ActivationState.INACTIVE
