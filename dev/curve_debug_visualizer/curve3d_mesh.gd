@@ -61,6 +61,7 @@ func _update_from_vertices(
 
 func update() -> void:
 	if curve.point_count < 2:
+		_update_from_vertices(PackedVector3Array())
 		return
 	
 	var point_loops: Array[PackedVector3Array] = []
