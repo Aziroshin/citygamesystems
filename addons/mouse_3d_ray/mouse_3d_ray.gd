@@ -153,10 +153,6 @@ func _ready() -> void:
 #   https://stackoverflow.com/questions/76893256/how-to-get-the-3d-mouse-pos-in-godot-4-1
 #   See answer by Theraot (https://stackoverflow.com/users/402022/theraot)
 func _physics_process(_p_delta: float) -> void:
-	var time := 0.0
-	var start: float
-	var end: float
-	
 	collisions.all.clear()
 	
 	var viewport_mouse_position := viewport_mouse_position_getter.position
@@ -180,9 +176,7 @@ func _physics_process(_p_delta: float) -> void:
 	
 	while try_count < max_tries:
 		try_count += 1
-		start = Time.get_ticks_usec()
 		var result := space_state.intersect_ray(query)
-		end = Time.get_ticks_usec()
 		if not result.is_empty():
 			collisions.all.append(result)
 			# Appending to `query.exclude` directly doesn't work for some
@@ -192,6 +186,3 @@ func _physics_process(_p_delta: float) -> void:
 			query.exclude = exclude
 		else:
 			break
-	
-	time += end - start
-	print("Took: ", str(time))
