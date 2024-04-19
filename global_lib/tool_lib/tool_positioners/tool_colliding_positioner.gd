@@ -81,7 +81,10 @@ func _ready() -> void:
 	collider.area_exited.connect(_on_area_exited)
 
 
-func get_position(p_reference_position: Vector3) -> Vector3:
+func get_position(
+	p_reference_position: Vector3,
+	_p_status := PositionGettingStatus.new()
+) -> Vector3:
 	update_reference_position(p_reference_position)
 	return position
 
