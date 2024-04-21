@@ -1,10 +1,17 @@
 ## A 3D mouse raycasting node that makes available all collisions for the the
 ## current frame in its `.collisions` property.
-extends Node3D
+extends Node
 class_name Mouse3DRay
 
 @export var viewport: Viewport
 @export var camera: Camera3D
+@export var ray_caster := Mouse3DRayRayCaster.new()
+@export var collide_with_areas := false
+@export var collide_with_bodies := true
+@export_flags_3d_physics var collision_mask := 4294967295
+@export var exclude: Array[RID] = []
+@export var hit_back_faces := true
+@export var hit_from_inside := false
 ## Used to prevent infinite looping. Increase if you expect more collisions per
 ## mouse ray.
 @export var max_tries := 1000
@@ -97,6 +104,34 @@ class Collisions:
 		return false
 
 
+func new_query_parameters() -> PhysicsRayQueryParameters3D:
+	var viewport_mouse_position := viewport_mouse_position_getter.position
+	
+	var ray_normal := camera.project_ray_normal(viewport_mouse_position)
+	var ray_length := camera.far
+	var ray := ray_normal * ray_length
+	
+	var ray_origin := camera.project_ray_origin(viewport_mouse_position)
+	var ray_end := ray_origin + ray
+	
+	var query := PhysicsRayQueryParameters3D.create(
+		ray_origin,
+		ray_end,
+		collision_mask,
+		exclude,
+	)
+	query.collide_with_areas = collide_with_areas
+	query.collide_with_bodies = collide_with_bodies
+	query.hit_back_faces = hit_back_faces
+	query.hit_from_inside = hit_from_inside
+	
+	return query
+
+
+func get_space_state() -> PhysicsDirectSpaceState3D:
+	return viewport.find_world_3d().direct_space_state
+
+
 ## Checks whether we have a viewport and/or camera set.
 ## Warns/errors and initializes if one or both are missing as configured.
 ## If `fail_on_viewport_or_camera_missing` is set, no initialization will
@@ -161,41 +196,3 @@ func _ready() -> void:
 	ensure_sanity()
 	ensure_caching_viewport_mouse_position_getter_attached()
 
-
-# Reference on the topic of getting the mouse position (Godot 4.1):
-#   https://stackoverflow.com/questions/76893256/how-to-get-the-3d-mouse-pos-in-godot-4-1
-#   See answer by Theraot (https://stackoverflow.com/users/402022/theraot)
-func _physics_process(_p_delta: float) -> void:
-	collisions.all.clear()
-	
-	var viewport_mouse_position := viewport_mouse_position_getter.position
-	var world := viewport.find_world_3d()
-	var space_state := world.direct_space_state
-	
-	var ray_normal := camera.project_ray_normal(viewport_mouse_position)
-	var ray_length := camera.far
-	var ray := ray_normal * ray_length
-	
-	var ray_origin := camera.project_ray_origin(viewport_mouse_position)
-	var ray_end := ray_origin + ray
-	
-	var query := PhysicsRayQueryParameters3D.create(
-		ray_origin,
-		ray_end,
-	)
-	query.collide_with_areas = true
-	
-	var try_count := 0
-	
-	while try_count < max_tries:
-		try_count += 1
-		var result := space_state.intersect_ray(query)
-		if not result.is_empty():
-			collisions.all.append(result)
-			# Appending to `query.exclude` directly doesn't work for some
-			# reason, so we do that (for now?).
-			var exclude: Array[RID] = query.exclude
-			exclude.append(result[collisions.Keys.COLLIDER_RID])
-			query.exclude = exclude
-		else:
-			break

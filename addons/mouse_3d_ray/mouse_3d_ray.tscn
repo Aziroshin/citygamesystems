@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://addons/mouse_3d_ray/mouse_3d_ray.gd" id="1_52rdy"]
 
-[node name="Mouse3dRay" type="Node3D"]
+[node name="Mouse3DRay" type="Node"]
 script = ExtResource("1_52rdy")
