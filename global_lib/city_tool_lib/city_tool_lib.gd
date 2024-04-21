@@ -149,28 +149,6 @@ class CurveTool extends StateDuplicatingUndoableTool:
 		emit_curve_changed()
 		if p_finalized:
 			copy_state_to_undo()
-	
-	func get_baked_node_indexes() -> PackedInt64Array:
-		var baked_node_indexes := PackedInt64Array()
-		var baked_points := _get_curve_tool_type_state().curve.get_baked_points()
-		var node_count : = get_node_count()
-		
-		# TODO: Use a 2-dimensional array approach to prevent false matches when
-		# a baked point coincides on the same position as a node.
-		
-		var i_node := 0
-		for i_baked in _get_curve_tool_type_state().curve.get_baked_length():
-			if i_node >= node_count:
-				push_error("")
-				break
-			
-			var node_position := _get_curve_tool_type_state().curve.get_point_position(i_node)
-			var baked_position := baked_points[i_baked]
-			if node_position == baked_position:
-				baked_node_indexes.append(i_baked)
-			i_node += 1
-		
-		return baked_node_indexes
 
 
 class StreetToolState extends CurveToolState:
