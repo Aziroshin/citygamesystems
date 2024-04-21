@@ -2,8 +2,8 @@ extends Node3D
 class_name WorldObject
 
 # Dependencies:
-# - CityBuilder.MultiPositioner
-# - CityBuilder.OriginPositioner
+# - PositionerLib.MultiPositioner
+# - PositionerLib.OriginPositioner
 
 signal collider_added(world_object: WorldObject, collider: CollisionObject3D)
 signal collider_removed(collider: CollisionObject3D)
@@ -23,8 +23,8 @@ func _ready() -> void:
 
 # Intended to be overriden in a sub-class with a more appropriate implementation
 # for the object in question.
-func create_positioner() -> CityBuilder.MultiPositioner:
-	var multi_positioner := CityBuilder.MultiPositioner.new()
-	multi_positioner.add_positioner(CityBuilder.OriginPositioner.new(self))
+func create_positioner() -> PositionerLib.MultiPositioner:
+	var multi_positioner := PositionerLib.MultiPositioner.new()
+	multi_positioner.add_positioner(PositionerLib.OriginPositioner.new(self))
 	return multi_positioner
 

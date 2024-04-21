@@ -2,7 +2,8 @@ extends WorldObject
 class_name LayoutWorldObject
 
 # Dependencies:
-# - CityBuilder.Layout
+# - CityBuilder
+# - PositionerLib
 
 @export var layout: CityBuilder.Layout
 @export var _colliders: Array[CollisionObject3D] = []
@@ -13,8 +14,8 @@ func _set_defaults() -> void:
 		layout = CityBuilder.Layout.new()
 
 
-func create_positioner() -> CityBuilder.MultiPositioner:
-	var multi_positioner := CityBuilder.MultiPositioner.new()
+func create_positioner() -> PositionerLib.MultiPositioner:
+	var multi_positioner := PositionerLib.MultiPositioner.new()
 	var corner_positioner := CityBuilder.LayoutCornerPositioner.new(layout)
 	var outline_positioner := CityBuilder.LayoutOutlinePositioner.new(layout)
 	multi_positioner.add_positioner(corner_positioner)
