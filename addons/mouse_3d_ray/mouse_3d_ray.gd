@@ -39,6 +39,8 @@ var collisions := Collisions.new()
 ##   If the ray did not intersect anything, then an empty dictionary is returned
 ##   instead.
 class Collisions:
+	const _CLASS_NAME := "Collisions"
+	
 	class Keys:
 		const COLLIDER = "collider"
 		const COLLIDER_ID = "collider_id"
@@ -47,11 +49,17 @@ class Collisions:
 		const FACE_INDEX = "face_index"
 		const COLLIDER_RID = "rid"
 		const SHAPE = "shape"
+		
 	## Result dictionaries as per `PhysicsDirectSpaceState3D.intersect_ray(...)`.
 	## Is sorted by collision encounter along the ray (index 0 has the closest).
-	var all: Array[Dictionary] = []
+	## No-set: Assigning a (new) array will error.
+	var all: Array[Dictionary] = []:
+		set(p_value):
+			push_error("Tried setting no-set property `%s.all`." % _CLASS_NAME)
 	
 	
+	## Returns a dictionary where the keys are the colliders and the values
+	## their corresponding collisions.
 	func get_by_collider() -> Dictionary:
 		var by_collider := {}
 		for collision in all:
@@ -59,6 +67,8 @@ class Collisions:
 		return by_collider
 	
 	
+	## Returns a dictionary where the keys are the collider IDs and the values
+	## their corresponding collisions.
 	func get_by_id() -> Dictionary:
 		var by_id := {}
 		for collision in all:
@@ -66,10 +76,12 @@ class Collisions:
 		return by_id
 	
 	
+	## Are there any collisions?
 	func exist() -> bool:
 		return true if len(all) > 0 else false
 	
 	
+	## Are there any collisions with this object?
 	func with_object_exist(p_collider: CollisionObject3D) -> bool:
 		for collision in all:
 			if collision[Keys.COLLIDER] == p_collider:
@@ -77,6 +89,7 @@ class Collisions:
 		return false
 	
 	
+	## Are there any collisions with an object with this ID?
 	func with_object_by_id_exist(p_id: int) -> bool:
 		for collision in all:
 			if collision[Keys.COLLIDER_ID] == p_id:
