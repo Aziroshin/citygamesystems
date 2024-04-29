@@ -28,11 +28,11 @@ static func create_network_segment(
 	new_mesh_instance3d.mesh = GeoFoo.create_array_mesh(vertices)
 	#new_mesh_instance3d.mesh.surface_set_material(0, material)
 	
-	var debug_overlay := MeshDebugLib.ADebugOverlay.new()
-	debug_overlay.show_labels(false)
-	debug_overlay.show_vertex_indicators(true)
-	new_mesh_instance3d.add_child(debug_overlay)
-	debug_overlay.visualize_array_vertex(vertices)
+	#var debug_overlay := MeshDebugLib.ADebugOverlay.new()
+	#debug_overlay.show_labels(false)
+	#debug_overlay.show_vertex_indicators(true)
+	#new_mesh_instance3d.add_child(debug_overlay)
+	#debug_overlay.visualize_array_vertex(vertices)
 	
 	return new_mesh_instance3d
 
