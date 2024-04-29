@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://e1d4uxeyog88"]
+[gd_scene load_steps=27 format=3 uid="uid://e1d4uxeyog88"]
 
 [ext_resource type="Script" path="res://main_scenes/city_demo.gd" id="1_elgex"]
 [ext_resource type="PackedScene" uid="uid://t6fjyxuaed8g" path="res://world_objects/player_world_interface/player_world_interface.tscn" id="2_16h52"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://main_scenes/city_demo_lib/tools/tool_arbiter/tool_arbiter.gd" id="5_ar3lr"]
 [ext_resource type="Script" path="res://main_scenes/city_demo_lib/tools/street_tool/street_tool.gd" id="5_knyav"]
 [ext_resource type="PackedScene" uid="uid://4eosp6wvjrgl" path="res://main_scenes/city_demo_lib/world_object_lib/life_cyclers/life_cyclers.tscn" id="6_07ip7"]
+[ext_resource type="PackedScene" uid="uid://gbgib1frpkhx" path="res://main_scenes/city_demo_lib/tools/street_tool/street_tool_map_previewer.tscn" id="6_o1idw"]
 [ext_resource type="Script" path="res://main_scenes/city_demo_lib/world_objects/city_game_life_cyclers.gd" id="7_njors"]
 [ext_resource type="PackedScene" uid="uid://dvj7tkpwy5s6u" path="res://dev/curve_debug_visualizer/curve3d_debug_visualizer.tscn" id="8_55k1a"]
 [ext_resource type="Texture2D" uid="uid://dxovxwyj5arqf" path="res://icon.svg" id="8_btgyr"]
@@ -60,6 +61,9 @@ in_handle_material = ExtResource("9_kyia3")
 out_handle_material = ExtResource("9_kyia3")
 tangent_material = ExtResource("9_kyia3")
 get_curve_by_signal = true
+
+[node name="StreetToolMapPreviewer" parent="Map" node_paths=PackedStringArray("map_agent") instance=ExtResource("6_o1idw")]
+map_agent = NodePath("../../street_tool/PlaneMapAgent")
 
 [node name="ColliderManager" parent="." instance=ExtResource("21_r70eu")]
 
@@ -185,6 +189,7 @@ _arbiter_agent = NodePath("../../../../LayoutTool/LayoutToolArbiterAgent")
 [connection signal="deactivated" from="street_tool" to="Map/debug_visualizer_for_street_tool" method="hide" flags=3]
 [connection signal="deactivated" from="street_tool" to="ButtonBar/SubButtonBarsBar/StreetToolSubBar" method="hide"]
 [connection signal="request_map_points" from="street_tool" to="StreetToolMapRayCaster" method="_on_request_map_points" flags=3]
+[connection signal="street_previewably_changed" from="street_tool" to="Map/StreetToolMapPreviewer" method="_on_previewable_change" flags=3]
 [connection signal="activated" from="LayoutTool" to="Map/debug_visualizer_for_layout_tool" method="show" flags=3]
 [connection signal="activated" from="LayoutTool" to="ButtonBar/SubButtonBarsBar/LayoutToolSubBar" method="show" flags=3]
 [connection signal="curve_changed" from="LayoutTool" to="Map/debug_visualizer_for_layout_tool" method="_on_curve_changed" flags=3]

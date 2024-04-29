@@ -2,14 +2,34 @@ extends CityToolLib.StreetTool
 
 ## Used to get the actual corresponding map points to our curve points.
 signal request_map_points(source_points: PackedVector3Array)
+## Fired on in-edit changes to the street of interest to previewers.
+## Code listening for this should be fast enough to potentially run every frame.
+signal street_previewably_changed(
+	p_points: PackedVector3Array,
+	p_point_transforms: Array[Transform3D],
+	p_profile2d: PackedVector2Array,
+)
 
 enum StreetToolMapRayCasterRequestTypeId {
 	CURVE,
 	LEFT_SIDE,
 	RIGHT_SIDE
 }
+## Set to true when the final request for building the street is made, so
+## signal responders involved in that process know that the tool is finishing
+## up.
+var build_requested = false
+
 @export var map_agent: ToolLibMapAgent
 @export var map_ray_caster: ToolMapRayCaster
+## A polygon used to extrude as a mesh along the map-adjused street curve
+## points.
+var _bounding_box_profile2d := PackedVector2Array([
+	Vector2(0.5, 0.1),
+	Vector2(0.5, -0.1),
+	Vector2(-0.5, -0.1),
+	Vector2(-0.5, 0.1)
+])
 
 
 func _check_vars_exist(
@@ -108,9 +128,43 @@ func _on_map_mouse_position_change(
 			p_mouse_position - get_state().curve.get_point_position(get_last_node_idx()),
 			UNFINALIZED
 		)
+	if get_node_count() > 1:
+		print("street_tool.gd: on map mouse position change")
+		_update_street()
 
 
+func _get_point_transforms(p_map_points: PackedVector3Array) -> Array[Transform3D]:
+	var transforms: Array[Transform3D] = []
+	
+	for i_map_point in range(len(p_map_points)):
+		transforms.append(
+			Transform3D(
+				GeoFoo.get_baked_point_transform(get_state().curve, i_map_point).basis,
+				p_map_points[i_map_point]
+			)
+		)
+	
+	return transforms
+
+
+func _emit_street_previewably_changed(p_map_points: PackedVector3Array) -> void:
+	print("street_tool.gd: Emitting previewably changed")
+	street_previewably_changed.emit(
+		p_map_points,
+		_get_point_transforms(p_map_points),
+		_bounding_box_profile2d
+	)
+
+
+## This fires when the final street build is kicked off by the user, e.g.
+## by clicking a button that sends a signal here.
 func _on_request_build_street() -> void:
+	build_requested = true
+	_update_street()
+
+
+## Run every time the street has previewable changes.
+func _update_street() -> void:
 	request_map_points.emit(
 		ToolMapRayCaster.Request.new(
 			StreetToolMapRayCasterRequestTypeId.CURVE,
@@ -122,20 +176,15 @@ func _on_request_build_street() -> void:
 
 
 func _on_result_map_points(p_result: ToolMapRayCaster.Result) -> void:
-	#for point in p_result.map_points:
-		#Cavedig.needle(
-			#map_agent.get_map_node(),
-			#Transform3D(Basis(), point),
-			#Vector3(0.85, 0.1, 0.75),
-			#0.3,
-			#0.02
-		#)
-	_build_street(p_result.map_points)
+	if build_requested:
+		_build_street(p_result.map_points)
+	else:
+		print("street_tool.gd: not build requested")
+		if get_node_count() > 1:
+			_emit_street_previewably_changed(p_result.map_points)
 
 
 func _build_street(p_map_points: PackedVector3Array) -> void:
-	
-	#----- Build Street
 	_add_street_to_map(
 		_create_street(
 			p_map_points
@@ -144,26 +193,10 @@ func _build_street(p_map_points: PackedVector3Array) -> void:
 
 
 func _create_street(p_map_points: PackedVector3Array) -> MeshInstance3D:
-	var profile2d := PackedVector2Array([
-		Vector2(0.5, 0.1),
-		Vector2(0.5, -0.1),
-		Vector2(-0.5, -0.1),
-		Vector2(-0.5, 0.1)
-	])
-	var transforms: Array[Transform3D] = []
-	
-	for i_map_point in range(len(p_map_points)):
-		transforms.append(
-			Transform3D(
-				GeoFoo.get_baked_point_transform(get_state().curve, i_map_point).basis,
-				p_map_points[i_map_point]
-			)
-		)
-	
 	return StreetMesh.create_network_segment(
 		p_map_points,
-		transforms,
-		profile2d
+		_get_point_transforms(p_map_points),
+		_bounding_box_profile2d 
 	)
 
 
