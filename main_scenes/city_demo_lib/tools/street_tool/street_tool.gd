@@ -1,5 +1,9 @@
 extends CityToolLib.StreetTool
 
+## "Imports": CityToolLib
+const CurveCursor := CityToolLib.CurveCursor
+const StreetToolState := CityToolLib.StreetToolState
+
 ## Used to get the actual corresponding map points to our curve points.
 signal request_map_points(source_points: PackedVector3Array)
 ## Fired on in-edit changes to the street of interest to previewers.
@@ -22,6 +26,7 @@ var build_requested = false
 
 @export var map_agent: ToolLibMapAgent
 @export var map_ray_caster: ToolMapRayCaster
+@onready var cursor := CurveCursor.new(get_state().curve)
 ## A polygon used to extrude as a mesh along the map-adjused street curve
 ## points.
 var _bounding_box_profile2d := PackedVector2Array([
@@ -78,6 +83,14 @@ func deactivate() -> void:
 	map_agent.mouse_position_change.disconnect(_on_map_mouse_position_change)
 
 
+func add_node(
+	p_position: Vector3,
+	p_finalized: bool,
+) -> int:
+	cursor.current_idx = super(p_position, p_finalized)
+	return cursor.current_idx
+
+
 func _ready() -> void:
 	if len(_on_ready_sanity_checks(PackedStringArray())) > 0:
 		push_error(
@@ -101,14 +114,14 @@ func _on_map_mouse_button(
 			var idx := add_node(p_mouse_position, true)
 			Cavedig.needle(
 				map_agent.get_map_node(),
-				Transform3D(Basis(), get_state().curve.get_point_position(idx))
+				Transform3D(Basis(), cursor.current_position_ro)
 			)
 		else:
 			#get_state().node_metadata[get_last_node_idx()].out_point_finalized = true
 			#get_state().node_finalizations[get_last_node_idx()].handle_out = FINALIZED
 			set_node_handle_out_point(
-				get_last_node_idx(),
-				p_mouse_position - get_state().curve.get_point_position(get_last_node_idx()),
+				cursor.current_idx,
+				p_mouse_position - cursor.current_position_ro,
 				FINALIZED
 			)
 
@@ -122,14 +135,13 @@ func _on_map_mouse_position_change(
 ) -> void:
 	if\
 	get_node_count() > 0\
-	and not get_state().node_finalizations[get_last_node_idx()].handle_out:
+	and not get_state().node_finalizations[cursor.current_idx].handle_out:
 		set_node_handle_out_point(
-			get_last_node_idx(),
-			p_mouse_position - get_state().curve.get_point_position(get_last_node_idx()),
+			cursor.current_idx,
+			p_mouse_position - cursor.current_position_ro,
 			UNFINALIZED
 		)
 	if get_node_count() > 1:
-		print("street_tool.gd: on map mouse position change")
 		_update_street()
 
 
@@ -148,7 +160,6 @@ func _get_point_transforms(p_map_points: PackedVector3Array) -> Array[Transform3
 
 
 func _emit_street_previewably_changed(p_map_points: PackedVector3Array) -> void:
-	print("street_tool.gd: Emitting previewably changed")
 	street_previewably_changed.emit(
 		p_map_points,
 		_get_point_transforms(p_map_points),
@@ -177,9 +188,8 @@ func _update_street() -> void:
 
 func _on_result_map_points(p_result: ToolMapRayCaster.Result) -> void:
 	if build_requested:
-		_build_street(p_result.map_points)
+		_do_and_finish(p_result.map_points)
 	else:
-		print("street_tool.gd: not build requested")
 		if get_node_count() > 1:
 			_emit_street_previewably_changed(p_result.map_points)
 
@@ -203,3 +213,36 @@ func _create_street(p_map_points: PackedVector3Array) -> MeshInstance3D:
 func _add_street_to_map(p_street_mesh: MeshInstance3D) -> void:
 	map_agent.get_map_node().add_child(p_street_mesh)
 
+#==========================================================================
+# BEGIN: Reset functions
+# They get called when the tool is getting reset to a blank
+# state.
+# The existence of these things here is a prototyping fragment, as
+# ideally, they would be a part of the tool state.
+#==========================================================================
+
+
+## Initializes a blank state.
+## Not the same as the `reset` signal on the state.
+func _reset_state() -> void:
+	set_state(StreetToolState.new())
+	emit_curve_changed()
+
+
+func _reset() -> void:
+	_reset_state()
+	cursor = CurveCursor.new(get_state().curve)
+	build_requested = false
+
+# END: Reset functions
+#==========================================================================
+
+
+func _finish() -> void:
+	deactivate()
+
+
+func _do_and_finish(p_map_points: PackedVector3Array) -> void:
+	_build_street(p_map_points)
+	_reset()
+	_finish()
