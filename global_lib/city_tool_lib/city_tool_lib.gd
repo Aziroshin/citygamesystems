@@ -22,6 +22,8 @@ class CurveCursor extends RefCounted:
 	var _curve: Curve3D
 	var current_idx := 0
 	
+	func _init(p_curve: Curve3D):
+		_curve = p_curve
 	
 	var previous_idx_ro: int:
 		get:
@@ -48,11 +50,7 @@ class CurveCursor extends RefCounted:
 			return _curve.get_point_position(next_idx_ro)
 		set(p_value):
 			push_error(READ_ONLY_ERR)
-		
-	
-	func _init(p_curve: Curve3D):
-		_curve = p_curve
-	
+
 
 class CurveTool extends StateDuplicatingUndoableTool:
 	# Since the idea of one atomic change is different for the tool than
