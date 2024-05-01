@@ -55,6 +55,10 @@ func get_cap3d(p_inverted: bool) -> PackedVector3Array:
 func _update_from_vertices(
 	p_vertices: PackedVector3Array
 ) -> void:
+	if len(p_vertices) < 3:
+		mesh = Mesh.new()
+		return
+	
 	mesh = Curve3DDebugFuncs.create_array_mesh(p_vertices)
 	mesh.surface_set_material(0, material)
 
