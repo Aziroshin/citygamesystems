@@ -1,11 +1,7 @@
 extends Node3D
 class_name Curve3DDebugHandleVisualizer
 
-enum TangentPointIndexes {
-	IN,
-	POINT_OF_TANGENCY,
-	OUT
-}
+
 const default_in_handle_material := preload("./in_handle_material.tres")
 const default_out_handle_material := preload("./out_handle_material.tres")
 const default_tangent_material := preload("./tangent_material.tres")
@@ -136,6 +132,16 @@ func _update_visualization() -> void:
 		if idx > curve.point_count - 1:
 			continue
 		
+		var transform_of_tangency: Transform3D
+		if curve.point_count == 1:
+			transform_of_tangency = Transform3D(Basis(), curve.get_point_position(idx))
+		else:
+			transform_of_tangency = curve.sample_baked_with_rotation(
+				Curve3DDebugFuncs.get_closest_offset_on_curve_or_zero(
+					curve,
+					curve.get_point_position(idx)
+				)
+		)
 		var tangent_mesh := Curve3DDebugMesh.new()
 		# Since the tangent handle is not expected to bend, let's cut down its
 		# resolution somewhat.
@@ -148,39 +154,49 @@ func _update_visualization() -> void:
 		var point_of_tangency: Vector3
 		# Point "in" of `curve`.
 		tangent_mesh.curve.add_point(curve.get_point_position(idx) + curve.get_point_in(idx))
+		# `sample_baked_with_rotation` would error on a 1-point curve.
 		if curve.point_count == 1:
 			point_of_tangency = curve.get_point_position(0)
 		else:
-			point_of_tangency = curve.sample_baked_with_rotation(
-				Curve3DDebugFuncs.get_closest_offset_on_curve_or_zero(
-					curve,
-					curve.get_point_position(idx)
-				)
-			).origin
+			point_of_tangency = transform_of_tangency.origin
 		# Point of `curve`.
-		tangent_mesh.curve.add_point(point_of_tangency)
+		# If the in-point is ZERO, `point_of_tangency` is the current idx
+		# position in `curve`. If we wouldn't check here, we'd add the same
+		# position twice in a row.
+		if not curve.get_point_in(idx) == Vector3.ZERO:
+			tangent_mesh.curve.add_point(point_of_tangency)
 		# Point "out" of `curve`.
-		tangent_mesh.curve.add_point(curve.get_point_position(idx) + curve.get_point_out(idx))
+		# Check to avoid consecutive same-point, as with the in-point above.
+		if not curve.get_point_out(idx) == Vector3.ZERO:
+			tangent_mesh.curve.add_point(curve.get_point_position(idx) + curve.get_point_out(idx))
+		# If both in and out points are ZERO, the tangent mesh will be empty.
 		tangent_mesh.update()
-		tangent_mesh.mesh.surface_set_material(0, tangent_material)
+		if tangent_mesh.mesh.get_surface_count() > 0:
+			tangent_mesh.mesh.surface_set_material(0, tangent_material)
 		
 		#-------------
 		#--- In point.
 		var handle_in_point_mesh := _create_handle_in_point_mesh()
-		handle_in_point_mesh.transform = Curve3DDebugFuncs.get_point_transform(
-			tangent_mesh.curve,
-			TangentPointIndexes.IN
-		)
+		if tangent_mesh.curve.point_count == 1:
+			handle_in_point_mesh.transform = transform_of_tangency
+		else:
+			handle_in_point_mesh.transform = Curve3DDebugFuncs.get_point_transform(
+				tangent_mesh.curve,
+				0
+			)
 		in_handle_meshes.append(handle_in_point_mesh)
 		add_child(handle_in_point_mesh)
 		
 		#--------------
 		#--- Out point.
 		var handle_out_point_mesh := _create_handle_out_point_mesh()
-		handle_out_point_mesh.transform = Curve3DDebugFuncs.get_point_transform(
-			tangent_mesh.curve,
-			TangentPointIndexes.OUT
-		)
+		if tangent_mesh.curve.point_count == 1:
+			handle_out_point_mesh.transform = transform_of_tangency
+		else:
+			handle_out_point_mesh.transform = Curve3DDebugFuncs.get_point_transform(
+				tangent_mesh.curve,
+				tangent_mesh.curve.point_count - 1
+			)
 		out_handle_meshes.append(handle_out_point_mesh)
 		add_child(handle_out_point_mesh)
 
