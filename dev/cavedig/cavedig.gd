@@ -19,7 +19,8 @@ static func needle(
 	p_transform: Transform3D,
 	p_color: Vector3 = Vector3(0.5, 0.5, 0.5),
 	p_height: float = 10.0,
-	p_radius: float = 0.05
+	p_radius: float = 0.05,
+	p_hidden := false
 ) -> CSGCylinder3D:
 	var shader = load("res://dev/cavedig/cavedig_material.tres")
 	var debug_cylinder = CSGCylinder3D.new()
@@ -29,6 +30,8 @@ static func needle(
 	debug_cylinder.height = p_height
 	debug_cylinder.radius = p_radius
 	debug_cylinder.transform = p_transform
+	if p_hidden:
+		debug_cylinder.hide()
 	
 	return debug_cylinder
 
