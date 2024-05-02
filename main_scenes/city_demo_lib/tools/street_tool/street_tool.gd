@@ -35,6 +35,7 @@ var _bounding_box_profile2d := PackedVector2Array([
 	Vector2(-0.5, -0.1),
 	Vector2(-0.5, 0.1)
 ])
+var _debug_node_adding_visualizer: CSGCylinder3D
 
 
 func _check_vars_exist(
@@ -60,7 +61,10 @@ func _on_ready_sanity_checks(
 	var initial_err_msg_count := len(p_err_msgs)
 	_check_vars_exist(
 		p_err_msgs,
-		{}
+		{
+			"map_agent": "@export var map_agent not defined.",
+			"map_ray_caster": "@export var map_ray_caster not defined."
+		}
 	)
 	
 	var errors_found := len(p_err_msgs) - initial_err_msg_count > 0
@@ -83,6 +87,22 @@ func deactivate() -> void:
 	map_agent.mouse_position_change.disconnect(_on_map_mouse_position_change)
 
 
+func is_in_handle_setting_mode() -> bool:
+	return !is_in_node_adding_mode()
+
+
+## Calls `set_node_handle_out_point` with `FINALIZED`.
+func set_node_handle_out_point_and_enter_node_adding_mode(
+		p_idx: int,
+		p_position: Vector3,
+	) -> void:
+		set_node_handle_out_point(
+			p_idx,
+			p_position,
+			FINALIZED
+		)
+
+
 func add_node(
 	p_position: Vector3,
 	p_finalized: bool,
@@ -91,12 +111,34 @@ func add_node(
 	return cursor.current_idx
 
 
+func enter_handle_setting_mode():
+	get_state().node_finalizations[cursor.current_idx].point = FINALIZED
+
+
+## Calls `add_node` with `FINALIZED`.
+func add_node_and_enter_handle_setting_mode(p_position: Vector3,) -> int:
+	return add_node(p_position, FINALIZED)
+
+
 func _ready() -> void:
-	if len(_on_ready_sanity_checks(PackedStringArray())) > 0:
+	if len(_on_ready_sanity_checks(PackedStringArray(), true)) > 0:
 		push_error(
 			"Failed to initialize `%s`. " % get_name()
 			+ "See earlier error(s)."
 		)
+
+
+func _set_debug_node_adding_visualizer(p_position: Vector3) -> void:
+	if not _debug_node_adding_visualizer:
+		_debug_node_adding_visualizer = Cavedig.needle(
+			map_agent.get_map_node(),
+			Transform3D(Basis(), p_position),
+			Vector3(0.1, 0.8, 0.3),
+			0.8,
+			0.14
+		)
+		return
+	_debug_node_adding_visualizer.transform.origin = p_position
 
 
 func _on_map_mouse_button(
@@ -110,19 +152,26 @@ func _on_map_mouse_button(
 	# a way modular enough that it won't be a pain to integrate the tool into
 	# other codebases.
 	if p_event.button_index == MOUSE_BUTTON_LEFT and p_event.pressed:
-		if is_in_node_adding_mode():
-			var idx := add_node(p_mouse_position, true)
+		if not get_state().node_finalizations[cursor.current_idx].point:
+			set_node_position(
+				cursor.current_idx,
+				p_mouse_position,
+				FINALIZED
+			)
 			Cavedig.needle(
 				map_agent.get_map_node(),
 				Transform3D(Basis(), cursor.current_position_ro)
 			)
-		else:
-			#get_state().node_metadata[get_last_node_idx()].out_point_finalized = true
-			#get_state().node_finalizations[get_last_node_idx()].handle_out = FINALIZED
+		elif not get_state().node_finalizations[cursor.current_idx].handle_out:
 			set_node_handle_out_point(
 				cursor.current_idx,
 				p_mouse_position - cursor.current_position_ro,
 				FINALIZED
+			)
+			# New (current) point
+			add_node(
+				p_mouse_position,
+				UNFINALIZED
 			)
 
 
@@ -133,16 +182,26 @@ func _on_map_mouse_position_change(
 	_p_normal: Vector3,
 	_p_shape: int
 ) -> void:
-	if\
-	get_node_count() > 0\
-	and not get_state().node_finalizations[cursor.current_idx].handle_out:
-		set_node_handle_out_point(
-			cursor.current_idx,
-			p_mouse_position - cursor.current_position_ro,
+	if get_node_count() == 0:
+		add_node(
+			p_mouse_position,
 			UNFINALIZED
 		)
-	if get_node_count() > 1:
-		_update_street()
+	if not get_state().node_finalizations[cursor.current_idx].point:
+		set_node_position(
+			cursor.current_idx,
+			p_mouse_position,
+			UNFINALIZED
+		)
+	elif not get_state().node_finalizations[cursor.current_idx].handle_out:
+		if not get_state().curve.get_point_position(cursor.current_idx) == p_mouse_position:
+			set_node_handle_out_point(
+				cursor.current_idx,
+				p_mouse_position - cursor.current_position_ro,
+				UNFINALIZED
+			)
+	#if get_node_count() > 1:
+			#_update_street()
 
 
 func _get_point_transforms(p_map_points: PackedVector3Array) -> Array[Transform3D]:
