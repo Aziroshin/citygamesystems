@@ -22,7 +22,14 @@ enum StreetToolMapRayCasterRequestTypeId {
 ## Set to true when the final request for building the street is made, so
 ## signal responders involved in that process know that the tool is finishing
 ## up.
-var build_requested = false
+var build_requested := false
+## `true` when waiting for a response from the `.map_ray_caster`, so the data
+## sent from the raycaster doesn't get matched up with curve data that changed
+## in the interim.
+var waiting_for_map_points := false
+## Used to store the first mouse click when waiting for map points. Questionable
+## workaround for clicks getting lost as the tool is in waiting mode.
+var click_buffer := SingleFirstSignalBuffer.new()
 
 @export var map_agent: ToolLibMapAgent
 @export var map_ray_caster: ToolMapRayCaster
@@ -142,12 +149,21 @@ func _set_debug_node_adding_visualizer(p_position: Vector3) -> void:
 
 
 func _on_map_mouse_button(
-	_p_camera: Camera3D,
+	p_camera: Camera3D,
 	p_event: InputEventMouseButton,
 	p_mouse_position: Vector3,
-	_p_normal: Vector3,
-	_p_shape: int
+	p_normal: Vector3,
+	p_shape: int
 ) -> void:
+	if waiting_for_map_points:
+		click_buffer.push(
+			InputEventMouseSignalBufferCall.new(
+				p_camera, p_event, p_mouse_position, p_normal, p_shape
+			),
+			_on_map_mouse_button
+		)
+		return
+	
 	# TODO: This will need to be properly tied into actions, but also in
 	# a way modular enough that it won't be a pain to integrate the tool into
 	# other codebases.
@@ -182,6 +198,9 @@ func _on_map_mouse_position_change(
 	_p_normal: Vector3,
 	_p_shape: int
 ) -> void:
+	if waiting_for_map_points:
+		return
+	
 	if get_node_count() == 0:
 		add_node(
 			p_mouse_position,
@@ -200,8 +219,8 @@ func _on_map_mouse_position_change(
 				p_mouse_position - cursor.current_position_ro,
 				UNFINALIZED
 			)
-	#if get_node_count() > 1:
-			#_update_street()
+	if get_node_count() > 1:
+			_update_street()
 
 
 func _get_point_transforms(p_map_points: PackedVector3Array) -> Array[Transform3D]:
@@ -235,6 +254,7 @@ func _on_request_build_street() -> void:
 
 ## Run every time the street has previewable changes.
 func _update_street() -> void:
+	waiting_for_map_points = true
 	request_map_points.emit(
 		ToolMapRayCaster.Request.new(
 			StreetToolMapRayCasterRequestTypeId.CURVE,
@@ -251,6 +271,8 @@ func _on_result_map_points(p_result: ToolMapRayCaster.Result) -> void:
 	else:
 		if get_node_count() > 1:
 			_emit_street_previewably_changed(p_result.map_points)
+	waiting_for_map_points = false
+	click_buffer.flush()
 
 
 func _build_street(p_map_points: PackedVector3Array) -> void:

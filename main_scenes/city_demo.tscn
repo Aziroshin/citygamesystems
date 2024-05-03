@@ -189,7 +189,7 @@ _arbiter_agent = NodePath("../../../../LayoutTool/LayoutToolArbiterAgent")
 [connection signal="deactivated" from="street_tool" to="Map/debug_visualizer_for_street_tool" method="hide" flags=3]
 [connection signal="deactivated" from="street_tool" to="ButtonBar/SubButtonBarsBar/StreetToolSubBar" method="hide"]
 [connection signal="request_map_points" from="street_tool" to="StreetToolMapRayCaster" method="_on_request_map_points" flags=3]
-[connection signal="street_previewably_changed" from="street_tool" to="Map/StreetToolMapPreviewer" method="_on_previewable_change" flags=3]
+[connection signal="street_previewably_changed" from="street_tool" to="Map/StreetToolMapPreviewer" method="_on_previewable_change"]
 [connection signal="activated" from="LayoutTool" to="Map/debug_visualizer_for_layout_tool" method="show" flags=3]
 [connection signal="activated" from="LayoutTool" to="ButtonBar/SubButtonBarsBar/LayoutToolSubBar" method="show" flags=3]
 [connection signal="curve_changed" from="LayoutTool" to="Map/debug_visualizer_for_layout_tool" method="_on_curve_changed" flags=3]

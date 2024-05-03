@@ -52,18 +52,26 @@ func _physics_process(_p_delta: float) -> void:
 		var space_state := get_world_3d().direct_space_state
 		var request: Request = requests.pop_back()
 		
+		var i_point := 0
+		var i_added_points := 0
 		for point in request.source_points:
 			var result := cast(point, cast_offset, -cast_offset, space_state)
 			if result.has("position"):
 				map_points.append(result["position"])
+				i_added_points += 1
 			else:
-				push_error("Street tool ray cast failed to collide with map.")
+				push_error(
+					"Street tool ray cast failed to collide with map at "
+					+ "point idx %s." % i_point
+				)
+			i_point += 1
 		
-		result_map_points.emit(
-			Result.new(
+		var result := Result.new(
 				request.id,
 				map_points
 			)
+		result_map_points.emit(
+			result
 		)
 
 
