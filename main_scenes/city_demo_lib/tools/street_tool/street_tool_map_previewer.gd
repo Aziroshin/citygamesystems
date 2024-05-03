@@ -14,7 +14,8 @@ func _on_previewable_change(
 	p_transforms: Array[Transform3D],
 	p_profile2d: PackedVector2Array,
 ) -> void:
-	map_agent.get_map_node().remove_child(_preview_mesh)
+	if _preview_mesh in map_agent.get_map_node().get_children():
+		map_agent.get_map_node().remove_child(_preview_mesh)
 	_preview_mesh = StreetMesh.create_network_segment(
 		p_map_points,
 		p_transforms,
