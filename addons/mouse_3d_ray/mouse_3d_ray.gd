@@ -187,6 +187,7 @@ func ensure_sanity() -> bool:
 func ensure_caching_viewport_mouse_position_getter_attached() -> void:
 	for child in viewport.get_children():
 		if child is CachingViewportMousePositionGetter:
+			viewport_mouse_position_getter = child
 			return
 	viewport_mouse_position_getter = CachingViewportMousePositionGetter.new(viewport)
 	viewport.add_child(viewport_mouse_position_getter)
