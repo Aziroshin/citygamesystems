@@ -56,7 +56,7 @@ func _update_from_vertices(
 	p_vertices: PackedVector3Array
 ) -> void:
 	if len(p_vertices) < 3:
-		mesh = Mesh.new()
+		mesh = ArrayMesh.new()
 		return
 	
 	mesh = Curve3DDebugFuncs.create_array_mesh(p_vertices)
