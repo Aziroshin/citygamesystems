@@ -198,7 +198,10 @@ func save_config_value(p_section: String, p_key: String, p_value) -> bool:
 func load_config_value(p_section: String, p_key: String) -> Variant:
 	var config := ConfigFile.new()
 	config.load(config_file_path)
-	return config.get_value(p_section, p_key)
+	if config.has_section(p_section) and config.has_section_key(p_section, p_key):
+		return config.get_value(p_section, p_key)
+	else:
+		return null
 	
 	
 func save_transform() -> bool:
