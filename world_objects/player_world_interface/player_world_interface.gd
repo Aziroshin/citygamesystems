@@ -377,7 +377,6 @@ func _physics_process(p_delta: float) -> void:
 		)
 		
 	if Input.is_action_pressed(RESET_TRANSFORM_ACTION):
-		print("Reset requested.")
 		transform = transform_before_config_load
 		
 	#======================================================================
