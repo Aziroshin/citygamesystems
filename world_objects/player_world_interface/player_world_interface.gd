@@ -36,7 +36,7 @@ const SAVE_AND_QUIT_EDITOR_ACTION := "dev_camera_save_and_quit"
 @export var default_pitch_speed := 2.0
 ## This happens at runtime and doesn't write to the project.
 @export var override_existing_actions := false
-@export var double_tap_interval := 0.2
+@export var double_tap_interval := 0.3
 @export var initial_motion_mode: MotionMode = MOTION_MODE_FLOATING
 @export var config_file_path := ""
 @export var config_section := ""
@@ -76,6 +76,7 @@ const CONFIG_VALUE_NAME_CAMERA_TRANSFORM := "camera_transform"
 # Non-config globals
 #======================================================================
 var delta_without_up_action := 0.0
+var waiting_for_second_tap := false
 var transform_before_config_load: Transform3D = transform
 var non_floating_collision_mask := collision_mask
 #======================================================================
@@ -263,6 +264,22 @@ func load_motion_mode() -> NilableInt:
 
 
 #======================================================================
+# Util
+#======================================================================
+func toggle_motion_mode() -> void:
+	if motion_mode == MOTION_MODE_GROUNDED:
+		motion_mode = MOTION_MODE_FLOATING
+	else:
+		motion_mode = MOTION_MODE_GROUNDED
+
+
+func reset_double_tap() -> void:
+	waiting_for_second_tap = false
+	delta_without_up_action = 0.0
+#======================================================================
+
+
+#======================================================================
 # The Stuff
 #======================================================================
 func _ready():
@@ -314,14 +331,22 @@ func _physics_process(p_delta: float) -> void:
 	# Move upward when holding the up-action and start falling
 	# when double-tapping the up-action. This will probably break
 	# or at least get really awkward with non-button-ish controls.
-	if Input.is_action_pressed(MOVE_UP_ACTION):
-		if Input.is_action_just_pressed(MOVE_UP_ACTION):
+	if delta_without_up_action > double_tap_interval:
+		reset_double_tap()
+	
+	if Input.is_action_just_pressed(MOVE_UP_ACTION):
+		if waiting_for_second_tap:
 			if delta_without_up_action <= double_tap_interval:
-				motion_mode = MOTION_MODE_GROUNDED
-			else:
-				motion_mode = MOTION_MODE_FLOATING
-			delta_without_up_action = 0.0
+				toggle_motion_mode()
+				reset_double_tap()
 		else:
+			waiting_for_second_tap = true
+	
+	if waiting_for_second_tap:
+		delta_without_up_action = delta_without_up_action + p_delta
+	
+	if Input.is_action_pressed(MOVE_UP_ACTION):
+		if motion_mode == MOTION_MODE_FLOATING:
 			forces.append(transform.basis.y + Vector3(0.0, 1.0, 0.0))
 	
 	if Input.is_action_pressed(MOVE_DOWN_ACTION):
@@ -365,8 +390,6 @@ func _physics_process(p_delta: float) -> void:
 	if len(forces) > 0:
 		velocity = force_from_forces(forces).normalized() * default_speed * p_delta
 		move_and_slide()
-		
-	delta_without_up_action = delta_without_up_action + p_delta
 	
 	
 func _input(_p_event: InputEvent) -> void:
