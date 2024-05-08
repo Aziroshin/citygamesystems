@@ -8,10 +8,10 @@ extends CharacterBody3D
 # them into class syntax (take everything except the first two lines, indent
 # it all and write, for example, `class NilableInt:` (unindented) above it).
 
-###########################################################################
+#======================================================================
 # Config
-###########################################################################
-### Action names for movement.
+#======================================================================
+#=== Action names for movement.
 const MOVE_LEFT_ACTION := "camera_left"
 const MOVE_RIGHT_ACTION := "camera_right"
 const MOVE_FORWARD_ACTION := "camera_forward"
@@ -24,13 +24,13 @@ const PITCH_UP_ACTION := "camera_pitch_up"
 const PITCH_DOWN_ACTION := "camera_pitch_down"
 const RESET_TRANSFORM_ACTION := "camera_reset_transform"
 
-### Action names for editor-only functionality.
-# This is a special action for quick in-editor testing, which should be
-# distinct from normal "save and quit" type of actions in more complex
-# applications, and is intended to be used by this camera, not other things.
+#=== Action names for editor-only functionality.
+## This is a special action for quick in-editor testing, which should be
+## distinct from normal "save and quit" type of actions in more complex
+## applications, and is intended to be used by this camera, not other things.
 const SAVE_AND_QUIT_EDITOR_ACTION := "dev_camera_save_and_quit"
 
-### Exports
+#=== Exports
 @export var default_speed := 128.0
 @export var default_rotation_speed := 6.0
 @export var default_pitch_speed := 2.0
@@ -43,13 +43,13 @@ const SAVE_AND_QUIT_EDITOR_ACTION := "dev_camera_save_and_quit"
 @export var enable_integration_warnings := true
 @export var show_integration_errors := true
 
-### Child nodes should get a handy variable here, which should then be used
-### in the code instead of the path, to make node tree refactoring more
-### straight forward.
+#=== Child nodes should get a handy variable here, which should then be used
+#=== in the code instead of the path, to make node tree refactoring more
+#=== straight forward.
 @onready var camera: Camera3D = $SpringArm/Camera
 
-### Default keys for actions.
-### If more than a key is needed, refactor the value to be an object instead.
+#=== Default keys for actions.
+#=== If more than a key is needed, refactor the value to be an object instead.
 var action_default_keys := {
 	MOVE_LEFT_ACTION: create_input_event(KEY_A),
 	MOVE_RIGHT_ACTION: create_input_event(KEY_D),
@@ -65,24 +65,25 @@ var action_default_keys := {
 	RESET_TRANSFORM_ACTION: create_input_event(KEY_DELETE, [Modifiers.ALT])
 }
 
-### Config file anatomy.
+#=== Config file anatomy.
 const CONFIG_VALUE_NAME_TRANSFORM := "transform"
 const CONFIG_VALUE_NAME_MOTION_MODE := "motion_mode"
 const CONFIG_VALUE_NAME_CAMERA_TRANSFORM := "camera_transform"
-###########################################################################
+#======================================================================
 
 
-###########################################################################
+#======================================================================
 # Non-config globals
-###########################################################################
+#======================================================================
 var delta_without_up_action := 0.0
 var transform_before_config_load: Transform3D = transform
-###########################################################################
+var non_floating_collision_mask := collision_mask
+#======================================================================
 
 
-###########################################################################
+#======================================================================
 # Misc
-###########################################################################
+#======================================================================
 # Get the resulting vector from adding up all vectors in the specified array.
 func force_from_forces(p_forces: Array[Vector3]) -> Vector3:
 	assert(len(p_forces) > 0, "`forces` can't be empty.")
@@ -96,12 +97,12 @@ func force_from_forces(p_forces: Array[Vector3]) -> Vector3:
 		force = p_forces[i] + p_forces[i + 1]
 		i = i + 1
 	return force
-###########################################################################
+#======================================================================
 
 
-###########################################################################
+#======================================================================
 # Actions
-###########################################################################
+#======================================================================
 enum Modifiers {
 	SHIFT,
 	CONTROL_OR_META,
@@ -140,8 +141,8 @@ func set_action_key(p_action: String, p_keycode: Key):
 	var key_event_for_action := InputEventKey.new()
 	key_event_for_action.keycode = p_keycode
 	InputMap.action_add_event(p_action, key_event_for_action)
-	
-	
+
+
 # Add (and override if specified) an action as required to make sure it's
 # reasonably set up as configured without having to set it up in the Input Map
 # first.
@@ -160,20 +161,20 @@ func ensure_action_configured(
 			)
 	elif p_override:
 		InputMap.action_add_event(p_action, action_default_keys[p_action])
-		
-		
+
+
 # Add (and override if specified) actions as required to provide reasonable
 # controls as configured without having to set them up in the Input Map first.
 # This alters `InputMap` at runtime and doesn't write to the project.
 func ensure_actions_configured(p_override: bool = false) -> void:
 	for action in action_default_keys.keys():
 		ensure_action_configured(action, p_override)
-###########################################################################
+#======================================================================
 
 
-###########################################################################
+#======================================================================
 # Config
-###########################################################################
+#======================================================================
 # Checks whether we have everything to access the config.
 func check_config_access() -> bool:
 	if config_file_path == "" or config_section == "":
@@ -181,8 +182,8 @@ func check_config_access() -> bool:
 			push_error("No config file path and/or section configured for %s" % name)
 		return false
 	return true
-	
-	
+
+
 # Saves config value and returns true or fails and returns false.
 func save_config_value(p_section: String, p_key: String, p_value) -> bool:
 	if check_config_access():
@@ -192,8 +193,8 @@ func save_config_value(p_section: String, p_key: String, p_value) -> bool:
 		config.save(config_file_path)
 		return true
 	return false
-	
-	
+
+
 # Loads config and returns config value, or `null` if it fails.
 func load_config_value(p_section: String, p_key: String) -> Variant:
 	var config := ConfigFile.new()
@@ -202,24 +203,24 @@ func load_config_value(p_section: String, p_key: String) -> Variant:
 		return config.get_value(p_section, p_key)
 	else:
 		return null
-	
-	
+
+
 func save_transform() -> bool:
 	return save_config_value(
 		config_section,
 		CONFIG_VALUE_NAME_TRANSFORM,
 		transform
 	)
-	
-	
+
+
 func save_camera_transform() -> bool:
 	return save_config_value(
 		config_section,
 		CONFIG_VALUE_NAME_CAMERA_TRANSFORM,
 		camera.transform
 	)
-	
-	
+
+
 func load_camera_transform() -> NilableTransform3D:
 	var value = load_config_value(
 		config_section,
@@ -229,8 +230,8 @@ func load_camera_transform() -> NilableTransform3D:
 		return NilableTransform3D.new().set_value(value)
 	else:
 		return NilableTransform3D.new()
-	
-	
+
+
 func load_transform() -> NilableTransform3D:
 	var value = load_config_value(
 		config_section,
@@ -240,16 +241,16 @@ func load_transform() -> NilableTransform3D:
 		return NilableTransform3D.new().set_value(value)
 	else:
 		return NilableTransform3D.new()
-		
-		
+
+
 func save_motion_mode() -> bool:
 	return save_config_value(
 		config_section,
 		CONFIG_VALUE_NAME_MOTION_MODE,
 		motion_mode
 	)
-		
-		
+
+
 func load_motion_mode() -> NilableInt:
 	var value = load_config_value(
 		config_section,
@@ -258,12 +259,12 @@ func load_motion_mode() -> NilableInt:
 	if typeof(value) == TYPE_INT:
 		return NilableInt.new().set_value(value)
 	return NilableInt.new()
-###########################################################################
+#======================================================================
 
 
-###########################################################################
+#======================================================================
 # The Stuff
-###########################################################################
+#======================================================================
 func _ready():
 	# Store initial transform in case we want to reset to it.
 	transform_before_config_load = transform
@@ -286,14 +287,14 @@ func _ready():
 		camera.transform = camera_transform_data_from_config.value
 	
 	ensure_actions_configured(override_existing_actions)
-	
-	
+
+
 func _physics_process(p_delta: float) -> void:
 	var forces: Array[Vector3] = []
 	
-	#######################################################################
+	#======================================================================
 	# Input
-	#######################################################################
+	#======================================================================
 	if Input.is_action_just_pressed(SAVE_AND_QUIT_EDITOR_ACTION):
 		if OS.has_feature("editor"):
 			save_transform()
@@ -309,24 +310,23 @@ func _physics_process(p_delta: float) -> void:
 		forces.append(transform.basis.z)
 	if Input.is_action_pressed(MOVE_BACKWARD_ACTION):
 		forces.append(-transform.basis.z)
-		
+	
 	# Move upward when holding the up-action and start falling
 	# when double-tapping the up-action. This will probably break
 	# or at least get really awkward with non-button-ish controls.
 	if Input.is_action_pressed(MOVE_UP_ACTION):
 		if Input.is_action_just_pressed(MOVE_UP_ACTION):
-			print(delta_without_up_action)
 			if delta_without_up_action <= double_tap_interval:
 				motion_mode = MOTION_MODE_GROUNDED
 			else:
 				motion_mode = MOTION_MODE_FLOATING
 			delta_without_up_action = 0.0
 		else:
-			forces.append(transform.basis.y)
-		
+			forces.append(transform.basis.y + Vector3(0.0, 1.0, 0.0))
+	
 	if Input.is_action_pressed(MOVE_DOWN_ACTION):
 		forces.append(-transform.basis.y)
-		
+	
 	if Input.is_action_pressed(ROTATE_LEFT_ACTION):
 		transform = transform.rotated_local(
 			Vector3(0, 1, 0),
@@ -355,7 +355,7 @@ func _physics_process(p_delta: float) -> void:
 		print("Reset requested.")
 		transform = transform_before_config_load
 		
-	#######################################################################
+	#======================================================================
 	
 	# If we're flying without being in floating mode, add a gravity force.
 	if not is_on_floor() and not motion_mode == MOTION_MODE_FLOATING:
@@ -363,8 +363,7 @@ func _physics_process(p_delta: float) -> void:
 	
 	# Combine all forces and move.
 	if len(forces) > 0:
-		velocity = force_from_forces(forces)\
-			.normalized() * default_speed * p_delta
+		velocity = force_from_forces(forces).normalized() * default_speed * p_delta
 		move_and_slide()
 		
 	delta_without_up_action = delta_without_up_action + p_delta
@@ -372,4 +371,4 @@ func _physics_process(p_delta: float) -> void:
 	
 func _input(_p_event: InputEvent) -> void:
 	pass
-###########################################################################
+#======================================================================
