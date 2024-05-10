@@ -266,66 +266,6 @@ func load_motion_mode() -> NilableInt:
 #======================================================================
 # Util
 #======================================================================
-# Since `PlayerWorldInterface` probably won't need anything but `SphereShape3D`,
-# limiting the implementation to that should be fine.
-## Returns the guessed distance between the origin and a potential
-## `CollisionShape3D`-type child's lowest y-point.
-## Only implemented for `SphereShape3D`. Returns `1.0` in all other
-## cases.
-func get_guessed_collision_shape_height_from_origin_to_lowest() -> float:
-	for child in get_children():
-		if child is CollisionShape3D:
-			if child.shape is SphereShape3D:
-				return child.shape.radius
-	return 1.0
-
-
-## Returns the map collision info above (on the y-axis) if we're below the map.
-##
-## This assumes a height map sort of topology, e.g. a special mesh generated for
-## the PlayerWorldInterface to slide on if this is used with a 3D map. To also
-## cover 3D map cases to some degree, this casts two rays, one up, one down. If
-## the down ray comes up empty but the up ray collides, it's a "below map"
-## situation. If you want to rely on that, make sure `p_base_ray_length` is at
-## least a bit greater than the max. height the `PlayerWorldInterface` will ever
-## be at.
-##
-## If deemed to be below the map, it returns the ray casting result Dictionary of 
-## the up raycast. For the shape of the Dictionary, look at the Godot
-## documentation for the `intersect_ray`function of `PhysicsDirectSpaceState3D`.
-## If deemed not below the map, an empty Dictionary is returned.
-func get_map_collision_above_if_below_map(p_base_ray_length := 1000.0) -> Dictionary:
-	# Experiment to glean what numbers might be involved in determining when
-	# the offset for the rays allows correctly identifying when we're stuck
-	# in the map and when it doesn't.
-	# We don't want a magic number, so this won't do as a solution, of course.
-	var magic_number_boundary_correct := -0.4587
-	var magic_number_boundary_wrong := -0.4588
-	
-	var from_offset = Vector3(
-		0.0,
-		get_guessed_collision_shape_height_from_origin_to_lowest() + magic_number_boundary_correct,
-		0.0
-	)
-	var target_offset = Vector3(0.0, p_base_ray_length, 0.0)
-	
-	var space_state := get_world_3d().direct_space_state
-	var down_ray_query := PhysicsRayQueryParameters3D.new()
-	down_ray_query.from = transform.origin - from_offset
-	down_ray_query.to = transform.origin - target_offset
-	var up_ray_query := PhysicsRayQueryParameters3D.new()
-	up_ray_query.from = transform.origin - from_offset
-	up_ray_query.to = transform.origin + target_offset
-	
-	var down_ray_result := space_state.intersect_ray(down_ray_query)
-	var up_ray_result := space_state.intersect_ray(up_ray_query)
-	
-	if not "position" in down_ray_result and "position" in up_ray_result:  # Below map.
-		return up_ray_result
-	else:  # Above map.
-		return {}
-
-
 func toggle_motion_mode() -> void:
 	if motion_mode == MOTION_MODE_GROUNDED:
 		motion_mode = MOTION_MODE_FLOATING
@@ -343,12 +283,6 @@ func reset_double_tap() -> void:
 # The Stuff
 #======================================================================
 func _ready():
-	# TODO [debug-cleanup]
-	print(
-		"player_world_interface.gd, floor_snap_length: %s, " % floor_snap_length,
-		"floor_snap_length: %s." % safe_margin
-	)
-	
 	# Store initial transform in case we want to reset to it.
 	transform_before_config_load = transform
 	
@@ -374,31 +308,6 @@ func _ready():
 
 func _physics_process(p_delta: float) -> void:
 	var forces: Array[Vector3] = []
-	
-	# TODO: This will prevent going below the map, which isn't good, but it
-	# deals with the problem of getting stuck below or in the ground for now.
-	# We should probably move this to an event that responds to collisions,
-	# so we're only checking when we're getting entangled.
-	var maybe_collision := get_map_collision_above_if_below_map()
-	if "position" in maybe_collision:
-		var bump_up_distance := (
-		(abs(maybe_collision["position"].y) as float)\
-		+ get_guessed_collision_shape_height_from_origin_to_lowest()
-	)
-		# TODO [debug-cleanup]
-		print("player_world_interface.gd, deemed under world")
-		print(
-			"player_world_interface.gd, maybe_collision: %s, " % maybe_collision["position"],
-			"transform.origin: %s." % transform.origin
-		)
-		transform.origin = transform.origin + Vector3(
-			0.0,
-			abs(maybe_collision["position"].y)
-			+ get_guessed_collision_shape_height_from_origin_to_lowest(),
-			0.0
-		)
-		move_and_collide(Vector3(0.0, -10.0, 0.0))
-	
 	
 	#======================================================================
 	# Input
