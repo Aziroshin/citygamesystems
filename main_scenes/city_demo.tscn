@@ -32,6 +32,7 @@
 script = ExtResource("1_elgex")
 
 [node name="PlayerWorldInterface" parent="." instance=ExtResource("2_16h52")]
+transform = Transform3D(1, 0, 0, 0, 0.900364, -0.435137, 0, 0.435137, 0.900364, 0, 3.86307, 0)
 override_existing_actions = true
 enable_integration_warnings = false
 
