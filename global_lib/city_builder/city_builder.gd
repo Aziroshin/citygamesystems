@@ -200,6 +200,11 @@ class Layout extends Node3D:
 			corner_points.append(outline_points[idx])
 
 
+# TODO
+class StreetSegment extends Node3D:
+	pass
+
+
 # TODO: Curve initialization from layout.
 # This will be added to a PositionerMultiComponent.
 #class LayoutCurvePositioner extends CurvePositioner:
