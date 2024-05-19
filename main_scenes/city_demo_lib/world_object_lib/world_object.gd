@@ -7,6 +7,18 @@ class_name WorldObject
 
 signal collider_added(world_object: WorldObject, collider: CollisionObject3D)
 signal collider_removed(collider: CollisionObject3D)
+# The ID:
+# IMPORTANT: Whatever is initializing the world object needs to make sure the ID
+# is set before anything in the game is trying to read it, otherwise the game
+# will crash once something tries to access it. This is intentionally left
+# uninitialized, because errors in ID-initialization are too severe to be left
+# to some obscured default behaviour (e.g. just setting it to 0 to prevent
+# crashes on access).
+## This ID represents the world object in the abstract. Other parts of the game
+## may use this where directly referring to the object as seen at runtime isn't
+## robust. Of course, it can also be used in general if that fits the game's
+## architecture.
+var id: int
 
 
 ## Override in sub-class to initialize defaults if needed.
