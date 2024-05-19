@@ -1,0 +1,4 @@
+extends CharacterBody3D
+class_name WorldObjectCharacterBody3D
+
+var world_object: WorldObject

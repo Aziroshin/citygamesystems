@@ -61,3 +61,9 @@ class NodeGroups:
 ## Special node names used in the city game.
 class NodeNames:
 	const CGS_COLLIDER_MANAGER := &"ColliderManager"
+
+
+## Names of metadata keys (as in `set_meta`/`get_meta`).
+class MetaNames:
+	## Refers to the `WorldObject` a collider is associated with.
+	const WORLD_OBJECT_ON_COLLIDERS := &"cgs_world_object"
