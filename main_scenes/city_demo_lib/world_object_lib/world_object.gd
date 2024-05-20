@@ -7,6 +7,7 @@ class_name WorldObject
 
 signal collider_added(world_object: WorldObject, collider: CollisionObject3D)
 signal collider_removed(collider: CollisionObject3D)
+@export var _colliders: Array[CollisionObject3D] = []
 # The ID:
 # IMPORTANT: Whatever is initializing the world object needs to make sure the ID
 # is set before anything in the game is trying to read it, otherwise the game
@@ -78,3 +79,13 @@ static func get_from_collider_or_null(
 				return p_collider.get_meta(p_meta)
 			
 	return null
+
+
+func get_colliders() -> Array[CollisionObject3D]:
+	return _colliders
+
+
+func add_collider(p_collider: CollisionObject3D) -> void:
+	_colliders.append(p_collider)
+	add_child(p_collider)
+	collider_added.emit(self, p_collider)

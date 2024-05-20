@@ -6,7 +6,6 @@ class_name LayoutWorldObject
 # - PositionerLib
 
 @export var layout: CityBuilder.Layout
-@export var _colliders: Array[CollisionObject3D] = []
 
 
 func _set_defaults() -> void:
@@ -22,11 +21,3 @@ func create_positioner() -> PositionerLib.MultiPositioner:
 	multi_positioner.add_positioner(outline_positioner)
 	return multi_positioner
 
-
-func get_colliders() -> Array[CollisionObject3D]:
-	return _colliders
-
-func add_collider(p_collider: CollisionObject3D) -> void:
-	_colliders.append(p_collider)
-	add_child(p_collider)
-	collider_added.emit(self, p_collider)
