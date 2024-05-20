@@ -26,7 +26,10 @@ func create_from_corner_points(p_corner_points: PackedVector3Array) -> LayoutWor
 
 # I'm not yet sure where to put the create-collider stuff, so I'm putting
 # it here for now.
-func _create_collider(p_layout: CityBuilder.Layout, p_depth := 1.0) -> CollisionObject3D:
+func _create_collider(
+	p_layout: CityBuilder.Layout,
+	p_depth := 1.0
+) -> CollisionObject3D:
 	var collider := Area3D.new()
 	var shape := CollisionPolygon3D.new()
 	var shape_polygon_vertices = PackedVector2Array()
@@ -58,15 +61,15 @@ func _create_collider(p_layout: CityBuilder.Layout, p_depth := 1.0) -> Collision
 		#vert_idx += 1
 		
 	shape.transform = shape.transform.rotated(Vector3(1.0, 0.0, 0.0), PI/2)
-	 
 	shape.depth = p_depth
 	shape.polygon = shape_polygon_vertices
 	collider.add_child(shape)
+	
 	return collider
 
 
 func create_from_layout(p_layout: CityBuilder.Layout) -> LayoutWorldObject:
-	var world_object = LayoutWorldObject.new()
+	var world_object := LayoutWorldObject.new()
 	world_object.layout = p_layout
 	world_object.add_collider(_create_collider(world_object.layout))
 	
