@@ -240,9 +240,9 @@ func _create_and_spawn_corner_only_layout_object() -> LayoutWorldObject:
 		corner_points.append(get_state().curve.get_point_position(i_point))
 	
 	#TODO: Snap the centroid to the map on the y-axis.
-	var centroid := GeoFoo.get_centroid_3d(corner_points)
+	var centroid := GeoFoo.get_centroid(corner_points)
 	GeoFoo.translate(corner_points, -centroid)
-	var layout_object = life_cyclers.layout.create_from_corner_points(corner_points)
+	var layout_object := life_cyclers.layout.create_from_corner_points(corner_points)
 	
 	map_agent.get_map_node().add_child(layout_object)
 	layout_object.transform.origin = centroid
