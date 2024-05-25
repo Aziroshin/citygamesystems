@@ -269,8 +269,7 @@ func _on_result_map_points(p_result: ToolMapRayCaster.Result) -> void:
 	if build_requested:
 		_do_and_finish(p_result.map_points)
 	else:
-		if get_node_count() > 1:
-			_emit_street_previewably_changed(p_result.map_points)
+		_emit_street_previewably_changed(p_result.map_points)
 	waiting_for_map_points = false
 	click_buffer.flush()
 
@@ -312,6 +311,7 @@ func _reset_state() -> void:
 
 func _reset() -> void:
 	_reset_state()
+	_emit_street_previewably_changed(PackedVector3Array())
 	cursor = CurveCursor.new(get_state().curve)
 	build_requested = false
 

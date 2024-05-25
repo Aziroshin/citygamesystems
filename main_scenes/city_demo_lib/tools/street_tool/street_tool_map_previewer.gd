@@ -16,10 +16,12 @@ func _on_previewable_change(
 ) -> void:
 	if _preview_mesh in map_agent.get_map_node().get_children():
 		map_agent.get_map_node().remove_child(_preview_mesh)
-	_preview_mesh = StreetMesh.create_network_segment(
-		p_map_points,
-		p_transforms,
-		p_profile2d
-	)
-	map_agent.get_map_node().add_child(_preview_mesh)
+	
+	if len(p_map_points) >= 2:
+		_preview_mesh = StreetMesh.create_network_segment(
+			p_map_points,
+			p_transforms,
+			p_profile2d
+		)
+		map_agent.get_map_node().add_child(_preview_mesh)
 
