@@ -10,8 +10,8 @@ signal request_map_points(source_points: PackedVector3Array)
 enum LayoutToolMapRayCasterRequestTypeId {
 	CURVE,
 }
-@export var map_agent: ToolLibMapAgent
 @export var life_cyclers: CityGameWorldObjectLifeCyclers
+@export var map_agent: ToolLibMapAgent
 ## Used for the colliders the tool uses to detect the boundary and corners of
 ## the area it's working with. Not related to the colliders of the layout
 ## objects themselves.
