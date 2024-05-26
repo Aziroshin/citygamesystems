@@ -3,6 +3,7 @@ class_name CityGameWorldObjectLifeCyclers
 
 @export var collider_manager: ColliderManager
 @onready var layout := LayoutWorldObjectLifeCycler.new(collider_manager)
+@onready var street_segment := StreetSegmentWorldObjectLifeCycler.new(collider_manager)
 
 
 func _enter_tree() -> void:

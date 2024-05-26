@@ -1,13 +1,14 @@
 extends EditorPlugin
 class_name GeoFoo
 
+class vector3:
+	static func xy(p_xyz: Vector3) -> Vector2:
+		return Vector2(p_xyz.x, p_xyz.y)
 
-func _enter_tree():
-	pass
+	static func xz (p_xyz: Vector3) -> Vector2:
+		return Vector2(p_xyz.x, p_xyz.z)
 
 
-func _exit_tree():
-	pass
 
 
 static func create_array_mesh(
@@ -185,6 +186,39 @@ static func get_loop_to_loop_extruded(
 	return vertices
 
 
+## Get a mesh made up of tris woven between two lines.
+static func get_tris_between_equal_lines(
+	p_from: PackedVector3Array,
+	p_to: PackedVector3Array
+) -> PackedVector3Array:
+	assert(len(p_from) >= 2)
+	assert(len(p_from) == len(p_to))
+	
+	var vertices := PackedVector3Array()
+	
+	var segment_count := (len(p_from) - 1)
+	var vertex_count := segment_count * 6
+	vertices.resize(vertex_count)
+	for i_segment in range(0, segment_count):
+		var i_first := i_segment * 6
+		vertices[i_first] = p_from[i_segment]
+		vertices[i_first+1] = p_from[i_segment+1]
+		vertices[i_first+2] = p_to[i_segment]
+		
+		vertices[i_first+3] = p_from[i_segment+1]
+		vertices[i_first+4] = p_to[i_segment+1]
+		vertices[i_first+5] = p_to[i_segment]
+	
+	return vertices
+
+
+## Convenience function to get a reversed duplicate `PackedVector3Array`.
+static func get_reversed(p_array: PackedVector3Array) -> PackedVector3Array:
+	var new_array := p_array.duplicate()
+	new_array.reverse()
+	return new_array
+
+
 ## Transforms `p_vertices` according to `p_transform`.
 ## Also returns `p_vertices` for convenience.
 static func to_transformed(
@@ -222,6 +256,51 @@ static func get_baked_point_transform(
 	)
 
 
+## Get the points of a `Curve3D` offset by the specified amount.
+## If `curve_relative` is `false`, the resulting points will be global
+## (default), otherwise they will be relative to the corresponding
+## point in the curve.
+static func get_offset_curve_points(
+	p_curve: Curve3D,
+	p_offset: float,
+	curve_relative := false
+) -> PackedVector3Array:
+	var offset_points := PackedVector3Array()
+	
+	for i_point in range(len(p_curve.get_baked_points())):
+		var transform := GeoFoo.get_baked_point_transform(p_curve, i_point)
+		var offset_point := transform.basis.x * p_offset
+		if curve_relative:
+			offset_points.append(offset_point)
+		else:
+			offset_points.append(transform.origin + offset_point)
+	
+	return offset_points
+
+
+## Returns the vector from  the point at `p_idx` to the "out" position of the
+## point at `p_idx - 1`.
+## This assumes all checks have been done, e.g. that the curve has at least
+## two points.
+static func get_point_to_preceding_point_out(
+	p_curve: Curve3D,
+	p_idx: int,
+	p_normalized := false,
+	p_scale := 1.0
+) -> Vector3:
+	var preceding_idx := p_idx - 1
+	var vector := (
+		p_curve.get_point_position(preceding_idx)
+		+ p_curve.get_point_out(preceding_idx)
+		- p_curve.get_point_position(p_idx)
+	)
+	
+	if p_normalized:
+		vector = vector.normalized()
+	
+	return vector * p_scale
+
+
 ## Recalculates all `p_vertices` into the local space of `p_node3d`.
 static func localize_to_node(p_vertices: PackedVector3Array, p_node: Node3D) -> void:
 	for i_vertex in len(p_vertices):
@@ -237,7 +316,7 @@ static func flip_tris(p_vertices: PackedVector3Array) -> void:
 		p_vertices[i_vertex+2] = tmp_vertex1
 
 
-static func flip(p_vertices) -> void:
+static func flip(p_vertices: PackedVector3Array) -> void:
 	for i_vertex in len(p_vertices):
 		p_vertices[i_vertex] = p_vertices[i_vertex] * -1
 

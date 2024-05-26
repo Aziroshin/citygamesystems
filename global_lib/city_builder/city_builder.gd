@@ -200,9 +200,32 @@ class Layout extends Node3D:
 			corner_points.append(outline_points[idx])
 
 
-# TODO
+# This is a piece of street, in the abstract. However, there might be a
+# hypothetical "StreetSegmentFrame", which might actually overshoot the
+# boundaries and fill in gaps to nearby developments, for example.
+## A piece of street, with data such as the main curve and boundaries.
 class StreetSegment extends Node3D:
-	pass
+	var main_curve: Curve3D
+	var radius: float
+	# Since this class might support proper boundry Curve3Ds one day, these
+	# two variables might be dropped later on.
+	var _outer_boundary_points := PackedVector3Array()
+	var _inner_boundary_points := PackedVector3Array()
+	
+	func _init(
+		p_main_curve: Curve3D,
+		p_radius: float
+	) -> void:
+		main_curve = p_main_curve
+		radius = p_radius
+	
+	## Outer boundary points.
+	func get_outer_boundary_points() -> PackedVector3Array:
+		return _outer_boundary_points
+	
+	## Inner boundary points.
+	func get_inner_boundary_points() -> PackedVector3Array:
+		return _inner_boundary_points
 
 
 # TODO: Curve initialization from layout.

@@ -75,8 +75,9 @@ collider_manager = NodePath("../ColliderManager")
 [node name="tool_arbiter" type="Node" parent="."]
 script = ExtResource("5_ar3lr")
 
-[node name="street_tool" type="Node" parent="." node_paths=PackedStringArray("map_agent", "map_ray_caster")]
+[node name="street_tool" type="Node" parent="." node_paths=PackedStringArray("life_cyclers", "map_agent", "map_ray_caster")]
 script = ExtResource("5_knyav")
+life_cyclers = NodePath("../LifeCyclers")
 map_agent = NodePath("PlaneMapAgent")
 map_ray_caster = NodePath("../StreetToolMapRayCaster")
 
@@ -86,9 +87,9 @@ arbiter = NodePath("../../tool_arbiter")
 [node name="PlaneMapAgent" parent="street_tool" node_paths=PackedStringArray("map") instance=ExtResource("9_yqsrf")]
 map = NodePath("../../Map")
 
-[node name="LayoutTool" parent="." node_paths=PackedStringArray("map_agent", "life_cyclers") instance=ExtResource("9_0jihv")]
-map_agent = NodePath("PlaneMapAgent")
+[node name="LayoutTool" parent="." node_paths=PackedStringArray("life_cyclers", "map_agent") instance=ExtResource("9_0jihv")]
 life_cyclers = NodePath("../LifeCyclers")
+map_agent = NodePath("PlaneMapAgent")
 
 [node name="LayoutToolArbiterAgent" parent="LayoutTool" node_paths=PackedStringArray("arbiter") instance=ExtResource("8_egxbx")]
 arbiter = NodePath("../../tool_arbiter")

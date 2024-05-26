@@ -31,16 +31,20 @@ var waiting_for_map_points := false
 ## workaround for clicks getting lost as the tool is in waiting mode.
 var click_buffer := SingleFirstSignalBuffer.new()
 
+@export var life_cyclers: CityGameWorldObjectLifeCyclers
 @export var map_agent: ToolLibMapAgent
 @export var map_ray_caster: ToolMapRayCaster
 @onready var cursor := CurveCursor.new(get_state().curve)
+var outer_radius := 0.5
+var inner_radius_ratio := 0.8
+var inner_radius = outer_radius * inner_radius_ratio
 ## A polygon used to extrude as a mesh along the map-adjused street curve
 ## points.
 var _bounding_box_profile2d := PackedVector2Array([
-	Vector2(0.5, 0.1),
-	Vector2(0.5, -0.1),
-	Vector2(-0.5, -0.1),
-	Vector2(-0.5, 0.1)
+	Vector2(outer_radius, 0.1),
+	Vector2(outer_radius, -0.1),
+	Vector2(-outer_radius, -0.1),
+	Vector2(-outer_radius, 0.1)
 ])
 var _debug_node_adding_visualizer: CSGCylinder3D
 
@@ -212,6 +216,17 @@ func _on_map_mouse_position_change(
 			p_mouse_position,
 			UNFINALIZED
 		)
+		if get_node_count() > 1:
+			set_node_handle_in_point(
+				cursor.current_idx,
+				GeoFoo.get_point_to_preceding_point_out(
+					get_state().curve,
+					cursor.current_idx,
+					true,
+					0.1
+				),
+				UNFINALIZED,
+			)
 	elif not get_state().node_finalizations[cursor.current_idx].handle_out:
 		if not get_state().curve.get_point_position(cursor.current_idx) == p_mouse_position:
 			set_node_handle_out_point(
@@ -275,11 +290,14 @@ func _on_result_map_points(p_result: ToolMapRayCaster.Result) -> void:
 
 
 func _build_street(p_map_points: PackedVector3Array) -> void:
-	_add_street_to_map(
-		_create_street(
-			p_map_points
-		)
+	var street_mesh := _create_street(p_map_points)
+	var street_segment := life_cyclers.street_segment.create(
+		get_state().curve.duplicate(true),
+		outer_radius,
+		p_map_points
 	)
+	#street_segment.add_child(street_mesh)
+	_add_street_to_map(street_segment)
 
 
 func _create_street(p_map_points: PackedVector3Array) -> MeshInstance3D:
@@ -290,8 +308,9 @@ func _create_street(p_map_points: PackedVector3Array) -> MeshInstance3D:
 	)
 
 
-func _add_street_to_map(p_street_mesh: MeshInstance3D) -> void:
-	map_agent.get_map_node().add_child(p_street_mesh)
+func _add_street_to_map(p_street_segment: StreetSegmentWorldObject) -> void:
+	map_agent.get_map_node().add_child(p_street_segment)
+
 
 #==========================================================================
 # BEGIN: Reset functions
