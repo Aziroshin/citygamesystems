@@ -20,18 +20,119 @@ func _create_collider(
 	p_segment: CityBuilder.StreetSegment,
 	p_depth := 0.1
 ) -> CollisionObject3D:
-	var collider := Area3D.new()
+	var collider := WorldObjectArea3D.new()
 	var shape_provider := CollisionShape3D.new()
 	var shape := ConcavePolygonShape3D.new()
 	
+	var segment_main_curve_baked_point_transforms := GeoFoo.get_baked_point_transforms(
+		p_segment.main_curve
+	)
+	
+	# =====
+	# Debugging `GeoFoo.get_overlapping_offset_2d_curve_point_indexes`
+	var overlapping_indexes := GeoFoo.get_overlapping_offset_2d_curve_point_indexes(
+		segment_main_curve_baked_point_transforms,
+		#-p_segment.radius,
+		-p_segment.radius,
+		collider
+	)
+	#for i in overlapping_indexes:
+		#Cavedig.needle(
+			#collider,
+			#segment_main_curve_baked_point_transforms[i],
+			#Vector3(1.0, 0.4, 0.4),
+			#7.0,
+			#0.02
+		#)
+	
+	print("street_segment_life_cycler.gd, overlapping indexes: ", overlapping_indexes)
+	print("test intersection result: ", Geometry2D.line_intersects_line(
+		Vector2(1.0, 1.0),
+		Vector2(0.0, 1.0),
+		Vector2(-2.0, -2.0),
+		Vector2(2.0, -4.0)
+	))
+	
+	# Testing `Cavedig.needle_between`.
+	var point_count := len(segment_main_curve_baked_point_transforms)
+	Cavedig.needle_between(
+		collider,
+		segment_main_curve_baked_point_transforms[0].origin,
+		segment_main_curve_baked_point_transforms[point_count-1].origin,
+		Vector3(0.0, 0.9, 0.9),
+		0.2
+	)
+	
+	var offset_points := PackedVector3Array()
+	var offset_forwards := PackedVector3Array()
+	
+	var i_debug := 0
+	for transform in segment_main_curve_baked_point_transforms:
+		var offset_point := transform.origin + transform.basis.x * -p_segment.radius
+		
+		var debug_scaling := 32.0  # Makes it easier to see when debug visualizing.
+		var offset_forward := offset_point - transform.basis.z * 0.5 * debug_scaling
+		
+		var debug_color_good := Vector3(0.0, 1.0, 0.0)
+		var debug_color_bad := Vector3(1.0, 0.0, 0.0)
+		
+		# Testing `Cavedig.needle_between`.
+		Cavedig.needle_between(
+			collider,
+			offset_point + Vector3(0.0, 1.0, 0.0),
+			offset_forward + Vector3(0.0, 1.0, 0.0),
+			debug_color_bad if i_debug in overlapping_indexes else debug_color_good,
+			0.005
+		)
+		
+		
+		Cavedig.needle(
+			collider,
+			Transform3D(Basis(), offset_point + Vector3(0.0, 1.0, 0.0)),
+			Vector3(1.0, 0.0, 0.0),
+			1.0,
+			0.002
+		)
+		Cavedig.needle(
+			collider,
+			Transform3D(Basis(), offset_forward + Vector3(0.0, 1.0, 0.0)),
+			Vector3(0.0, 0.0, 1.0),
+			1.5,
+			0.001
+		)
+		var line_mesh := MeshInstance3D.new()
+		var line_size := 0.004
+		var line_vertices := GeoFoo.get_loop_to_loop_extruded(
+			PackedVector3Array([
+				offset_point,
+				offset_point+Vector3(0.0, line_size, 0.0),
+				offset_point+Vector3(0.0, line_size, line_size)
+			]),
+			PackedVector3Array([
+				offset_forward,
+				offset_forward+Vector3(0.0, line_size, 0.0),
+				offset_forward+Vector3(0.0, line_size, line_size)
+			])
+		)
+		line_mesh.mesh = GeoFoo.create_array_mesh(line_vertices)
+		line_mesh.transform.origin = line_mesh.transform.origin + Vector3(0.0, 0.5, 0.0)
+		collider.add_child(line_mesh)
+		
+		offset_points.append(offset_point)
+		offset_forwards.append(transform.basis.z)
+		
+		i_debug += 1
+	# =====
+	
+	
 	#================================
 	# Top Surface
-	var left_boundary_points_top := GeoFoo.get_offset_curve_points(
-		p_segment.main_curve,
+	var left_boundary_points_top := GeoFoo.get_offset_baked_curve_points(
+		segment_main_curve_baked_point_transforms,
 		p_segment.radius
 	)
-	var right_boundary_points_top := GeoFoo.get_offset_curve_points(
-		p_segment.main_curve,
+	var right_boundary_points_top := GeoFoo.get_offset_baked_curve_points(
+		segment_main_curve_baked_point_transforms,
 		-p_segment.radius
 	)
 	var top_surface := GeoFoo.get_tris_between_equal_lines(
@@ -73,8 +174,8 @@ func _create_collider(
 				i_baked
 			).rotated_local(Vector3(0.0, 0.0, 1.0), PI/2),
 			Vector3(0.2, 0.8, 0.8),
-			2.8,
-			0.04
+			p_segment.radius * 2.0,
+			0.02
 		)
 		staff.transform.origin = (
 			staff.transform.origin
@@ -88,7 +189,10 @@ func _create_collider(
 	shape.set_faces(shape_tris)
 	#shape_provider.transform = shape_provider.transform.rotated(Vector3(1.0, 0.0, 0.0), PI/2)
 	shape_provider.shape = shape
+	
+	# y-offset for debugging.
 	shape_provider.transform.origin = Vector3(0.0, 3.0, 0.0)
+	
 	collider.add_child(shape_provider)
 	
 	return collider

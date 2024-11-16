@@ -14,6 +14,7 @@ const Colors: Dictionary = {
 	BLUE = Vector3(0, 0, 1)
 }
 
+
 static func needle(
 	p_parent: Node3D,
 	p_transform: Transform3D,
@@ -34,6 +35,40 @@ static func needle(
 		debug_cylinder.hide()
 	
 	return debug_cylinder
+
+
+static func needle_between(
+	p_parent: Node3D,
+	p_from: Vector3,
+	p_to: Vector3,
+	p_color: Vector3 = Vector3(0.5, 0.5, 0.5),
+	p_radius: float = 0.05,
+	p_hidden := false
+) -> CSGCylinder3D:
+	var vector := (p_to - p_from)
+	
+	var basis_x := vector.normalized().cross(Vector3(0.0, 1.0, 0.0))
+	var basis_y := vector.normalized()
+	var basis_z := basis_x.cross(basis_y)
+	
+	var cylinder := needle(
+		p_parent,
+		Transform3D(
+			Basis(
+				basis_x,
+				basis_y,
+				basis_z,
+			),
+			p_from + vector * 0.5
+		),
+		p_color,
+		vector.length(),
+		p_radius,
+		p_hidden
+	)
+	
+	return cylinder
+
 
 static func bone(
 	p_parent: Node3D,

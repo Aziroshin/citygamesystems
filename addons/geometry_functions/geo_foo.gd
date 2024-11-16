@@ -9,6 +9,32 @@ class vector3:
 		return Vector2(p_xyz.x, p_xyz.z)
 
 
+class basis:
+	static func get_subtracted(
+		p_minuend: Basis,
+		p_subtrahend: Basis
+	) -> Basis:
+		return Basis(
+			p_minuend.x - p_subtrahend.x,
+			p_minuend.y - p_subtrahend.y,
+			p_minuend.z - p_subtrahend.z
+		)
+		
+	static func get_added(
+		p_a: Basis,
+		p_b: Basis
+	):
+		return Basis(
+			p_a.x + p_b.x,
+			p_a.y + p_b.y,
+			p_a.z + p_b.z
+		)
+		
+	static func get_linearly_extrapolated(
+		p_from: Basis,
+		p_to: Basis
+	) -> Basis:
+		return get_added(p_to, get_subtracted(p_from, p_to))
 
 
 static func create_array_mesh(
@@ -232,50 +258,194 @@ static func to_transformed(
 
 ## Returns the transform of a (non-baked) point in a curve.
 static func get_point_transform(
-	curve: Curve3D,
-	idx: int
+	p_curve: Curve3D,
+	p_idx: int
 ) -> Transform3D:
-	return curve.sample_baked_with_rotation(
+	return p_curve.sample_baked_with_rotation(
 		Curve3DDebugFuncs.get_closest_offset_on_curve_or_zero(
-			curve,
-			curve.get_point_position(idx)
+			p_curve,
+			p_curve.get_point_position(p_idx)
 		)
 	)
 
 
+# Note: There's a copy-paste of this function's body in
+# `get_baked_point_transforms`. If there should ever be changes to this
+# function, make sure to make changes there accordingly as well.
 ## Returns the transform of a baked point in a curve.
 static func get_baked_point_transform(
-	curve: Curve3D,
-	idx: int
+	p_curve: Curve3D,
+	p_idx: int
 ) -> Transform3D:
-	return curve.sample_baked_with_rotation(
-		Curve3DDebugFuncs.get_closest_offset_on_curve_or_zero(
-			curve,
-			curve.get_baked_points()[idx]
+	return p_curve.sample_baked_with_rotation(
+		get_closest_offset_on_curve_or_zero(
+			p_curve,
+			p_curve.get_baked_points()[p_idx]
 		)
 	)
+
+
+static func get_baked_point_transforms(
+	p_curve: Curve3D
+) -> Array[Transform3D]:
+	var transforms: Array[Transform3D] = []
+	
+	for idx in len(p_curve.get_baked_points()):
+		transforms.append(
+			# Copy-paste of `get_baked_point_transform` - saving on function
+			# call overhead a bit, as there might potentially be a lot of points
+			# to go through, and often.
+			p_curve.sample_baked_with_rotation(
+				get_closest_offset_on_curve_or_zero(
+					p_curve,
+					p_curve.get_baked_points()[idx]
+				)
+			)
+		)
+	return transforms
 
 
 ## Get the points of a `Curve3D` offset by the specified amount.
 ## If `curve_relative` is `false`, the resulting points will be global
 ## (default), otherwise they will be relative to the corresponding
 ## point in the curve.
-static func get_offset_curve_points(
-	p_curve: Curve3D,
+static func get_offset_baked_curve_points(
+	p_baked_point_transforms: Array[Transform3D],
 	p_offset: float,
 	curve_relative := false
 ) -> PackedVector3Array:
 	var offset_points := PackedVector3Array()
 	
-	for i_point in range(len(p_curve.get_baked_points())):
-		var transform := GeoFoo.get_baked_point_transform(p_curve, i_point)
+	# BUG: Crash bug happens somewhere here; has to do something with 
+	# `VariantSetGet_Transform3D_basis::validated_get`.
+	for transform in p_baked_point_transforms:
+		# Crash bug happens here.
 		var offset_point := transform.basis.x * p_offset
 		if curve_relative:
 			offset_points.append(offset_point)
 		else:
 			offset_points.append(transform.origin + offset_point)
+	# End of crash bug section.
 	
 	return offset_points
+
+
+#static func get_offset_baked_curve_forward_points(
+	#p_baked_point_transforms: Array[Transform3D],
+	#p_offset_factor: float
+#) -> PackedVector3Array:
+	#var forward_points := PackedVector3Array()
+	#for transform in p_baked_point_transforms:
+		#forward_points.append(
+			#
+		#)
+
+#
+#static func get_inner_curve_offset_2d_overlaps(
+	#p_,
+	#p_transforms: Array[Transform3D]
+#) -> PackedVector3Array:
+	#for idx in range(0, len(p_transforms)):
+		#var transform := p_transforms[idx]
+		#var offset_forward := transform.origin + transform.basis.z
+
+
+static func get_overlapping_offset_2d_curve_point_indexes(
+	p_baked_point_transforms: Array[Transform3D],
+	p_offset: float,
+	p_debug_object: Node3D
+) -> PackedInt64Array:
+	var indexes := PackedInt64Array()
+	var offset_points := PackedVector3Array()
+	var offset_forwards := PackedVector3Array()
+	
+	for transform in p_baked_point_transforms:
+		var offset_point := transform.origin + transform.basis.x * p_offset
+		offset_points.append(offset_point)
+		offset_forwards.append(-transform.basis.z * 0.1)
+	
+	
+	Cavedig.needle(
+		p_debug_object,
+		Transform3D(Basis(), offset_points[0]),
+		Vector3(0.4, 1.0, 0.2),
+		6.5,
+		0.006
+	)
+	
+	var visited_indexes := 0
+	var point_count := len(offset_points)
+	for i_point in range(0, len(offset_points)):
+		if i_point in indexes:
+			continue
+		
+		var point_intersects := false
+		for i_visited_point in range(visited_indexes + 1, point_count):
+			var intersection_point_or_null = Geometry2D.line_intersects_line(
+				vector3.xz(offset_points[i_point]),
+				vector3.xz(offset_forwards[i_point]).normalized(),
+				vector3.xz(offset_points[i_visited_point]),
+				vector3.xz(offset_forwards[i_visited_point]).normalized()
+			)
+			
+			# Guarding against parallels.
+			if intersection_point_or_null == null:
+				continue
+			var intersection_point: Vector2 = intersection_point_or_null
+			
+			#print(
+				#"intersection: ", intersection_point,
+				#", i_poi: ", i_point,
+				#", i_vis: ", i_visited_point,
+				#", points(i_poi): ", GeoFoo.vector3.xz(offset_points[i_point]),
+				#", points(i_vis): ", GeoFoo.vector3.xz(offset_points[i_visited_point]),
+				#", forwards(i_poi): ", GeoFoo.vector3.xz(offset_forwards[i_point]).normalized(),
+				#", forwards(i_vis)", GeoFoo.vector3.xz(-offset_forwards[i_visited_point]).normalized()
+			#)
+			#print("geo_food.gd: (normalized) intersection point: %s, forward: %s" % [
+				#(intersection_point - GeoFoo.vector3.xz(offset_points[i_visited_point])).normalized(),
+				#GeoFoo.vector3.xz(-offset_forwards[i_visited_point]).normalized()
+			#])
+			
+			# Show which side it's processing.
+			#Cavedig.needle(
+				#p_debug_object,
+				#Transform3D(Basis(), offset_points[i_point]),
+				#Vector3(0.4, 1.0, 0.2),
+				#6.5,
+				#0.006
+			#)
+			
+			var from_offset_to_intersection_point := intersection_point - GeoFoo.vector3.xz(
+				offset_points[i_visited_point]
+			)
+			var offset_forward := GeoFoo.vector3.xz(offset_forwards[i_visited_point])
+			if not from_offset_to_intersection_point.normalized()\
+			.is_equal_approx(-offset_forward.normalized()):
+			#if not from_offset_to_intersection_point.normalized().dot(-offset_forward.normalized()) == 1.0:
+				#indexes.append(i_visited_point)
+				point_intersects = true
+				print(
+					"geo_foo.gd, intersection@", intersection_point, " between ",
+					"(%s)" % i_point, vector3.xz(offset_points[i_point]), " and ",
+					"(%s)" % i_visited_point, vector3.xz(offset_points[i_visited_point])
+				)
+				Cavedig.needle(
+					p_debug_object,
+					Transform3D(Basis(), Vector3(intersection_point.x, 0.0, intersection_point.y)),
+					Vector3(1.0, 0.4, 0.4),
+					7.0,
+					0.005
+				)
+				break
+		if point_intersects:
+			print("BAD: ", i_point)
+			indexes.append(i_point)
+		else:
+			print("good: ", i_point)
+		visited_indexes += 1
+	
+	return indexes
 
 
 ## Returns the vector from  the point at `p_idx` to the "out" position of the
@@ -375,3 +545,9 @@ static func get_centroid(p_vertices: PackedVector3Array) -> Vector3:
 		centroid += vertex
 	centroid /= len(p_vertices)
 	return centroid
+
+
+#==========================================================================
+# Vector converters
+#==========================================================================
+

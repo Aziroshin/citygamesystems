@@ -47,14 +47,14 @@ func create_positioner() -> PositionerLib.MultiPositioner:
 ## Returns `null` if no association with a `WorldObject` can be determined.
 ##
 ## To determine it, it first checks if the collider is an instance of one of the
-## following classes, then if they hold an initialized reference to a
+## following classes, then it checks if they hold a reference to a
 ## `WorldObject` and returns it if that's the case:
 ##   - WorldObjectCharacterBody3D
 ##   - WorldObjectStaticBody3D
 ##   - WorldObjectArea3D
 ##   - WorldObjectRigidBody3D
 ## If it's none of those classes, it returns the value of the specific metadata
-## key in `p_meta` on the collider if it's present. Will ignore this if `p_meta`
+## key in `p_meta` on the collider if it's present . Will ignore this if `p_meta`
 ## is an empty string (default).
 static func get_from_collider_or_null(
 	p_collider: Variant,
@@ -75,9 +75,10 @@ static func get_from_collider_or_null(
 				return (p_collider as WorldObjectRigidBody3D).world_object
 		elif not p_meta == &"":
 			if p_collider.has_meta(p_meta):
-				# May return `null`.
-				return p_collider.get_meta(p_meta)
-			
+				var meta_value = p_collider.get_meta(p_meta)  # May return `null`.
+				if meta_value is WorldObject:
+					return meta_value
+	
 	return null
 
 
