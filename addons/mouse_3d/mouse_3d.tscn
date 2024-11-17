@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://clstktysn3o30"]
+
+[ext_resource type="Script" path="res://addons/mouse_3d/mouse_3d.gd" id="1_mho2j"]
+
+[node name="Mouse3D" type="Node"]
+script = ExtResource("1_mho2j")

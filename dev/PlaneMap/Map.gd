@@ -11,6 +11,7 @@ const default_material = preload("res://dev/PlaneMap/MapMaterial.tres")
 @export var alpha := 1.0
 @export var noise := default_noise
 @export var material := default_material
+@export var mouse_3d: Mouse3D
 
 var last_mouse_position := Vector3()
 
@@ -85,42 +86,65 @@ func _ready():
 	
 	# Making the map mouse-interactable.
 	mesh_instance.create_trimesh_collision()
+	
 	var static_body: StaticBody3D = mesh_instance.get_node("_col")
-	static_body.connect("input_event", _on_mouse_event)
+	#static_body.connect("input_event", _on_mouse_event)
+	mouse_3d.mouse_motion.connect(_on_mouse_motion)
+	mouse_3d.mouse_button.connect(_on_mouse_button)
+	mouse_3d.mouse_position_change.connect(_on_mouse_position_change)
+	# TODO [priority:low]: This won't update when the Map's layer mask is
+	# changed at a later time.
+	static_body.collision_layer = collision_layer
 	
 	add_child(mesh_instance)
 
 
-func _on_mouse_event(
+func _on_mouse_motion(
 	p_camera: Camera3D,
 	p_event: InputEvent,
 	p_mouse_position: Vector3,
 	p_normal: Vector3,
 	p_shape: int
 ):
-	if p_event is InputEventMouseMotion:
-		mouse_motion.emit(
-			p_camera,
-			p_event,
-			p_mouse_position,
-			p_normal,
-			p_shape
-		)
-		if not p_mouse_position == last_mouse_position:
-			mouse_position_change.emit(
-				p_camera,
-				p_event,
-				p_mouse_position,
-				p_normal,
-				p_shape
-			)
-	if p_event is InputEventMouseButton:
-		mouse_button.emit(
-			p_camera,
-			p_event,
-			p_mouse_position,
-			p_normal,
-			p_shape
-		)
-	last_mouse_position = p_mouse_position
+	print("mouse motion")
+	mouse_motion.emit(
+		p_camera,
+		p_event,
+		p_mouse_position,
+		p_normal,
+		p_shape
+	)
+	
 
+func _on_mouse_button(
+	p_camera: Camera3D,
+	p_event: InputEvent,
+	p_mouse_position: Vector3,
+	p_normal: Vector3,
+	p_shape: int
+):
+	print("mouse_button")
+	mouse_button.emit(
+		p_camera,
+		p_event,
+		p_mouse_position,
+		p_normal,
+		p_shape
+	)
+
+
+func _on_mouse_position_change(
+	p_camera: Camera3D,
+	p_event: InputEvent,
+	p_mouse_position: Vector3,
+	p_normal: Vector3,
+	p_shape: int
+):
+	print("mouse_position_change")
+	mouse_position_change.emit(
+		p_camera,
+		p_event,
+		p_mouse_position,
+		p_normal,
+		p_shape
+	)

@@ -43,3 +43,4 @@ func _physics_process(_p_delta: float) -> void:
 			query.exclude = exclude
 		else:
 			break
+	updated.emit()

@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://addons/mouse_3d_ray/ray_casters/full_mouse_3d_ray_caster/full_mouse_3d_ray_caster.gd" id="1_irm5u"]
 
-[node name="FullMouse3dRayCaster" type="Node"]
+[node name="FullMouse3DRayCaster" type="Node"]
 script = ExtResource("1_irm5u")

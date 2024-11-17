@@ -55,6 +55,10 @@ toggle_dev_menu={
 ]
 }
 
+[layer_names]
+
+3d_physics/layer_32="Map"
+
 [network]
 
 limits/debugger/max_chars_per_second=131072
