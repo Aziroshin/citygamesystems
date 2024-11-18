@@ -9,6 +9,17 @@ class Positioner extends RefCounted:
 		push_warning("Not implemented. Returning `%s`" % Vector3())
 		return Vector3()
 		
+	# The implementation is open - e.g. `MultiPositioner` gets its tags from
+	# the positioners it wraps and doesn't support having any tags of its own,
+	# whereas `TaggablePositioner` does and has methods for adding and removing
+	# tags.
+	#
+	# If a Positioner doesn't do anything with tags, it can just leave this
+	# default definition in place, so it'll always return an empty array.
+	# Strictly speaking, it should probably be a subclass that adds this
+	# method, since it kinda communicates the wrong idea if a positioner that
+	# doesn't do anything with tags has such a method. Then again, I don't want
+	# to overdo it too much with the class hierarchies.
 	func get_tags() -> PackedStringArray:
 		return []
 

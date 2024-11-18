@@ -39,7 +39,6 @@ func _on_deactivation_requested(_p_activator_agent: ToolLibToolActivatorAgent) -
 
 
 func _activate_tool() -> void:
-	print("activate tool on tool arbiter agent called")
 	tool.activated.connect(arbiter._on_tool_activated, CONNECT_ONE_SHOT)
 	tool.activate()
 	tool.deactivated.connect(arbiter._on_tool_deactivated, CONNECT_ONE_SHOT)

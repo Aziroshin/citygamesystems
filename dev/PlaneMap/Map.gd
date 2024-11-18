@@ -106,7 +106,6 @@ func _on_mouse_motion(
 	p_normal: Vector3,
 	p_shape: int
 ):
-	print("mouse motion")
 	mouse_motion.emit(
 		p_camera,
 		p_event,
@@ -123,7 +122,6 @@ func _on_mouse_button(
 	p_normal: Vector3,
 	p_shape: int
 ):
-	print("mouse_button")
 	mouse_button.emit(
 		p_camera,
 		p_event,
@@ -140,7 +138,6 @@ func _on_mouse_position_change(
 	p_normal: Vector3,
 	p_shape: int
 ):
-	print("mouse_position_change")
 	mouse_position_change.emit(
 		p_camera,
 		p_event,

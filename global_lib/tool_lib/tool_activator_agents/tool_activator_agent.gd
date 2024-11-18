@@ -42,7 +42,6 @@ func _on_activator_toggling() -> void:
 
 
 func _on_tool_activated() -> void:
-	print("tool_activator_agent.gd._on_tool_activated called.")
 	state = State.TOOL_ACTIVE
 	_set_activator_to_active()
 

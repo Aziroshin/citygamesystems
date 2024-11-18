@@ -53,32 +53,26 @@ func set_activation_request_state(p_tool: Node):
  
 func _on_request_activation(p_tool: Node):
 	if state == State.NOTHING:
-		print("NOTHING")
 		set_activation_request_state(p_tool)
 		request_granted.emit(true)
 		return
 		
 	if state == State.TOOL_ACTIVE:
-		print("TOOL_ACTIVE")
 		set_activation_request_state(p_tool)
 		deactivate.connect(active_tool._on_deactivate, CONNECT_ONE_SHOT)
 		deactivate.emit()
 		return
 		
-	print("fallthrough")
+	# Fallthrough.
 	request_granted.emit(false)
 	
 func _on_tool_deactivated():
-	print("_on_tool_deactivated")
 	if state == State.ACTIVATION_REQUEST:
-		print("request granted, not first run")
 		request_granted.emit(true)
 		return
-	print("reset")
 	reset()
 	
 func _on_tool_activated():
-	print("_on_tool_activated called")
 	active_tool = activation_requesting_tool
 	state = State.TOOL_ACTIVE
 	
