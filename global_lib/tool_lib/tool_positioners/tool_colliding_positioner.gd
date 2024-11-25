@@ -9,6 +9,7 @@ var reference_position := Vector3():
 		reference_position = p_value
 		collider.transform.origin = p_value
 var position := Vector3()
+var position_getting_status := PositionGettingStatus.new()
 ## Will be used for the default SphereShape3D if no collider override is
 ## specified.
 @export var default_collider_radius := 0.5
@@ -83,13 +84,17 @@ func _ready() -> void:
 
 func get_position(
 	p_reference_position: Vector3,
-	_p_status := PositionGettingStatus.new()
+	p_status := PositionGettingStatus.new()
 ) -> Vector3:
 	update_reference_position(p_reference_position)
+	if position_getting_status.got_position:
+		p_status.got_position = true
 	return position
 
 
-func update_reference_position(p_position: Vector3) -> void:
+func update_reference_position(
+	p_position: Vector3,
+) -> void:
 	reference_position = p_position
 	_update_position()
 
@@ -100,6 +105,10 @@ func _update_position() -> void:
 		position = colliding_objects.get_first().transform.origin
 	else:
 		position = collider.transform.origin
+	# This implementation's always got a relevant position.
+	# In your subclass, you'll want to set that to `false` in cases where
+	# no relevant position has been found.
+	position_getting_status.got_position = true
 
 
 func _add_colliding_object(p_colliding_object: CollisionObject3D) -> void:

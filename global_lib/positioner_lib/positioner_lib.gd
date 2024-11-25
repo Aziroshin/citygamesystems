@@ -51,6 +51,23 @@ class OriginPositioner extends TaggablePositioner:
 		return node.transform.origin
 
 
+class NodeRelativeWrappedPositioner extends Positioner:
+	var _node: Node3D
+	var _positioner: Positioner
+	
+	func _init(p_node: Node3D, p_positioner: Positioner):
+		_node = p_node
+		_positioner = p_positioner
+		
+	func get_closest_point(p_reference_point: Vector3) -> Vector3:
+		return _positioner.get_closest_point(
+			p_reference_point - _node.transform.origin
+		) + _node.transform.origin
+		
+	func get_tags() -> PackedStringArray:
+		return _positioner.get_tags()
+
+
 class CurvePositioner extends TaggablePositioner:
 	## Override virtual method.
 	func get_all_curves() -> Array[Curve3D]:
@@ -92,7 +109,9 @@ class MultiPositioner extends Positioner:
 				
 		func get_tags() -> PackedStringArray:
 			return _positioners_by_tag.keys()
-	
+			
+		func is_empty() -> bool:
+			return _positioners_by_tag.is_empty()
 	
 	var enabled_positioners: Array[Positioner] = []
 	var positioners := Positioners.new()
@@ -125,3 +144,7 @@ class MultiPositioner extends Positioner:
 		for positioner in enabled_positioners:
 			closest_points.append(positioner.get_closest_point(p_reference_point))
 		return GeoFoo.get_closest_point(p_reference_point, closest_points)
+		
+	func has_positioners() -> bool:
+		return not positioners.is_empty()
+

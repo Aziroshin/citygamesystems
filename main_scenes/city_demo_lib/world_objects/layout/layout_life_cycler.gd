@@ -30,7 +30,7 @@ func _create_collider(
 	p_layout: CityBuilder.Layout,
 	p_depth := 1.0
 ) -> CollisionObject3D:
-	var collider := Area3D.new()
+	var collider := WorldObjectArea3D.new()
 	var shape := CollisionPolygon3D.new()
 	var shape_polygon_vertices = PackedVector2Array()
 	var triangulated_shape_indexes := PackedInt32Array()

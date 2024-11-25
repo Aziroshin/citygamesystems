@@ -4,7 +4,7 @@ class_name ToolLibMapAgent
 # Dependencies:
 # - ToolLibToolMapPositioner
 
-var positioner := ToolLibToolMapPositioner.new()
+var positioner := ToolLibToolPositioner.new()
 
 
 signal mouse_motion(
@@ -32,7 +32,7 @@ signal mouse_button(
 
 func _ready():
 	for child in get_children():
-		if child is ToolLibToolMapPositioner:
+		if child is ToolLibToolPositioner:
 			positioner = child
 
 

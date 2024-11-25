@@ -274,6 +274,7 @@ class LayoutCornerPositioner extends TaggablePositioner:
 	
 	func _init(p_layout: Layout) -> void:
 		_layout = p_layout
+		add_tags(["layout", "corner"])
 	
 	func get_closest_point(p_reference_point: Vector3) -> Vector3:
 		return GeoFoo.get_closest_point(p_reference_point, _layout.corner_points)
@@ -284,9 +285,10 @@ class LayoutOutlinePositioner extends TaggablePositioner:
 	
 	func _init(p_layout: Layout) -> void:
 		_layout = p_layout
+		add_tags(["layout", "outline"])
 	
 	func get_closest_point(p_reference_point: Vector3) -> Vector3:
-		return GeoFoo.get_closest_point(p_reference_point, _layout.outline_points)
+		return  GeoFoo.get_closest_point(p_reference_point, _layout.outline_points)
 
 
 func generate_simple_row_house(

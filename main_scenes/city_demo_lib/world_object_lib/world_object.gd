@@ -20,6 +20,12 @@ signal collider_removed(collider: CollisionObject3D)
 ## robust. Of course, it can also be used in general if that fits the game's
 ## architecture.
 var id: int
+# NOTE: If you change this default, change the documentation
+# of `get_from_collider_or_null` and `add_collider` (both further below)
+# accordingly.
+## The default meta key name used to set/get the world object on colliders
+## using `set_meta`/`get_meta`.
+const DEFAULT_WORLD_OBJECT_META_KEY = &"world_object"
 
 
 ## Override in sub-class to initialize defaults if needed.
@@ -53,12 +59,14 @@ func create_positioner() -> PositionerLib.MultiPositioner:
 ##   - WorldObjectStaticBody3D
 ##   - WorldObjectArea3D
 ##   - WorldObjectRigidBody3D
-## If it's none of those classes, it returns the value of the specific metadata
-## key in `p_meta` on the collider if it's present . Will ignore this if `p_meta`
-## is an empty string (default).
+## If it's none of those classes, it returns the value of the specified metadata
+## key in `p_meta` on the collider if it's present . Will ignore this if
+## `p_meta` is set to an empty string.
+## `p_meta` defaults to `DEFAULT_WORLD_OBJECT_META_KEY`, which
+## defaults to `&"world_object"`.
 static func get_from_collider_or_null(
 	p_collider: Variant,
-	p_meta: StringName = &""
+	p_meta: StringName = DEFAULT_WORLD_OBJECT_META_KEY
 ) -> WorldObject:
 	if p_collider is Node:
 		if p_collider is WorldObjectCharacterBody3D:
@@ -86,7 +94,30 @@ func get_colliders() -> Array[CollisionObject3D]:
 	return _colliders
 
 
-func add_collider(p_collider: CollisionObject3D) -> void:
+## Adds the specfied collider to the world object.
+## If the collider is not of one of the following types, a metadata tag
+## will be set on it with the world object as a value. `p_meta` is used
+## as the key for this and defaults to `DEFAULT_WORLD_OBJECT_META_KEY`,
+## which defaults to `&"world_object"`.
+func add_collider(
+	p_collider: CollisionObject3D,
+	p_meta: StringName = DEFAULT_WORLD_OBJECT_META_KEY
+) -> void:
 	_colliders.append(p_collider)
 	add_child(p_collider)
+	
+	if p_collider is WorldObjectCharacterBody3D:
+		(p_collider as WorldObjectCharacterBody3D).world_object = self
+	elif p_collider is WorldObjectStaticBody3D:
+		(p_collider as WorldObjectStaticBody3D).world_object = self
+	elif p_collider is WorldObjectArea3D:
+		(p_collider as WorldObjectArea3D).world_object = self
+	elif p_collider is WorldObjectRigidBody3D:
+		(p_collider as WorldObjectRigidBody3D).world_object = self
+	else:
+		p_collider.set_meta(
+			p_meta,
+			self
+		)
+	
 	collider_added.emit(self, p_collider)

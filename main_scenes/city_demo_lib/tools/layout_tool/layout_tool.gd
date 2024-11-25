@@ -1,6 +1,6 @@
 extends CityToolLib.CurveLayoutTool
 
-## "Imports": CityToolLib
+# "Imports": CityToolLib
 const CurveCursor := CityToolLib.CurveCursor
 const CurveLayoutToolState := CityToolLib.CurveLayoutToolState
 
@@ -194,8 +194,17 @@ func _on_map_mouse_position_change(
 		
 		var first_node_position := get_state().curve.get_point_position(0)
 		if not tool_position == first_node_position:
-			tool_position = get_boundary_clipped_position(p_mouse_position)
-			
+			var boundary_clipped_position := get_boundary_clipped_position(p_mouse_position)
+			# Since the clipped boundary position function defaults to the input
+			# position (in this case, the mouse position) if no clipping
+			# happened, we have to make sure we only set the tool position to
+			# its value when some clipping happened.
+			# Otherwise, we'd needlessly overwrite earlier determinations of
+			# the tool position, like from positioners hooked into the
+			# map agent.
+			if not boundary_clipped_position == p_mouse_position:
+				tool_position = boundary_clipped_position
+
 		set_node_position(cursor.current_idx, tool_position, UNFINALIZED)
 		
 		var current_node_in_point := cursor.previous_position_ro - cursor.current_position_ro

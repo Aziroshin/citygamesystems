@@ -52,10 +52,14 @@ static func create_array_mesh(
 	return array_mesh
 
 
+## Returns `p_reference_point` if `p_points` is empty.
 static func get_closest_point(
 	p_reference_point: Vector3,
 	p_points: PackedVector3Array
 ) -> Vector3:
+	if len(p_points) == 0:
+		return p_reference_point
+	
 	var closest_point_candidates_by_length: Dictionary = {}
 	
 	for closest_point_candidate in p_points:
@@ -63,7 +67,11 @@ static func get_closest_point(
 			(closest_point_candidate - p_reference_point).length()
 		] = closest_point_candidate
 	
-	return closest_point_candidates_by_length[min(closest_point_candidates_by_length.keys())]
+	var shortest_length = closest_point_candidates_by_length.keys().reduce(
+		func(shortest_so_far, prospective_length):
+			return min(shortest_so_far, prospective_length)
+	)
+	return closest_point_candidates_by_length[shortest_length]
 
 
 ## Returns the closest offset to `point_idx` or `0.0` if the offset is `NaN`.
