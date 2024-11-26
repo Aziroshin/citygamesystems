@@ -250,7 +250,7 @@ func _unhandled_input(event: InputEvent):
 
 func _create_and_spawn_corner_only_layout_object() -> LayoutWorldObject:
 	var corner_points := PackedVector3Array()
-	for i_point in get_state().curve.point_count:
+	for i_point in get_state().curve.point_count - 1:
 		corner_points.append(get_state().curve.get_point_position(i_point))
 	
 	#TODO: Snap the centroid to the map on the y-axis.
