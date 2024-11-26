@@ -75,6 +75,67 @@ class CurvePositioner extends TaggablePositioner:
 		return []
 
 
+class PointsGetter:
+	func get_points() -> PackedVector3Array:
+		push_warning("Not implemented. Returning empty `PackedVector3Array`.")
+		return PackedVector3Array()
+
+
+## Gets points from an array reference passed at instantiation time.
+##
+## Whilst the reference is not supposed to change during the lifetime of the
+## object, the array is shared with any other references that exist to it,
+## which means the array's content may get altered by other parts of the code.
+## If this behaviour is relied on for sharing array data, it's important that
+## other parts of the code don't replace their reference when updating the
+## array, or they'll refer to a different array from there on out.
+##
+## The array reference may only be set once (which happens in `_init`). If a
+## subsequent attempt is made to set it, an error is pushed.
+class StaticFromArrayReferencePointsGetter extends PointsGetter:
+	var _points_ro_set := false
+	var _points_ro: PackedVector3Array:
+		set(p_value):
+			if not _points_ro_set:
+				_points_ro = p_value
+				_points_ro_set = true
+			else:
+				push_error(
+					"Attempted setting readonly value of var `_points_ro` of "
+					+ "a `StaticFromArrayReferencePointsGetter` (or subclass) "
+					+ "object."
+				)
+	
+	func _init(p_points: PackedVector3Array):
+		_points_ro = p_points
+		
+	## `PackedVector3Array` reference as passed to this object at instantiation
+	## time.
+	func get_points() -> PackedVector3Array:
+		return _points_ro
+
+
+class PointsGetterPositioner extends TaggablePositioner:
+	var _points_getter: PointsGetter
+	
+	func _init(p_points_getter: PointsGetter):
+		_points_getter = p_points_getter
+		var previous_point
+	
+	func get_closest_point(p_reference_point: Vector3) -> Vector3:
+		return GeoFoo.get_closest_point(p_reference_point, _points_getter.get_points())
+		
+		
+class LerpedPointsGetterPositioner extends PointsGetterPositioner:
+	func get_closest_point(p_reference_point: Vector3) -> Vector3:
+		var time_start := 0
+		var time_end := 0
+		time_start = Time.get_ticks_usec()
+		var lerped_point := GeoFoo.get_closest_lerped_point(p_reference_point, _points_getter.get_points())
+		time_end = Time.get_ticks_usec()
+		return lerped_point
+		
+		
 class MultiPositioner extends Positioner:
 	class Positioners:
 		var _positioners_by_tag := Dictionary()

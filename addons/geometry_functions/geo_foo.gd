@@ -74,6 +74,75 @@ static func get_closest_point(
 	return closest_point_candidates_by_length[shortest_length]
 
 
+## Returns `p_reference_point` if `p_points` is empty.
+## If `p_points` contains only one point, that point is returned.
+static func get_closest_lerped_point(
+	p_reference_point: Vector3,
+	p_points: PackedVector3Array,
+	p_loop := true
+) -> Vector3:
+	if len(p_points) == 0:
+		return p_reference_point
+	elif len(p_points) == 1:
+		return p_points[0]
+	elif len(p_points) == 2:
+		return Geometry3D.get_closest_point_to_segment(p_reference_point, p_points[0], p_points[1])
+		
+	var closest_point_candidates_by_length: Dictionary = {}
+	## The index in `p_points`.
+	var closest_point_candidates_indexes_by_length: Dictionary = {}
+	
+	var i_points := 0
+	for closest_point_candidate in p_points:
+		var length := (closest_point_candidate - p_reference_point).length()
+		closest_point_candidates_by_length[length] = closest_point_candidate
+		closest_point_candidates_indexes_by_length[length] = i_points
+		i_points += 1
+	
+	var shortest_length = closest_point_candidates_by_length.keys().reduce(
+		func(shortest_so_far, prospective_length):
+			return min(shortest_so_far, prospective_length)
+	)
+	
+	var closest_point: Vector3 = closest_point_candidates_by_length[shortest_length]
+	var closest_point_index: int = closest_point_candidates_indexes_by_length[shortest_length]
+
+	if p_loop or closest_point_index != 0 or closest_point_index != len(p_points) - 1:
+		var left_point := p_points[closest_point_index-1]\
+			if closest_point_index > 0 else p_points[len(p_points)-1]
+		var right_point := p_points[closest_point_index+1]\
+			if closest_point_index < len(p_points) - 1 else p_points[0]
+		var left_lerped_point := Geometry3D.get_closest_point_to_segment(
+			p_reference_point,
+			left_point,
+			closest_point
+		)
+		var right_lerped_point := Geometry3D.get_closest_point_to_segment(
+			p_reference_point,
+			closest_point,
+			right_point
+		)
+		var distance_to_left_lerped_point := (left_lerped_point - p_reference_point).length()
+		var distance_to_right_lerped_point := (right_lerped_point - p_reference_point).length()
+		if distance_to_left_lerped_point < distance_to_right_lerped_point:
+			return left_lerped_point
+		else:
+			return right_lerped_point
+	elif closest_point_index == 0:
+		return Geometry3D.get_closest_point_to_segment(
+			p_reference_point,
+			p_points[0],
+			p_points[1]
+		)
+	
+	# Last case: closest_point_index == len(p_points) - 1:
+	return Geometry3D.get_closest_point_to_segment(
+		p_reference_point,
+		p_points[len(p_points)-2],
+		p_points[len(p_points)-1]
+	)
+	
+
 ## Returns the closest offset to `point_idx` or `0.0` if the offset is `NaN`.
 ## If the offset is `NaN`, it will also push an error.
 static func get_closest_offset_on_curve_or_zero(

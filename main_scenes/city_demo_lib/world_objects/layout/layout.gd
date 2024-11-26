@@ -23,7 +23,16 @@ func create_positioner() -> PositionerLib.MultiPositioner:
 		self,
 		CityBuilder.LayoutOutlinePositioner.new(layout)
 	)
+	var unwrapped_lerped_outline_positioner := PositionerLib.LerpedPointsGetterPositioner.new(
+			PositionerLib.StaticFromArrayReferencePointsGetter.new(layout.outline_points)
+	)
+	unwrapped_lerped_outline_positioner.add_tags(["lerped", "outline", "layout"])
+	var lerped_outline_positioner := PositionerLib.NodeRelativeWrappedPositioner.new(
+		self,
+		unwrapped_lerped_outline_positioner
+	)
 	multi_positioner.add_positioner(corner_positioner)
 	multi_positioner.add_positioner(outline_positioner)
+	multi_positioner.add_positioner(lerped_outline_positioner)
 	return multi_positioner
 
