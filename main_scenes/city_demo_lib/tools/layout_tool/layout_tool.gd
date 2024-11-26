@@ -128,20 +128,25 @@ func _on_map_mouse_button(
 				tool_position,
 				UNFINALIZED
 			)
-		if get_node_count() >= 2:
-			add_node_with_collider(
-				tool_position,
-				UNFINALIZED
-			)
-		
+			
 		Cavedig.needle(
 			map_agent.get_map_node(),
 			Transform3D(Basis(), get_state().curve.get_point_position(cursor.current_idx))
 		)
 		
 		if get_node_count() >= 3\
-		and map_agent.get_position(p_mouse_position) == get_state().curve.get_point_position(0):
-			_on_request_build_layout()
+			and map_agent.get_position(p_mouse_position) == get_state().curve.get_point_position(0):
+				_on_request_build_layout()
+				
+		if get_node_count() >= 2:
+			add_node_with_collider(
+				tool_position,
+				UNFINALIZED
+			)
+		
+
+		
+		
 
 
 func get_boundary_clipped_position(p_reference_position: Vector3) -> Vector3:
