@@ -4,6 +4,7 @@ class_name CityBuilder
 
 # "Imports": PositionerLib
 const TaggablePositioner := PositionerLib.TaggablePositioner
+# const CurvePositioner := PositionerLib.CurvePositioner
 
 
 enum HouseSideKinds {
@@ -229,7 +230,7 @@ class StreetSegment extends Node3D:
 
 
 # TODO: Curve initialization from layout.
-# This will be added to a PositionerMultiComponent.
+#  Old comment: This will be added to a PositionerMultiComponent.
 #class LayoutCurvePositioner extends CurvePositioner:
 	#var _layout: Layout
 	#var _proximal_curve_dirty = true
@@ -261,9 +262,9 @@ class StreetSegment extends Node3D:
 	#
 	#func get_closest_point(p_reference_point: Vector3) -> Vector3:
 		#var closest_point_candidates := PackedVector3Array()
-		#
 		#for curve in get_all_curves():
-			#
+			#closest_point_candidates.append(curve.get_closest_point(p_reference_point))
+		#return GeoFoo.get_closest_point(p_reference_point, closest_point_candidates)
 		#
 	#func get_all_curves() -> Array[Curve3D]:
 		#return _all_curves
@@ -288,7 +289,7 @@ class LayoutOutlinePositioner extends TaggablePositioner:
 		add_tags(["layout", "outline"])
 	
 	func get_closest_point(p_reference_point: Vector3) -> Vector3:
-		return  GeoFoo.get_closest_point(p_reference_point, _layout.outline_points)
+		return GeoFoo.get_closest_point(p_reference_point, _layout.outline_points)
 
 
 func generate_simple_row_house(
