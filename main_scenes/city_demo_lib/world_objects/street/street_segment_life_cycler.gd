@@ -8,7 +8,7 @@ class_name StreetSegmentWorldObjectLifeCycler
 func create(
 	p_main_curve: Curve3D,
 	p_radius: float,
-	p_foundation_points: PackedVector3Array
+	_p_foundation_points: PackedVector3Array
 ) -> StreetSegmentWorldObject:
 	return create_from_segment(CityBuilder.StreetSegment.new(
 		p_main_curve,

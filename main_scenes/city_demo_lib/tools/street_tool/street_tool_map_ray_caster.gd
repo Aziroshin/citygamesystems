@@ -55,9 +55,9 @@ func _physics_process(_p_delta: float) -> void:
 		var i_point := 0
 		var i_added_points := 0
 		for point in request.source_points:
-			var result := cast(point, cast_offset, -cast_offset, space_state)
-			if result.has("position"):
-				map_points.append(result["position"])
+			var cast_result := cast(point, cast_offset, -cast_offset, space_state)
+			if cast_result.has("position"):
+				map_points.append(cast_result["position"])
 				i_added_points += 1
 			else:
 				push_error(

@@ -290,7 +290,7 @@ func _on_result_map_points(p_result: ToolMapRayCaster.Result) -> void:
 
 
 func _build_street(p_map_points: PackedVector3Array) -> void:
-	var street_mesh := _create_street(p_map_points)
+	#var street_mesh := _create_street(p_map_points)
 	var street_segment := life_cyclers.street_segment.create(
 		get_state().curve.duplicate(true),
 		outer_radius,

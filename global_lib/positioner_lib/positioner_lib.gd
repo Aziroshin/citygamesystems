@@ -120,7 +120,6 @@ class PointsGetterPositioner extends TaggablePositioner:
 	
 	func _init(p_points_getter: PointsGetter):
 		_points_getter = p_points_getter
-		var previous_point
 	
 	func get_closest_point(p_reference_point: Vector3) -> Vector3:
 		return GeoFoo.get_closest_point(p_reference_point, _points_getter.get_points())
@@ -128,11 +127,9 @@ class PointsGetterPositioner extends TaggablePositioner:
 		
 class LerpedPointsGetterPositioner extends PointsGetterPositioner:
 	func get_closest_point(p_reference_point: Vector3) -> Vector3:
-		var time_start := 0
-		var time_end := 0
-		time_start = Time.get_ticks_usec()
-		var lerped_point := GeoFoo.get_closest_lerped_point(p_reference_point, _points_getter.get_points())
-		time_end = Time.get_ticks_usec()
+		var lerped_point := GeoFoo.get_closest_lerped_point(
+			p_reference_point, _points_getter.get_points()
+		)
 		return lerped_point
 		
 		
