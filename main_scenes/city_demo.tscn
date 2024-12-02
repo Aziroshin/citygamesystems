@@ -81,6 +81,8 @@ mouse_3d_ray = NodePath("MapMouse3DRay")
 [node name="MapMouse3DRay" parent="Map/Mouse3D" node_paths=PackedStringArray("ray_caster") instance=ExtResource("24_q7ps3")]
 ray_caster = NodePath("FullMouse3DRayCaster")
 collision_mask = 2147483648
+show_missing_camera_warning = false
+show_missing_viewport_warning = false
 
 [node name="FullMouse3DRayCaster" parent="Map/Mouse3D/MapMouse3DRay" instance=ExtResource("25_hy1ne")]
 
@@ -201,6 +203,8 @@ _arbiter_agent = NodePath("../../../../LayoutTool/LayoutToolArbiterAgent")
 [node name="LayoutToolMapRayCaster" parent="." instance=ExtResource("13_ot6hf")]
 
 [node name="Mouse3DRay" parent="." instance=ExtResource("24_q7ps3")]
+show_missing_camera_warning = false
+show_missing_viewport_warning = false
 
 [node name="FullMouse3DRayCaster" parent="Mouse3DRay" instance=ExtResource("25_hy1ne")]
 
