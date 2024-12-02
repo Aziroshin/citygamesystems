@@ -14,7 +14,7 @@ func _set_defaults() -> void:
 
 
 func create_positioner() -> PositionerLib.MultiPositioner:
-	var multi_positioner := PositionerLib.MultiPositioner.new()
+	var multi_positioner := PositionerLib.RadiusPrioritizingMultiPositioner.new()
 	var corner_positioner := PositionerLib.NodeRelativeWrappedPositioner.new(
 		self,
 		CityBuilder.LayoutCornerPositioner.new(layout)

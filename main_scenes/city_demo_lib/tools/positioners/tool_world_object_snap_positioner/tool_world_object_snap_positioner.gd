@@ -13,7 +13,11 @@ func _update_position() -> void:
 		for colliding_object in colliding_objects.get_all():
 			var colliding_world_object := WorldObject.get_from_collider_or_null(colliding_object)
 			if not colliding_world_object == null:
-				var err := colliding_positioners.add_positioner(colliding_world_object.create_positioner())
+				var err := colliding_positioners.add_positioner(
+					colliding_world_object.create_positioner()
+				)
+				if err:
+					push_error("Error when adding positioner: ", err)
 		if colliding_positioners.has_positioners():
 			position = colliding_positioners.get_closest_point(reference_position)
 			position = position

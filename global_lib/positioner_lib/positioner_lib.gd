@@ -177,18 +177,24 @@ class MultiPositioner extends Positioner:
 	func get_tags() -> PackedStringArray:
 		return positioners.get_tags()
 	
+	## Principal method to enable a positioner.
+	## Use only recommended in this class and subclasses. Doesn't check whether
+	## the positioner is already added, etc.
+	func _enable_positioner(p_positioner: Positioner) -> void:
+		enabled_positioners.append(p_positioner)
+	
 	func add_positioner(p_positioner: Positioner, p_enable := true) -> Error:
 		for tag in p_positioner.get_tags():
 			var err := positioners.add(tag, p_positioner)
 			if not err == OK:
 				return err
 		if p_enable:
-			enabled_positioners.append(p_positioner)
+			_enable_positioner(p_positioner)
 		return OK
 		
 	func enable_positioners_by_tag(p_tag: String) -> void:
 		for positioner in positioners.get_by_tag(p_tag):
-			enabled_positioners.append(positioner)
+			_enable_positioner(positioner)
 	
 	func disable_positioners_by_tag(p_tag: String) -> void:
 		var i_positioner := 0
@@ -206,3 +212,85 @@ class MultiPositioner extends Positioner:
 	func has_positioners() -> bool:
 		return not positioners.is_empty()
 
+
+class RadiusPrioritizingMultiPositioner extends MultiPositioner:
+	class Priorities extends RefCounted:
+		var _positioners_by_priority := Dictionary()
+		var _priority_by_positioner := Dictionary()
+		
+		func set_priority(p_positioner: Positioner, p_priority = -1) -> void:
+			if not p_priority in _positioners_by_priority:
+				_positioners_by_priority[p_priority] = []
+			_positioners_by_priority[p_priority].append(p_positioner)
+			_priority_by_positioner[p_positioner] = p_priority
+			
+		func remove(p_positioner: Positioner) -> void:
+			var priority: int = _priority_by_positioner[p_positioner]
+			GDFoo.variant_keyed_array_dictionary.erase_array_item_once(
+				_positioners_by_priority,
+				priority,
+				p_positioner,
+				true
+			)
+			_priority_by_positioner[p_positioner].erase()
+			
+		func get_priority(p_positioner: Positioner)  -> int:
+			return _priority_by_positioner[p_positioner]
+			
+	var priorities := Priorities.new()
+	
+	func _enable_positioner(p_positioner: Positioner) -> void:
+		if len(enabled_positioners) == 0:
+			enabled_positioners.append(p_positioner)
+			return
+		if p_positioner in enabled_positioners:
+			return
+		var priority := priorities.get_priority(p_positioner)
+		var i_enabled_positioner := 0
+		for enabled_positioner in enabled_positioners:
+			var enabled_positioner_priority := priorities.get_priority(enabled_positioner)
+			if priority >= enabled_positioner_priority:
+				enabled_positioners.insert(i_enabled_positioner, p_positioner)
+				return
+			i_enabled_positioner += 1
+	
+	func add_positioner(p_positioner: Positioner, _p_enable := true, p_priority := 0) -> Error:
+		var err := super(p_positioner, false)
+		if not err:
+			priorities.set_priority(p_positioner, p_priority)
+			_enable_positioner(p_positioner)
+		return err
+	
+	func get_closest_point(p_reference_point: Vector3) -> Vector3:
+		var radius := 1.5
+		
+		if len(enabled_positioners) == 0:
+			return p_reference_point
+		elif len(enabled_positioners) == 1:
+			return enabled_positioners[0].get_closest_point(p_reference_point)
+		
+		var closest_points := PackedVector3Array()
+		for positioner in enabled_positioners:
+			closest_points.append(positioner.get_closest_point(p_reference_point))
+		
+		var i_point := len(enabled_positioners) - 1
+		var closest_points_further_apart_than_radius := PackedVector3Array()
+		while i_point >= 0:
+			var point := closest_points[i_point]
+			var masked_by_higher_priority_point := false
+			
+			for higher_priority_point in closest_points.slice(i_point + 1, len(closest_points)):
+				var distance := (higher_priority_point - point).length()
+				if distance <= radius:
+					masked_by_higher_priority_point = true
+			
+			if not masked_by_higher_priority_point:
+				closest_points_further_apart_than_radius.append(point)
+			
+			i_point -= 1
+		
+		return GeoFoo.get_closest_point(
+			p_reference_point,
+			closest_points_further_apart_than_radius
+		)
+		

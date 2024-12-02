@@ -17,9 +17,6 @@ func get_position(
 			got_any_position = true
 	
 	if len(positioners) >= 2:
-		var shortest_distance_squared_so_far := (new_position - p_reference_position)\
-			# Squared is faster and we don't need the actual length.
-			.length_squared()
 		var closest_positioner_so_far := positioners[0]
 		
 		for i_prospective in range(1, len(positioners)):
