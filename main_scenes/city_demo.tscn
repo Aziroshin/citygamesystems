@@ -1,7 +1,8 @@
-[gd_scene load_steps=30 format=3 uid="uid://e1d4uxeyog88"]
+[gd_scene load_steps=31 format=3 uid="uid://e1d4uxeyog88"]
 
 [ext_resource type="Script" path="res://main_scenes/city_demo.gd" id="1_elgex"]
 [ext_resource type="PackedScene" uid="uid://t6fjyxuaed8g" path="res://world_objects/player_world_interface/player_world_interface.tscn" id="2_16h52"]
+[ext_resource type="PackedScene" uid="uid://b068jpi4lgej0" path="res://main_scenes/city_demo_lib/city_game/city_game.tscn" id="2_tc25n"]
 [ext_resource type="PackedScene" uid="uid://1t8u33ggj154" path="res://dev/PlaneMap/PlaneMap.tscn" id="3_44lli"]
 [ext_resource type="PackedScene" uid="uid://cxb3ks7y2k7yb" path="res://global_lib/tool_lib/tool_activator_agents/texture_button_tool_activator_agent.tscn" id="3_dh8bn"]
 [ext_resource type="PackedScene" uid="uid://ijj05fug1chm" path="res://main_scenes/city_demo_lib/ui/hud/street_tool_button.tscn" id="4_jdok4"]
@@ -33,6 +34,8 @@
 
 [node name="city_demo" type="Node3D"]
 script = ExtResource("1_elgex")
+
+[node name="CityGame" parent="." instance=ExtResource("2_tc25n")]
 
 [node name="PlayerWorldInterface" parent="." instance=ExtResource("2_16h52")]
 transform = Transform3D(1, 0, 0, 0, 0.900364, -0.435137, 0, 0.435137, 0.900364, 0, 3.86307, 0)
