@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dmt5jqslwvlbg"]
 
-[ext_resource type="Script" path="res://main_scenes/city_demo_lib/tools/positioners/tool_first_position_multi_positioner/tool_first_position_multi_positioner.gd" id="1_h4rgk"]
+[ext_resource type="Script" uid="uid://r7oa3844uj1h" path="res://main_scenes/city_demo_lib/tools/positioners/tool_first_position_multi_positioner/tool_first_position_multi_positioner.gd" id="1_h4rgk"]
 
 [node name="ToolFirstPositionMultiPositioner" type="Node"]
 script = ExtResource("1_h4rgk")

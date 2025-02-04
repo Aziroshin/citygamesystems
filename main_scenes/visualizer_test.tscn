@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://cx1beprjisv2x"]
 
-[ext_resource type="Script" path="res://main_scenes/visualizer_test.gd" id="1_t64ms"]
+[ext_resource type="Script" uid="uid://be82yr4bfm0ig" path="res://main_scenes/visualizer_test.gd" id="1_t64ms"]
 [ext_resource type="PackedScene" uid="uid://t6fjyxuaed8g" path="res://world_objects/player_world_interface/player_world_interface.tscn" id="2_bwpw3"]
 [ext_resource type="PackedScene" uid="uid://1t8u33ggj154" path="res://dev/PlaneMap/PlaneMap.tscn" id="3_oqnec"]
 

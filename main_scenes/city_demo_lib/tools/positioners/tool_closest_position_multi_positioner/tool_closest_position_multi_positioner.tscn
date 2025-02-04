@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://csurtudo2nl36"]
 
-[ext_resource type="Script" path="res://main_scenes/city_demo_lib/tools/positioners/tool_closest_position_multi_positioner/tool_closest_position_multi_positioner.gd" id="1_f4ae3"]
+[ext_resource type="Script" uid="uid://cxwh5xh4j1uqf" path="res://main_scenes/city_demo_lib/tools/positioners/tool_closest_position_multi_positioner/tool_closest_position_multi_positioner.gd" id="1_f4ae3"]
 
 [node name="ToolClosestPositionMultiPositioner" type="Node"]
 script = ExtResource("1_f4ae3")

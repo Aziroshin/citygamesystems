@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://4eosp6wvjrgl"]
 
-[ext_resource type="Script" path="res://main_scenes/city_demo_lib/world_object_lib/life_cyclers/life_cyclers.gd" id="1_uf44r"]
+[ext_resource type="Script" uid="uid://cnaabrp4pnqm7" path="res://main_scenes/city_demo_lib/world_object_lib/life_cyclers/life_cyclers.gd" id="1_uf44r"]
 
 [node name="LifeCyclers" type="Node"]
 script = ExtResource("1_uf44r")

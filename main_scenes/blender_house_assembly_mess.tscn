@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://c6fa0q603m7ac"]
 
-[ext_resource type="Script" path="res://main_scenes/blender_house_assembly_mess.gd" id="1_fwtcd"]
+[ext_resource type="Script" uid="uid://b3cmry322ny63" path="res://main_scenes/blender_house_assembly_mess.gd" id="1_fwtcd"]
 [ext_resource type="PackedScene" uid="uid://t6fjyxuaed8g" path="res://world_objects/player_world_interface/player_world_interface.tscn" id="2_s8083"]
 
 [node name="HouseAssemblyTest" type="Node3D"]

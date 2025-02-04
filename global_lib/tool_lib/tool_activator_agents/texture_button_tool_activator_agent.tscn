@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cxb3ks7y2k7yb"]
 
-[ext_resource type="Script" path="res://global_lib/tool_lib/tool_activator_agents/texture_button_tool_activator_agent.gd" id="1_ltapx"]
+[ext_resource type="Script" uid="uid://lfacybrh6m6l" path="res://global_lib/tool_lib/tool_activator_agents/texture_button_tool_activator_agent.gd" id="1_ltapx"]
 
 [node name="texture_button_tool_activator_agent" type="Node"]
 script = ExtResource("1_ltapx")

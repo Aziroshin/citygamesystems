@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://1k1p2i47kti0"]
 
-[ext_resource type="Script" path="res://addons/mouse_3d_ray/ray_casters/base_ray_caster/base_ray_caster.gd" id="1_81ftx"]
+[ext_resource type="Script" uid="uid://dqaimneocepr" path="res://addons/mouse_3d_ray/ray_casters/base_ray_caster/base_ray_caster.gd" id="1_81ftx"]
 
 [node name="BaseRayCaster" type="Node"]
 script = ExtResource("1_81ftx")

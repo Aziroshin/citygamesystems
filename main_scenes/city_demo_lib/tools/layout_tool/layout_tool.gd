@@ -315,6 +315,3 @@ func _do_and_finish() -> void:
 	_create_and_spawn_corner_only_layout_object()
 	_reset()
 	_finish()
-
-
-

@@ -35,4 +35,3 @@ func create_positioner() -> PositionerLib.MultiPositioner:
 	multi_positioner.add_positioner(outline_positioner)
 	multi_positioner.add_positioner(lerped_outline_positioner)
 	return multi_positioner
-

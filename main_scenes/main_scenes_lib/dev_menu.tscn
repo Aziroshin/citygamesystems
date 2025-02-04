@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://d2ekswsupdhqe"]
 
-[ext_resource type="Script" path="res://main_scenes/main_scenes_lib/scene_picker.gd" id="1_qajvu"]
-[ext_resource type="Script" path="res://main_scenes/main_scenes_lib/dev_menu.gd" id="1_qw3cm"]
+[ext_resource type="Script" uid="uid://cnxjkd1nlir58" path="res://main_scenes/main_scenes_lib/scene_picker.gd" id="1_qajvu"]
+[ext_resource type="Script" uid="uid://b4rcv6cfguu1w" path="res://main_scenes/main_scenes_lib/dev_menu.gd" id="1_qw3cm"]
 
 [node name="DevMenu" type="GridContainer"]
 offset_right = 40.0

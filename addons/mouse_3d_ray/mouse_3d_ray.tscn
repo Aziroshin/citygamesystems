@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dnxl0f01jb7xm"]
 
-[ext_resource type="Script" path="res://addons/mouse_3d_ray/mouse_3d_ray.gd" id="1_52rdy"]
+[ext_resource type="Script" uid="uid://c4i00xexgv24a" path="res://addons/mouse_3d_ray/mouse_3d_ray.gd" id="1_52rdy"]
 
 [node name="Mouse3DRay" type="Node"]
 script = ExtResource("1_52rdy")

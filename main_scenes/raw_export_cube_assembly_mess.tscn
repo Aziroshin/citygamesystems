@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bo6xykpgb234"]
 
-[ext_resource type="Script" path="res://main_scenes/raw_export_cube_assembly_mess.gd" id="1_65vpw"]
+[ext_resource type="Script" uid="uid://bfom1k41hspen" path="res://main_scenes/raw_export_cube_assembly_mess.gd" id="1_65vpw"]
 [ext_resource type="PackedScene" uid="uid://t6fjyxuaed8g" path="res://world_objects/player_world_interface/player_world_interface.tscn" id="2_0x2rq"]
 
 [node name="raw_export_cube_assembly_mess" type="Node3D"]

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cib5i6rj24kef"]
 
-[ext_resource type="Script" path="res://main_scenes/city_demo_lib/world_objects/street/street_segment.gd" id="1_fyen1"]
+[ext_resource type="Script" uid="uid://d3ph3eb3vs6dk" path="res://main_scenes/city_demo_lib/world_objects/street/street_segment.gd" id="1_fyen1"]
 
 [node name="StreetSegment" type="Node3D"]
 script = ExtResource("1_fyen1")

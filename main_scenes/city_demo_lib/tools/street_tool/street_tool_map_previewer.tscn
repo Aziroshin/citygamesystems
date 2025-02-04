@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://gbgib1frpkhx"]
 
-[ext_resource type="Script" path="res://main_scenes/city_demo_lib/tools/street_tool/street_tool_map_previewer.gd" id="1_5n43v"]
+[ext_resource type="Script" uid="uid://cyfdb8r232bvf" path="res://main_scenes/city_demo_lib/tools/street_tool/street_tool_map_previewer.gd" id="1_5n43v"]
 
 [node name="StreetToolMapPreviewer" type="Node3D"]
 script = ExtResource("1_5n43v")

@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://datqk40lxtk7q"]
 
-[ext_resource type="Script" path="res://main_scenes/a_horizontally_folded_triangle_mess.gd" id="1_huv21"]
+[ext_resource type="Script" uid="uid://m1u2jr3iv2be" path="res://main_scenes/a_horizontally_folded_triangle_mess.gd" id="1_huv21"]
 [ext_resource type="PackedScene" uid="uid://t6fjyxuaed8g" path="res://world_objects/player_world_interface/player_world_interface.tscn" id="2_g21rp"]
 
 [node name="HouseAssemblyTest" type="Node3D"]

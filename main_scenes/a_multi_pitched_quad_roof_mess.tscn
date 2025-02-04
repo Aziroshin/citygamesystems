@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bk0gxi50d2fto"]
 
-[ext_resource type="Script" path="res://main_scenes/a_multi_pitched_quad_roof_mess.gd" id="1_5ffth"]
+[ext_resource type="Script" uid="uid://chdfrybfjw5he" path="res://main_scenes/a_multi_pitched_quad_roof_mess.gd" id="1_5ffth"]
 [ext_resource type="PackedScene" uid="uid://t6fjyxuaed8g" path="res://world_objects/player_world_interface/player_world_interface.tscn" id="2_5w7f0"]
 
 [node name="HouseAssemblyTest" type="Node3D"]

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://b14eq0xk1fn05"]
 
-[ext_resource type="Script" path="res://main_scenes/city_demo_lib/tools/positioners/tool_world_object_snap_positioner/tool_world_object_snap_positioner.gd" id="1_hebov"]
+[ext_resource type="Script" uid="uid://cto7xwgoh2m4l" path="res://main_scenes/city_demo_lib/tools/positioners/tool_world_object_snap_positioner/tool_world_object_snap_positioner.gd" id="1_hebov"]
 
 [node name="ToolWorldObjectSnapPositioner" type="Node"]
 script = ExtResource("1_hebov")

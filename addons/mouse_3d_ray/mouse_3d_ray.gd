@@ -196,4 +196,3 @@ func ensure_caching_viewport_mouse_position_getter_attached() -> void:
 func _ready() -> void:
 	ensure_sanity()
 	ensure_caching_viewport_mouse_position_getter_attached()
-

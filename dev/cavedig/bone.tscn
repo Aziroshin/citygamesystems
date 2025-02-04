@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dotwc3k230pgb"]
 
-[ext_resource type="Script" path="res://dev/cavedig/bone.gd" id="1_gjtoi"]
+[ext_resource type="Script" uid="uid://drgolwt62tngr" path="res://dev/cavedig/bone.gd" id="1_gjtoi"]
 
 [node name="Bone" type="Node3D"]
 script = ExtResource("1_gjtoi")

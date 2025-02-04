@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://1t8u33ggj154"]
 
-[ext_resource type="Script" path="res://dev/PlaneMap/Map.gd" id="1"]
+[ext_resource type="Script" uid="uid://chtgvgun4xfq7" path="res://dev/PlaneMap/Map.gd" id="1"]
 
 [sub_resource type="BoxShape3D" id="1"]
 size = Vector3(4.2823, 0.0825164, 3.51038)

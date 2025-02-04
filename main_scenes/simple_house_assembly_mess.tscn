@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://cr5u4jqs44n2v"]
 
-[ext_resource type="Script" path="res://main_scenes/simple_house_assembly_mess.gd" id="1_7c3w6"]
+[ext_resource type="Script" uid="uid://cknelvwd5k0a" path="res://main_scenes/simple_house_assembly_mess.gd" id="1_7c3w6"]
 [ext_resource type="PackedScene" uid="uid://t6fjyxuaed8g" path="res://world_objects/player_world_interface/player_world_interface.tscn" id="2_73dku"]
 
 [node name="HouseAssemblyTest" type="Node3D"]

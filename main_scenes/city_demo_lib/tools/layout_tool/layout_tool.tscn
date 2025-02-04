@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://c8f6y73vhi7bh"]
 
-[ext_resource type="Script" path="res://main_scenes/city_demo_lib/tools/layout_tool/layout_tool.gd" id="1_baua5"]
+[ext_resource type="Script" uid="uid://qyntegk0bbk0" path="res://main_scenes/city_demo_lib/tools/layout_tool/layout_tool.gd" id="1_baua5"]
 
 [node name="LayoutTool" type="Node"]
 script = ExtResource("1_baua5")
