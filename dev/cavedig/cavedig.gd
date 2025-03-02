@@ -104,4 +104,51 @@ static func set_bone_indicators(p_skeleton: Skeleton3D):
 		
 		indicator = Cavedig.bone(p_skeleton, bone_transform, Colors.AQUA)
 		indicator.name = indicator_name
-		
+
+
+static func basis(
+	p_parent: Node3D,
+	p_transform: Transform3D,
+	p_color := Color(),
+	p_length := Vector3(1.0, 1.0, 1.0),
+	p_circumference := Vector3(1.0, 1.0, 1.0),
+	p_hidden := false
+) -> void:
+	#region Point
+	var Point: Resource = preload("res://dev/cavedig/point.tres")
+	Point.instance_count =+ 1
+	var largest_circumference: float = max(p_circumference.x, p_circumference.y, p_circumference.z)
+	var basis_p := Basis.from_scale(Vector3(
+		largest_circumference,
+		largest_circumference,
+		largest_circumference
+	))
+	Point.set_instance_color(Point.instance_count - 1, p_color)
+	Point.set_instance_transform(Point.instance_count - 1, Transform3D(basis_p, p_transform.origin))
+	
+	if not Point.instance in p_parent.get_children():
+		p_parent.add_child(Point.instance)
+	#endregion
+	
+	#region Arrow
+	var Arrow: Resource = preload("res://dev/cavedig/arrow.tres")
+	Arrow.instance_count =+ 3
+	
+	var basis_x := Basis().looking_at(p_transform.basis.x)
+	basis_x = basis_x * Basis.from_scale(Vector3(p_circumference.x, p_circumference.x, p_length.x))
+	Arrow.set_instance_color(Arrow.instance_count - 3, Color(1.0, 0.0, 0.0))
+	Arrow.set_instance_transform(Arrow.instance_count - 3, Transform3D(basis_x, p_transform.origin))
+	
+	var basis_y := Basis().looking_at(p_transform.basis.y * p_length.y)
+	basis_y = basis_y * Basis.from_scale(Vector3(p_circumference.y, p_circumference.y, p_length.y))
+	Arrow.set_instance_color(Arrow.instance_count - 2, Color(0.0, 1.0, 0.0))
+	Arrow.set_instance_transform(Arrow.instance_count - 2, Transform3D(basis_y, p_transform.origin))
+	
+	var basis_z := Basis().looking_at(p_transform.basis.z * p_length.z)
+	basis_z = basis_z * Basis.from_scale(Vector3(p_circumference.z, p_circumference.z, p_length.z))
+	Arrow.set_instance_color(Arrow.instance_count - 1, Color(0.0, 0.0, 1.0))
+	Arrow.set_instance_transform(Arrow.instance_count - 1, Transform3D(basis_z, p_transform.origin))
+	
+	if not Arrow.instance in p_parent.get_children():
+		p_parent.add_child(Arrow.instance)
+	#endregion
