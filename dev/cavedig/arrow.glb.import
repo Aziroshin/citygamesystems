@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cgtt7nx1j5w1x"
-path="res://.godot/imported/arrow.gltf-d80e712027dca7a35ca88ffc9ca441d0.scn"
+uid="uid://ciinags4vry1e"
+path="res://.godot/imported/arrow.glb-1d62e0b51e320c30b38e8c6ff04e515b.scn"
 
 [deps]
 
-source_file="res://dev/cavedig/arrow.gltf"
-dest_files=["res://.godot/imported/arrow.gltf-d80e712027dca7a35ca88ffc9ca441d0.scn"]
+source_file="res://dev/cavedig/arrow.glb"
+dest_files=["res://.godot/imported/arrow.glb-1d62e0b51e320c30b38e8c6ff04e515b.scn"]
 
 [params]
 

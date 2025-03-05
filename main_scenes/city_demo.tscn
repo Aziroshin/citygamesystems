@@ -57,6 +57,7 @@ collision_layer = 2147483649
 resolution = 4
 size = Vector2(256, 256)
 subdivision = Vector2(128, 128)
+alpha = 0.5
 mouse_3d = NodePath("Mouse3D")
 
 [node name="debug_visualizer_for_street_tool" parent="Map" instance=ExtResource("8_55k1a")]

@@ -441,7 +441,7 @@ static func get_overlapping_offset_2d_curve_point_indexes(
 		offset_points.append(offset_point)
 		offset_forwards.append(-transform.basis.z * 0.1)
 	
-	
+	# Show first point in offset_points.
 	Cavedig.needle(
 		p_debug_object,
 		Transform3D(Basis(), offset_points[0]),
@@ -627,4 +627,3 @@ static func get_centroid(p_vertices: PackedVector3Array) -> Vector3:
 #==========================================================================
 # Vector converters
 #==========================================================================
-
