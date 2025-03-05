@@ -1,7 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://xjpawx5cdq54"]
+[gd_scene load_steps=11 format=3 uid="uid://xjpawx5cdq54"]
 
 [ext_resource type="Script" uid="uid://c5cdeohggcwuh" path="res://main_scenes/curve3d_visualizer_mess.gd" id="1_huj3g"]
 [ext_resource type="PackedScene" uid="uid://dvj7tkpwy5s6u" path="res://dev/curve_debug_visualizer/curve3d_debug_visualizer.tscn" id="2_57o3w"]
+[ext_resource type="PackedScene" uid="uid://clstktysn3o30" path="res://addons/mouse_3d/mouse_3d.tscn" id="2_hpsv4"]
+[ext_resource type="PackedScene" uid="uid://dnxl0f01jb7xm" path="res://addons/mouse_3d_ray/mouse_3d_ray.tscn" id="3_vp43t"]
+[ext_resource type="PackedScene" uid="uid://m8h7lbfey7ln" path="res://addons/mouse_3d_ray/ray_casters/full_mouse_3d_ray_caster/full_mouse_3d_ray_caster.tscn" id="4_vf10v"]
 [ext_resource type="PackedScene" uid="uid://dsosiwktl112u" path="res://dev/sphere_map/sphere_map.tscn" id="4_xm07t"]
 [ext_resource type="PackedScene" uid="uid://t6fjyxuaed8g" path="res://world_objects/player_world_interface/player_world_interface.tscn" id="5_7iut4"]
 
@@ -31,14 +34,29 @@ disable_receive_shadows = true
 [node name="Curve3dVisualizerMess" type="Node3D"]
 script = ExtResource("1_huj3g")
 
+[node name="Mouse3D" parent="." node_paths=PackedStringArray("mouse_3d_ray") instance=ExtResource("2_hpsv4")]
+mouse_3d_ray = NodePath("MapMouse3DRay")
+
+[node name="MapMouse3DRay" parent="Mouse3D" node_paths=PackedStringArray("ray_caster") instance=ExtResource("3_vp43t")]
+ray_caster = NodePath("FullMouse3DRayCaster")
+collision_mask = 2147483648
+show_missing_camera_warning = false
+show_missing_viewport_warning = false
+
+[node name="FullMouse3DRayCaster" parent="Mouse3D/MapMouse3DRay" node_paths=PackedStringArray("mouse_3d_ray") instance=ExtResource("4_vf10v")]
+mouse_3d_ray = NodePath("..")
+
 [node name="curve3d_debug_visualizer" parent="." instance=ExtResource("2_57o3w")]
 in_handle_material = SubResource("StandardMaterial3D_457ea")
 out_handle_material = SubResource("StandardMaterial3D_j10og")
 tangent_material = SubResource("StandardMaterial3D_3pbm7")
 get_curve_by_signal = true
 
-[node name="Map" parent="." instance=ExtResource("4_xm07t")]
+[node name="Map" parent="." node_paths=PackedStringArray("mouse_3d") instance=ExtResource("4_xm07t")]
+collision_layer = 2147483649
+collision_mask = 2147483649
 alpha = 0.5
+mouse_3d = NodePath("../Mouse3D")
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -27.3065, 15.8951, 15.1031)
