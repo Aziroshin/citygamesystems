@@ -41,10 +41,16 @@ var curve_changed := false
 		return handle_visualizer.visualized_indexes
 	set(p_value):
 		handle_visualizer.visualized_indexes = p_value
+@export var visualize_transforms := false
+@export var transform_visualizer: CavedigTransform3DVisualizer
+var curve_transform_visualizer := Curve3DDebugBakedTransformVisualizer.new()
 
 
 func _ready() -> void:
-	# curve_mesh.profile2d = _get_tangent_profile2d()
+	if transform_visualizer == null:
+		transform_visualizer = CavedigTransform3DVisualizer.new()
+	add_child(curve_transform_visualizer)
+	curve_transform_visualizer.visualizer = transform_visualizer
 	add_child(curve_mesh)
 	add_child(handle_visualizer)
 	_update_curve_mesh()
@@ -68,3 +74,5 @@ func _on_curve_changed(p_curve: Curve3D) -> void:
 	if get_curve_by_signal:
 		curve = p_curve
 		handle_visualizer.set_curve(p_curve)
+		if visualize_transforms:
+			curve_transform_visualizer.set_curve(p_curve)

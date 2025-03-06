@@ -8,31 +8,45 @@ var point_multi_mesh: CavedigMultiMeshInstanceManager3D
 
 const FALLBACK_DEFAULT_LENGTH := Vector3(1.0, 1.0, 1.0)
 const FALLBACK_DEFAULT_CIRCUMFERENCE := Vector3(1.0, 1.0, 1.0)
-var initialized_default_length := FALLBACK_DEFAULT_LENGTH
-var initialized_default_circumference := FALLBACK_DEFAULT_CIRCUMFERENCE
+@export var color: Color
+@export var default_length: Vector3
+@export var default_circumference: Vector3
+@export var hidden: bool
+@export var template_material: ShaderMaterial = preload("res://dev/cavedig/cavedig_material.tres")
+var arrow_template_mesh: ArrayMesh = preload("res://dev/cavedig/arrow_Arrow.res")
+var point_template_mesh: ArrayMesh = preload("res://dev/cavedig/point_Point.res")
 
 
 func _init(
-	p_parent: Node3D,
+	p_parent: Node3D = null,
 	p_color := Color(),
-	p_length := FALLBACK_DEFAULT_LENGTH ,
-	p_circumference := FALLBACK_DEFAULT_CIRCUMFERENCE,
+	p_default_length := FALLBACK_DEFAULT_LENGTH ,
+	p_default_circumference := FALLBACK_DEFAULT_CIRCUMFERENCE,
 	p_hidden := false,
 	p_material: ShaderMaterial = null,
 ) -> void:
-	var template_material: ShaderMaterial
-	var arrow_template_mesh := preload("res://dev/cavedig/arrow_Arrow.res")
-	var point_template_mesh := preload("res://dev/cavedig/point_Point.res")
-	if p_material == null:
-		template_material = preload("res://dev/cavedig/cavedig_material.tres")
-	else:
+	if not color:
+		color = p_color
+	if not default_length:
+		default_length = p_default_length
+	if not default_circumference:
+		default_circumference = p_default_circumference
+	if not hidden:
+		hidden = p_hidden
+
+	if not p_material == null:
 		template_material = p_material
-		
+
+	if not p_parent == null:
+		p_parent.add_child(self)
+
+
+func _ready() -> void:
 	x_arrow_multi_mesh = CavedigMultiMeshInstanceManager3D.new(
 		arrow_template_mesh.duplicate(),
 		template_material.duplicate()
 	)
-	x_arrow_multi_mesh.material.set_shader_parameter(&"color_a", p_color)
+	x_arrow_multi_mesh.material.set_shader_parameter(&"color_a", color)
 	x_arrow_multi_mesh.material.set_shader_parameter(&"color_b", Vector3(1.0, 0.0, 0.0))
 	self.add_child(x_arrow_multi_mesh.instance)
 	
@@ -40,7 +54,7 @@ func _init(
 		arrow_template_mesh.duplicate(),
 		template_material.duplicate()
 	)
-	y_arrow_multi_mesh.material.set_shader_parameter(&"color_a", p_color)
+	y_arrow_multi_mesh.material.set_shader_parameter(&"color_a", color)
 	y_arrow_multi_mesh.material.set_shader_parameter(&"color_b", Vector3(0.0, 1.0, 0.0))
 	self.add_child(y_arrow_multi_mesh.instance)
 	
@@ -48,7 +62,7 @@ func _init(
 		arrow_template_mesh.duplicate(),
 		template_material.duplicate()
 	)
-	z_arrow_multi_mesh.material.set_shader_parameter(&"color_a", p_color)
+	z_arrow_multi_mesh.material.set_shader_parameter(&"color_a", color)
 	z_arrow_multi_mesh.material.set_shader_parameter(&"color_b", Vector3(0.0, 0.0, 1.0))
 	self.add_child(z_arrow_multi_mesh.instance)
 	
@@ -56,19 +70,18 @@ func _init(
 		point_template_mesh.duplicate(),
 		template_material.duplicate()
 	)
-	point_multi_mesh.material.set_shader_parameter(&"color_a", p_color)
-	point_multi_mesh.material.set_shader_parameter(&"color_b", p_color)
+	point_multi_mesh.material.set_shader_parameter(&"color_a", color)
+	point_multi_mesh.material.set_shader_parameter(&"color_b", color)
 	self.add_child(point_multi_mesh.instance)
 	
-	p_parent.add_child(self)
 
 
 ## Add a `Transform3D` to be visualized.
 ## `p_length` and `p_circumference` will be applied to the visualizing arrows.
 ## Only positive values are supported for `p_length` and `p_circumference`.
 ## If either are `Vector3(-1.0, -1.0, -1.0)` (the default), the corresponding
-## values are going to be initialized from `.initialized_default_length` or 
-## `.initialized_default_circumference` respectively.
+## values are going to be initialized from `.default_length` or 
+## `.default_circumference` respectively.
 ##
 ## Note: Don't forget to call `bake` once you're done adding transforms.
 func add(
@@ -76,10 +89,10 @@ func add(
 	p_length := Vector3(-1.0, -1.0, -1.0),
 	p_circumference := Vector3(-1, -1, -1),
 ) -> int:
-	var length := initialized_default_length if p_length == Vector3(-1, -1, -1)\
+	var length := default_length if p_length == Vector3(-1, -1, -1)\
 	else p_length
 	
-	var circumference := initialized_default_circumference if p_circumference == Vector3(-1, -1, -1)\
+	var circumference := default_circumference if p_circumference == Vector3(-1, -1, -1)\
 	else p_circumference
 	#region Point
 	var largest_circumference: float = max(circumference.x, circumference.y, circumference.z)

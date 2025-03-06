@@ -43,3 +43,4 @@ in_handle_material = SubResource("StandardMaterial3D_lm4oo")
 out_handle_material = SubResource("StandardMaterial3D_t762y")
 tangent_material = SubResource("StandardMaterial3D_p7n4p")
 visualized_indexes = PackedInt64Array(-1)
+visualize_transforms = null

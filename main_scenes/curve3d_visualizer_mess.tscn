@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://xjpawx5cdq54"]
+[gd_scene load_steps=12 format=3 uid="uid://xjpawx5cdq54"]
 
 [ext_resource type="Script" uid="uid://c5cdeohggcwuh" path="res://main_scenes/curve3d_visualizer_mess.gd" id="1_huj3g"]
 [ext_resource type="PackedScene" uid="uid://dvj7tkpwy5s6u" path="res://dev/curve_debug_visualizer/curve3d_debug_visualizer.tscn" id="2_57o3w"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://m8h7lbfey7ln" path="res://addons/mouse_3d_ray/ray_casters/full_mouse_3d_ray_caster/full_mouse_3d_ray_caster.tscn" id="4_vf10v"]
 [ext_resource type="PackedScene" uid="uid://dsosiwktl112u" path="res://dev/sphere_map/sphere_map.tscn" id="4_xm07t"]
 [ext_resource type="PackedScene" uid="uid://t6fjyxuaed8g" path="res://world_objects/player_world_interface/player_world_interface.tscn" id="5_7iut4"]
+[ext_resource type="Script" uid="uid://ct77olnyjxmtl" path="res://dev/cavedig/basis.gd" id="6_vp43t"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_457ea"]
 shading_mode = 0
@@ -46,11 +47,19 @@ show_missing_viewport_warning = false
 [node name="FullMouse3DRayCaster" parent="Mouse3D/MapMouse3DRay" node_paths=PackedStringArray("mouse_3d_ray") instance=ExtResource("4_vf10v")]
 mouse_3d_ray = NodePath("..")
 
-[node name="curve3d_debug_visualizer" parent="." instance=ExtResource("2_57o3w")]
+[node name="curve3d_debug_visualizer" parent="." node_paths=PackedStringArray("transform_visualizer") instance=ExtResource("2_57o3w")]
 in_handle_material = SubResource("StandardMaterial3D_457ea")
 out_handle_material = SubResource("StandardMaterial3D_j10og")
 tangent_material = SubResource("StandardMaterial3D_3pbm7")
 get_curve_by_signal = true
+visualize_transforms = true
+transform_visualizer = NodePath("CavedigTransform3DVisualizer")
+
+[node name="CavedigTransform3DVisualizer" type="Node3D" parent="curve3d_debug_visualizer"]
+script = ExtResource("6_vp43t")
+default_length = Vector3(0.7, 0.7, 0.7)
+default_circumference = Vector3(0.15, 0.15, 0.15)
+metadata/_custom_type_script = ExtResource("6_vp43t")
 
 [node name="Map" parent="." node_paths=PackedStringArray("mouse_3d") instance=ExtResource("4_xm07t")]
 collision_layer = 2147483649

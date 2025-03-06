@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3 uid="uid://e1d4uxeyog88"]
+[gd_scene load_steps=32 format=3 uid="uid://e1d4uxeyog88"]
 
 [ext_resource type="Script" uid="uid://kgpo7bmsi6lh" path="res://main_scenes/city_demo.gd" id="1_elgex"]
 [ext_resource type="PackedScene" uid="uid://t6fjyxuaed8g" path="res://world_objects/player_world_interface/player_world_interface.tscn" id="2_16h52"]
@@ -17,6 +17,7 @@
 [ext_resource type="PackedScene" uid="uid://c7wtxtgp78lw5" path="res://main_scenes/city_demo_lib/tools/tool_arbiter/tool_arbiter_agent.tscn" id="8_egxbx"]
 [ext_resource type="PackedScene" uid="uid://c8f6y73vhi7bh" path="res://main_scenes/city_demo_lib/tools/layout_tool/layout_tool.tscn" id="9_0jihv"]
 [ext_resource type="Material" uid="uid://bqywgg0jxxs4q" path="res://dev/curve_debug_visualizer/tangent_material.tres" id="9_kyia3"]
+[ext_resource type="Script" uid="uid://ct77olnyjxmtl" path="res://dev/cavedig/basis.gd" id="9_pmb6e"]
 [ext_resource type="PackedScene" uid="uid://bmooq3eqguv8d" path="res://dev/PlaneMap/tool_lib_map_agent/tool_lib_plane_map_agent.tscn" id="9_yqsrf"]
 [ext_resource type="PackedScene" uid="uid://cyuhwi4quaawd" path="res://main_scenes/city_demo_lib/ui/hud/texture_button_with_static_background.tscn" id="10_e8jwe"]
 [ext_resource type="PackedScene" uid="uid://b2rj4ji58dbdf" path="res://main_scenes/city_demo_lib/tools/positioners/tool_corner_snap_positioner/tool_corner_snap_positioner.tscn" id="11_651x8"]
@@ -60,13 +61,20 @@ subdivision = Vector2(128, 128)
 alpha = 0.5
 mouse_3d = NodePath("Mouse3D")
 
-[node name="debug_visualizer_for_street_tool" parent="Map" instance=ExtResource("8_55k1a")]
+[node name="debug_visualizer_for_street_tool" parent="Map" node_paths=PackedStringArray("transform_visualizer") instance=ExtResource("8_55k1a")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
 curve = SubResource("Curve3D_ogyrv")
 in_handle_material = ExtResource("9_kyia3")
 out_handle_material = ExtResource("9_kyia3")
 tangent_material = ExtResource("9_kyia3")
 get_curve_by_signal = true
+visualize_transforms = true
+transform_visualizer = NodePath("CavedigTransform3DVisualizer")
+
+[node name="CavedigTransform3DVisualizer" type="Node3D" parent="Map/debug_visualizer_for_street_tool"]
+script = ExtResource("9_pmb6e")
+default_circumference = Vector3(0.5, 0.5, 0.5)
+metadata/_custom_type_script = ExtResource("9_pmb6e")
 
 [node name="debug_visualizer_for_layout_tool" parent="Map" instance=ExtResource("8_55k1a")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
@@ -75,6 +83,7 @@ in_handle_material = ExtResource("9_kyia3")
 out_handle_material = ExtResource("9_kyia3")
 tangent_material = ExtResource("9_kyia3")
 get_curve_by_signal = true
+visualize_transforms = false
 
 [node name="StreetToolMapPreviewer" parent="Map" node_paths=PackedStringArray("map_agent") instance=ExtResource("6_o1idw")]
 map_agent = NodePath("../../street_tool/PlaneMapAgent")
