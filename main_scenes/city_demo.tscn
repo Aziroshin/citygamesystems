@@ -73,17 +73,17 @@ transform_visualizer = NodePath("CavedigTransform3DVisualizer")
 
 [node name="CavedigTransform3DVisualizer" type="Node3D" parent="Map/debug_visualizer_for_street_tool"]
 script = ExtResource("9_pmb6e")
-default_circumference = Vector3(0.5, 0.5, 0.5)
+default_circumference = Vector3(0.1, 0.1, 0.1)
 metadata/_custom_type_script = ExtResource("9_pmb6e")
 
-[node name="debug_visualizer_for_layout_tool" parent="Map" instance=ExtResource("8_55k1a")]
+[node name="debug_visualizer_for_layout_tool" parent="Map" node_paths=PackedStringArray("transform_visualizer") instance=ExtResource("8_55k1a")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
 curve = SubResource("Curve3D_ogyrv")
 in_handle_material = ExtResource("9_kyia3")
 out_handle_material = ExtResource("9_kyia3")
 tangent_material = ExtResource("9_kyia3")
 get_curve_by_signal = true
-visualize_transforms = false
+transform_visualizer = NodePath("@Node3D@19047/@Node3D@19048")
 
 [node name="StreetToolMapPreviewer" parent="Map" node_paths=PackedStringArray("map_agent") instance=ExtResource("6_o1idw")]
 map_agent = NodePath("../../street_tool/PlaneMapAgent")
