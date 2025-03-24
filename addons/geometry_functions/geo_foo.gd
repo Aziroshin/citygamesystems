@@ -435,7 +435,6 @@ static func get_overlapping_offset_2d_curve_point_indexes(
 	var indexes := PackedInt64Array()
 	var offset_points := PackedVector3Array()
 	var offset_forwards := PackedVector3Array()
-	
 	for transform in p_baked_point_transforms:
 		var offset_point := transform.origin + transform.basis.x * p_offset
 		offset_points.append(offset_point)
@@ -458,17 +457,103 @@ static func get_overlapping_offset_2d_curve_point_indexes(
 		
 		var point_intersects := false
 		for i_visited_point in range(visited_indexes + 1, point_count):
+			#var intersection_point_or_null = Geometry2D.line_intersects_line(
+				#vector3.xz(offset_points[i_point]),
+				#vector3.xz(offset_forwards[i_point]).normalized(),
+				#vector3.xz(offset_points[i_visited_point]),
+				#vector3.xz(offset_forwards[i_visited_point]).normalized()
+			#)
+			
+			print("geo_foo.gd: 3D offset visualization length: ")
 			var intersection_point_or_null = Geometry2D.line_intersects_line(
-				vector3.xz(offset_points[i_point]),
-				vector3.xz(offset_forwards[i_point]).normalized(),
-				vector3.xz(offset_points[i_visited_point]),
-				vector3.xz(offset_forwards[i_visited_point]).normalized()
+				vector3.xz(p_baked_point_transforms[i_point].origin),
+				vector3.xz(offset_points[i_point] - p_baked_point_transforms[i_point].origin).normalized(),
+				vector3.xz(p_baked_point_transforms[i_visited_point].origin),
+				vector3.xz(offset_points[i_visited_point] - p_baked_point_transforms[i_visited_point].origin).normalized()
+			)
+			print(
+				"geo_foo.gd: 3D offset visualization length: ",
+				(
+					abs(
+						p_baked_point_transforms[i_point].origin + (offset_points[i_point] - p_baked_point_transforms[i_point].origin)
+						- p_baked_point_transforms[i_point].origin
+					).length()
+				)
+			)
+			Cavedig.needle_between(
+				p_debug_object,
+				p_baked_point_transforms[i_point].origin,
+				p_baked_point_transforms[i_point].origin + (offset_points[i_point] - p_baked_point_transforms[i_point].origin),
+				Vector3(2.0, 0.4, 0.0),
+				0.015
+			)
+			Cavedig.needle_between(
+				p_debug_object,
+				p_baked_point_transforms[i_visited_point].origin,
+				p_baked_point_transforms[i_visited_point].origin + (offset_points[i_visited_point] - p_baked_point_transforms[i_visited_point].origin),
+				Vector3(0.0, 0.4, 2.0),
+				0.018
 			)
 			
 			# Guarding against parallels.
 			if intersection_point_or_null == null:
 				continue
 			var intersection_point: Vector2 = intersection_point_or_null
+			
+			var point_to_intersection := intersection_point - vector3.xz(p_baked_point_transforms[i_point].origin)
+			var visited_point_to_intersection := intersection_point - vector3.xz(p_baked_point_transforms[i_visited_point].origin)
+			if point_to_intersection.length() <= abs(p_offset):
+				print("geo_foo.gd: length: ", point_to_intersection.length())
+			if point_to_intersection.length() <= abs(p_offset) and visited_point_to_intersection.length() <= abs(p_offset):
+				print(
+					"geo_foo.gd: intersection_point", visited_point_to_intersection,
+					", length: ", visited_point_to_intersection.length(),
+					", max_considered_length: ", p_offset
+					)
+				# intersection
+				Cavedig.needle(
+					p_debug_object,
+					Transform3D(Basis(), Vector3(intersection_point.x, 0.0, intersection_point.y)),
+					Vector3(0.4, 0.4, 2.0),
+					9.0,
+					0.007
+				)
+				# visited point intersection
+				#Cavedig.needle_between(
+					#p_debug_object,
+					#p_baked_point_transforms[i_visited_point].origin,
+					#Vector3(
+						#intersection_point.x,
+						#p_baked_point_transforms[i_visited_point].origin.y,
+						#intersection_point.y
+					#),
+					#Vector3(0.2, 0.2, 2.0),
+					#0.02
+				#)
+
+				# point intersection
+				#var point_intersection_needle := Cavedig.needle_between(
+					#p_debug_object,
+					#p_baked_point_transforms[i_point].origin,
+					#Vector3(
+						#intersection_point.x,
+						#p_baked_point_transforms[i_point].origin.y,
+						#intersection_point.y
+					#),
+					#Vector3(0.2, 2.0, 0.2),
+					#0.02
+				#)
+				#point_intersection_needle.transform =\
+					#point_intersection_needle.transform.scaled_local(Vector3(1.0, 15.0, 1.0))
+				# Offset-ish
+				#Cavedig.needle_between(
+					#p_debug_object,
+					#p_baked_point_transforms[i_point].origin,
+					#offset_points[i_point],
+					#Vector3(0.2, 2.0, 1.0),
+					#0.03
+				#)
+
 			
 			#print(
 				#"intersection: ", intersection_point,
@@ -502,19 +587,19 @@ static func get_overlapping_offset_2d_curve_point_indexes(
 			#if not from_offset_to_intersection_point.normalized().dot(-offset_forward.normalized()) == 1.0:
 				#indexes.append(i_visited_point)
 				point_intersects = true
-				print(
-					"geo_foo.gd, intersection@", intersection_point, " between ",
-					"(%s)" % i_point, vector3.xz(offset_points[i_point]), " and ",
-					"(%s)" % i_visited_point, vector3.xz(offset_points[i_visited_point])
-				)
-				Cavedig.needle(
-					p_debug_object,
-					Transform3D(Basis(), Vector3(intersection_point.x, 0.0, intersection_point.y)),
-					Vector3(1.0, 0.4, 0.4),
-					7.0,
-					0.005
-				)
-				break
+				#print(
+					#"geo_foo.gd, intersection@", intersection_point, " between ",
+					#"(%s)" % i_point, vector3.xz(offset_points[i_point]), " and ",
+					#"(%s)" % i_visited_point, vector3.xz(offset_points[i_visited_point])
+				#)
+				#Cavedig.needle(
+					#p_debug_object,
+					#Transform3D(Basis(), Vector3(intersection_point.x, 0.0, intersection_point.y)),
+					#Vector3(1.0, 0.4, 0.4),
+					#4.0,
+					#0.005
+				#)
+				#break
 		if point_intersects:
 			print("BAD: ", i_point)
 			indexes.append(i_point)

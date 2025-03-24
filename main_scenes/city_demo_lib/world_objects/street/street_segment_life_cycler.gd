@@ -30,20 +30,23 @@ func _create_collider(
 	
 	# =====
 	# Debugging `GeoFoo.get_overlapping_offset_2d_curve_point_indexes`
+	var _debug_carrier := Node3D.new()
+	Engine.get_main_loop().root.add_child(_debug_carrier)
 	var overlapping_indexes := GeoFoo.get_overlapping_offset_2d_curve_point_indexes(
 		segment_main_curve_baked_point_transforms,
 		#-p_segment.radius,
 		-p_segment.radius,
-		collider
+		#collider
+		_debug_carrier
 	)
-	#for i in overlapping_indexes:
-		#Cavedig.needle(
-			#collider,
-			#segment_main_curve_baked_point_transforms[i],
-			#Vector3(1.0, 0.4, 0.4),
-			#7.0,
-			#0.02
-		#)
+	for i in overlapping_indexes:
+		Cavedig.needle(
+			collider,
+			segment_main_curve_baked_point_transforms[i],
+			Vector3(1.0, 0.4, 0.4),
+			7.0,
+			0.02
+		)
 	
 	print("street_segment_life_cycler.gd, overlapping indexes: ", overlapping_indexes)
 	print("test intersection result: ", Geometry2D.line_intersects_line(
