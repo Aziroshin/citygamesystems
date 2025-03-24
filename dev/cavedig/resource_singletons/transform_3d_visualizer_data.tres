@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="CavedigTransform3DVisualizerData" load_steps=2 format=3 uid="uid://c8gx5yrtperho"]
+
+[ext_resource type="Script" uid="uid://ksuq6op5xetm" path="res://dev/cavedig/resource_singletons/transform3d_visualizer_data.gd" id="1_0vaxu"]
+
+[resource]
+script = ExtResource("1_0vaxu")
+metadata/_custom_type_script = ExtResource("1_0vaxu")
