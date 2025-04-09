@@ -1,0 +1,83 @@
+[gd_scene load_steps=13 format=3 uid="uid://cy48me2jxm4s6"]
+
+[ext_resource type="Script" uid="uid://llyftc4uq1hh" path="res://main_scenes/cavedig_mess.gd" id="1_tski8"]
+[ext_resource type="PackedScene" uid="uid://t6fjyxuaed8g" path="res://world_objects/player_world_interface/player_world_interface.tscn" id="2_o7mdv"]
+[ext_resource type="PackedScene" uid="uid://1t8u33ggj154" path="res://dev/PlaneMap/PlaneMap.tscn" id="3_pstc3"]
+[ext_resource type="PackedScene" uid="uid://dvj7tkpwy5s6u" path="res://dev/curve_debug_visualizer/curve3d_debug_visualizer.tscn" id="4_ql5u8"]
+[ext_resource type="Material" uid="uid://bqywgg0jxxs4q" path="res://dev/curve_debug_visualizer/tangent_material.tres" id="5_rjmvs"]
+[ext_resource type="Script" uid="uid://ct77olnyjxmtl" path="res://dev/cavedig/basis.gd" id="6_tv6re"]
+[ext_resource type="PackedScene" uid="uid://gbgib1frpkhx" path="res://main_scenes/city_demo_lib/tools/street_tool/street_tool_map_previewer.tscn" id="7_i0c3g"]
+[ext_resource type="PackedScene" uid="uid://clstktysn3o30" path="res://addons/mouse_3d/mouse_3d.tscn" id="8_m0dkm"]
+[ext_resource type="PackedScene" uid="uid://dnxl0f01jb7xm" path="res://addons/mouse_3d_ray/mouse_3d_ray.tscn" id="9_8xgyf"]
+[ext_resource type="PackedScene" uid="uid://m8h7lbfey7ln" path="res://addons/mouse_3d_ray/ray_casters/full_mouse_3d_ray_caster/full_mouse_3d_ray_caster.tscn" id="10_5tyeo"]
+
+[sub_resource type="Curve3D" id="Curve3D_od80n"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8poj7"]
+shading_mode = 0
+specular_mode = 2
+disable_ambient_light = true
+disable_fog = true
+albedo_color = Color(0.192157, 0.223529, 0.847059, 0.964706)
+disable_receive_shadows = true
+
+[node name="CavedigMess" type="Node3D"]
+script = ExtResource("1_tski8")
+
+[node name="PlayerWorldInterface" parent="." instance=ExtResource("2_o7mdv")]
+override_existing_actions = true
+enable_integration_warnings = false
+
+[node name="OmniLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.22485, 0)
+light_color = Color(0.964706, 0.929412, 0.745098, 1)
+light_energy = 0.8
+omni_range = 12.1831
+omni_attenuation = 0.0743256
+
+[node name="Map" parent="." node_paths=PackedStringArray("mouse_3d") instance=ExtResource("3_pstc3")]
+collision_layer = 2147483649
+resolution = 4
+size = Vector2(256, 256)
+subdivision = Vector2(128, 128)
+alpha = 0.5
+mouse_3d = NodePath("Mouse3D")
+
+[node name="debug_visualizer_for_street_tool" parent="Map" node_paths=PackedStringArray("transform_visualizer") instance=ExtResource("4_ql5u8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+curve = SubResource("Curve3D_od80n")
+curve_material = SubResource("StandardMaterial3D_8poj7")
+in_handle_material = ExtResource("5_rjmvs")
+out_handle_material = ExtResource("5_rjmvs")
+tangent_material = ExtResource("5_rjmvs")
+get_curve_by_signal = true
+visualize_transforms = true
+transform_visualizer = NodePath("@Node3D@27312/@Node3D@27313")
+
+[node name="CavedigTransform3DVisualizer" type="Node3D" parent="Map/debug_visualizer_for_street_tool"]
+script = ExtResource("6_tv6re")
+default_circumference = Vector3(0.1, 0.1, 0.1)
+metadata/_custom_type_script = ExtResource("6_tv6re")
+
+[node name="debug_visualizer_for_layout_tool" parent="Map" node_paths=PackedStringArray("transform_visualizer") instance=ExtResource("4_ql5u8")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+curve = SubResource("Curve3D_od80n")
+curve_material = SubResource("StandardMaterial3D_8poj7")
+in_handle_material = ExtResource("5_rjmvs")
+out_handle_material = ExtResource("5_rjmvs")
+tangent_material = ExtResource("5_rjmvs")
+get_curve_by_signal = true
+transform_visualizer = NodePath("@Node3D@27320/@Node3D@27321")
+
+[node name="StreetToolMapPreviewer" parent="Map" instance=ExtResource("7_i0c3g")]
+
+[node name="Mouse3D" parent="Map" node_paths=PackedStringArray("mouse_3d_ray") instance=ExtResource("8_m0dkm")]
+mouse_3d_ray = NodePath("MapMouse3DRay")
+
+[node name="MapMouse3DRay" parent="Map/Mouse3D" node_paths=PackedStringArray("ray_caster") instance=ExtResource("9_8xgyf")]
+ray_caster = NodePath("FullMouse3DRayCaster")
+collision_mask = 2147483648
+show_missing_camera_warning = false
+show_missing_viewport_warning = false
+
+[node name="FullMouse3DRayCaster" parent="Map/Mouse3D/MapMouse3DRay" instance=ExtResource("10_5tyeo")]
