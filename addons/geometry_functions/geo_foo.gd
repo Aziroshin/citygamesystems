@@ -709,6 +709,27 @@ static func get_centroid(p_vertices: PackedVector3Array) -> Vector3:
 	return centroid
 
 
-#==========================================================================
-# Vector converters
-#==========================================================================
+static func get_continuously_ascending_set_boundary_indexes(p_sets: PackedInt64Array) -> PackedInt64Array:
+	var indexes := []
+	
+	if len(p_sets) == 0:
+		return indexes
+	if len(p_sets) == 1:
+		indexes.append(p_sets[0])
+		indexes.append(p_sets[0])
+		return indexes
+	
+	indexes.append(p_sets[0])
+	var current_set_start_number := p_sets[0]
+	var current_set_latest_number := p_sets[0]
+	
+	for i_number in range(1, len(p_sets)):
+		var number := p_sets[i_number]
+		if not number == current_set_latest_number + 1:
+			current_set_start_number = number
+			current_set_latest_number = number
+			continue
+		current_set_latest_number = number
+		
+	
+	return indexes
