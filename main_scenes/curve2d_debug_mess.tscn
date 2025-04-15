@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://ybfifw637hjd"]
+
+[ext_resource type="Script" uid="uid://jdfhkn8qq6cr" path="res://main_scenes/curve2d_debug_mess.gd" id="1_0iion"]
+
+[sub_resource type="Curve2D" id="Curve2D_70jy3"]
+_data = {
+"points": PackedVector2Array(-155.69, -47.5984, 155.69, 47.5984, 11.9355, 121.038, 0, 10.6575, 0, -10.6575, 246.269, 61.0358, 145.041, -116.145, -145.041, 116.145, 10.3441, 35.4696)
+}
+point_count = 3
+
+[node name="Curve2dDebug" type="Node3D"]
+script = ExtResource("1_0iion")
+
+[node name="Node2D" type="Node2D" parent="."]
+
+[node name="PointyHorseshoeCurve" type="Node2D" parent="Node2D"]
+position = Vector2(313, 96)
+
+[node name="Path2D" type="Path2D" parent="Node2D/PointyHorseshoeCurve"]
+position = Vector2(-10.4351, 66.7485)
+scale = Vector2(3.52231, 3.25162)
+curve = SubResource("Curve2D_70jy3")

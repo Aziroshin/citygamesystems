@@ -83,7 +83,7 @@ in_handle_material = ExtResource("9_kyia3")
 out_handle_material = ExtResource("9_kyia3")
 tangent_material = ExtResource("9_kyia3")
 get_curve_by_signal = true
-transform_visualizer = NodePath("@Node3D@19047/@Node3D@19048")
+transform_visualizer = NodePath("@Node3D@19088/@Node3D@19089")
 
 [node name="StreetToolMapPreviewer" parent="Map" node_paths=PackedStringArray("map_agent") instance=ExtResource("6_o1idw")]
 map_agent = NodePath("../../street_tool/PlaneMapAgent")
@@ -221,13 +221,6 @@ show_missing_viewport_warning = false
 
 [node name="FullMouse3DRayCaster" parent="Mouse3DRay" instance=ExtResource("25_hy1ne")]
 
-[connection signal="activated" from="street_tool" to="Map/debug_visualizer_for_street_tool" method="show" flags=3]
-[connection signal="activated" from="street_tool" to="ButtonBar/SubButtonBarsBar/StreetToolSubBar" method="show"]
-[connection signal="curve_changed" from="street_tool" to="Map/debug_visualizer_for_street_tool" method="_on_curve_changed" flags=3]
-[connection signal="deactivated" from="street_tool" to="Map/debug_visualizer_for_street_tool" method="hide" flags=3]
-[connection signal="deactivated" from="street_tool" to="ButtonBar/SubButtonBarsBar/StreetToolSubBar" method="hide"]
-[connection signal="request_map_points" from="street_tool" to="StreetToolMapRayCaster" method="_on_request_map_points" flags=3]
-[connection signal="street_previewably_changed" from="street_tool" to="Map/StreetToolMapPreviewer" method="_on_previewable_change"]
 [connection signal="activated" from="LayoutTool" to="Map/debug_visualizer_for_layout_tool" method="show" flags=3]
 [connection signal="activated" from="LayoutTool" to="ButtonBar/SubButtonBarsBar/LayoutToolSubBar" method="show" flags=3]
 [connection signal="curve_changed" from="LayoutTool" to="Map/debug_visualizer_for_layout_tool" method="_on_curve_changed" flags=3]
