@@ -94,13 +94,16 @@ var line_sets: Array = [
 	set(p_value):
 		line_sets[LineKind.RIGHT_OFFSETS][LineSetField.SHOWN_OFFSET_INDEXES] = p_value
 @export var show_offsets := true
+## Shows all offsets, even when `shown_[left|right]_offset_indexes` aren't
+## empty.
+@export var show_all_offsets := false
+
 
 func _ready() -> void:
 	transform = transform.scaled(Vector2(2.0, 2.0))
 
 
 # TODO: Visualize offset of first point.
-# TODO: show only offsets for configured indexes.
 func _update_from_curve() -> void:
 	if curve_changed and curve.point_count > 1:
 		var baked_points := curve.get_baked_points()
@@ -132,26 +135,37 @@ func _update_from_curve() -> void:
 func _draw() -> void:
 	_update_from_curve()
 	
-	if redraw:
-		for line_set in line_sets:
-			if not show_offsets\
-				and (line_set[LineSetField.KIND] == LineKind.LEFT_OFFSETS\
-					or line_set[LineSetField.KIND] == LineKind.RIGHT_OFFSETS
-				):
+	if not redraw:
+		return
+
+	for line_set in line_sets:
+		var kind: LineKind = line_set[LineSetField.KIND]
+		
+		if not show_offsets\
+		and (kind == LineKind.LEFT_OFFSETS or kind == LineKind.RIGHT_OFFSETS):
+			continue
+		
+		var shown_offset_indexes: PackedInt64Array = line_set[LineSetField.SHOWN_OFFSET_INDEXES]
+		var hide_non_shown_offsets := not show_all_offsets and not len(shown_offset_indexes) == 0
+		var i_line := 0
+		for line in line_set[LineSetField.POINTS_AND_COLOR]:
+			if hide_non_shown_offsets:
+				if not i_line in shown_offset_indexes:
 					continue
-			for line in line_set[LineSetField.POINTS_AND_COLOR]:
-				var line_offset_color_or_null = line[LineField.COLOR]
-				var color: Color =\
-					line_offset_color_or_null if not line_offset_color_or_null == null\
-					else line_set[LineSetField.COLOR]
-				draw_line(
-					line[LineField.POINT_1],  # point 1
-					line[LineField.POINT_2],  # point 2
-					color,  # color
-					line_set[LineSetField.THICKNESS],
-					line_set[LineSetField.ANTIALIASED]
-				)
-		redraw = false
+			
+			var line_offset_color_or_null = line[LineField.COLOR]
+			var color: Color =\
+				line_offset_color_or_null if not line_offset_color_or_null == null\
+				else line_set[LineSetField.COLOR]
+			draw_line(
+				line[LineField.POINT_1],  # point 1
+				line[LineField.POINT_2],  # point 2
+				color,  # color
+				line_set[LineSetField.THICKNESS],
+				line_set[LineSetField.ANTIALIASED]
+			)
+			i_line += 1
+	redraw = false
 
 
 func _on_curve_changed(p_curve: Curve2D) -> void:
