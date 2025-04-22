@@ -7,6 +7,6 @@ extends Node3D
 
 func _ready() -> void:
 	for rig in curve_rigs:
-		var visualizer := Curve2DDebugVisualizer.new()
+		var visualizer := Curve2dDebugVisualizer.new()
 		visualizer.curve = rig.get_node("Path2D").curve
 		rig.add_child(visualizer)

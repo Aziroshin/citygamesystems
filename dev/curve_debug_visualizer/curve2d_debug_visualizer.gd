@@ -1,6 +1,6 @@
 ## Draws the outline and (optionally) offset vectors of a `Curve2D` on itself.
 extends Node2D
-class_name Curve2DDebugVisualizer
+class_name Curve2dDebugVisualizer
 
 
 const DEFAULT_EDGE_COLOR := Color(0.8, 0.4, 0.1)
