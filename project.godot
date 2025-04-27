@@ -19,6 +19,14 @@ config/icon="res://icon.svg"
 
 enabled=PackedStringArray("res://addons/gdUnit4/plugin.cfg")
 
+[gdunit4]
+
+settings/test/test_discovery=true
+ui/inspector/tree_view_mode=1
+ui/inspector/tree_sort_mode=1
+Shortcuts/editor/run_test=PackedInt32Array(4194325, 4194336)
+Shortcuts/editor/run_test_debug=PackedInt32Array(4194325, 4194337)
+
 [input]
 
 camera_left={

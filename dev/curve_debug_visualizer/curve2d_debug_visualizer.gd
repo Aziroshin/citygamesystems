@@ -3,20 +3,17 @@ extends Node2D
 class_name Curve2dDebugVisualizer
 
 
+signal finished_drawing
 const DEFAULT_EDGE_COLOR := Color(0.8, 0.4, 0.1)
 const DEFAULT_LEFT_OFFSET_COLOR := Color(0.1, 0.4, 0.8)
 const DEFAULT_RIGHT_OFFSET_COLOR := Color(0.4, 0.8, 0.1)
-## Will redraw in the next `_draw` call if `true`.
-## `_draw` will set this to `false`.
-var redraw = false
-## Will become `true` when `p_curve` is set. When set to `true`, will also set
-## `redraw` to `true`.
+## Setting `curve` will set this to `true.`
 ## `_update_from_curve` will set this to `false`.
 var curve_changed = false:
 	set(p_value):
 		curve_changed = p_value
 		if p_value == true:
-			redraw = true
+			self.queue_redraw()
 #region Lines.
 # Color is set here so individual lines can be given a different color.
 enum LineField {
@@ -59,19 +56,16 @@ var line_sets: Array = [
 	get:
 		return line_sets[LineKind.EDGES][LineSetField.COLOR]
 	set(p_value):
-		#edge_color = p_value
 		line_sets[LineKind.EDGES][LineSetField.COLOR] = p_value
 @export var left_offset_color: Color:
 	get:
 		return line_sets[LineKind.LEFT_OFFSETS][LineSetField.COLOR]
 	set(p_value):
-		#left_offset_color = p_value
 		line_sets[LineKind.LEFT_OFFSETS][LineSetField.COLOR] = p_value
 @export var right_offset_color: Color:
 	get:
 		return line_sets[LineKind.RIGHT_OFFSETS][LineSetField.COLOR]
 	set(p_value):
-		#right_offset_color = p_value
 		line_sets[LineKind.RIGHT_OFFSETS][LineSetField.COLOR] = p_value
 @export var left_offset_length := 20.0
 @export var right_offset_length := 20.0
@@ -134,9 +128,6 @@ func _update_from_curve() -> void:
 
 func _draw() -> void:
 	_update_from_curve()
-	
-	if not redraw:
-		return
 
 	for line_set in line_sets:
 		var kind: LineKind = line_set[LineSetField.KIND]
@@ -165,7 +156,7 @@ func _draw() -> void:
 				line_set[LineSetField.ANTIALIASED]
 			)
 			i_line += 1
-	redraw = false
+	finished_drawing.emit()
 
 
 func _on_curve_changed(p_curve: Curve2D) -> void:
