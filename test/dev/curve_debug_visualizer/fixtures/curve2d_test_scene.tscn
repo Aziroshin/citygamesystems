@@ -1,0 +1,52 @@
+[gd_scene load_steps=6 format=3 uid="uid://b5ix4uw5lu851"]
+
+[ext_resource type="Script" uid="uid://dvjytn1pd1dha" path="res://test/dev/curve_debug_visualizer/fixtures/curve2d_test_scene.gd" id="1_5yapd"]
+[ext_resource type="Script" uid="uid://cs5en3j2uygud" path="res://dev/curve_debug_visualizer/curve2d_debug_visualizer.gd" id="2_1we2v"]
+
+[sub_resource type="Gradient" id="Gradient_5yapd"]
+colors = PackedColorArray(0, 1, 0.301961, 1, 0, 1, 0.303266, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_1we2v"]
+gradient = SubResource("Gradient_5yapd")
+
+[sub_resource type="Curve2D" id="Curve2D_70jy3"]
+_data = {
+"points": PackedVector2Array(-155.69, -47.5984, 155.69, 47.5984, 11.9355, 121.038, 0, 10.6575, 0, -10.6575, 202.551, 66.5058, 145.041, -116.145, -145.041, 116.145, 10.3441, 35.4696)
+}
+point_count = 3
+
+[node name="Curve2dDebug" type="Node2D"]
+script = ExtResource("1_5yapd")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Node2D" type="Node2D" parent="."]
+
+[node name="Curve2dDebugVisualizer" type="Node2D" parent="Node2D"]
+script = ExtResource("2_1we2v")
+metadata/_custom_type_script = "uid://cs5en3j2uygud"
+
+[node name="ColorRect" type="ColorRect" parent="Node2D/Curve2dDebugVisualizer"]
+visible = false
+custom_minimum_size = Vector2(1024, 512)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 1156.0
+offset_bottom = 644.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.226405, 0.265705, 1, 1)
+
+[node name="Sprite2D" type="Sprite2D" parent="Node2D/Curve2dDebugVisualizer"]
+visible = false
+position = Vector2(613, 328)
+scale = Vector2(20.1562, 11.25)
+texture = SubResource("GradientTexture2D_1we2v")
+
+[node name="Path2D" type="Path2D" parent="."]
+position = Vector2(191.552, 224.775)
+scale = Vector2(3.8136, 2.33582)
+curve = SubResource("Curve2D_70jy3")
