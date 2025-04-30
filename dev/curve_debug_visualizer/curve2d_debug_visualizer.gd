@@ -7,6 +7,7 @@ signal finished_drawing
 const DEFAULT_EDGE_COLOR := Color(0.8, 0.4, 0.1)
 const DEFAULT_LEFT_OFFSET_COLOR := Color(0.1, 0.4, 0.8)
 const DEFAULT_RIGHT_OFFSET_COLOR := Color(0.4, 0.8, 0.1)
+const DEFAULT_FORWARD_COLOR := Color(0.8, 0.8, 0.4)
 ## Setting `curve` will set this to `true.`
 ## `_update_from_curve` will set this to `false`.
 var curve_changed = false:
@@ -24,6 +25,7 @@ enum LineField {
 var edges: Array = []
 var left_offsets: Array = []
 var right_offsets: Array = []
+var forwards: Array = []
 #endregion
 #region Line sets.
 ## Used to index the arrays in the `line_sets` array.
@@ -38,18 +40,21 @@ enum LineSetField {
 enum LineKind {
 	EDGES,
 	LEFT_OFFSETS,
-	RIGHT_OFFSETS
+	RIGHT_OFFSETS,
+	FORWARDS
 }
 ## Line sets (indexed by the `LineKind` enum).
 ## Each entry is an array indexed by the `LineSetField` enum and contains the
 ## points and color to draw a line using `draw_line`.
 var line_sets: Array = [
-	[LineKind.EDGES, edges, 1.0, false, PackedInt64Array(),
+	[LineKind.EDGES, edges, 2.0, false, PackedInt64Array(),
 	DEFAULT_EDGE_COLOR],
 	[LineKind.LEFT_OFFSETS, left_offsets, 1.0, false, PackedInt64Array(),
 	DEFAULT_LEFT_OFFSET_COLOR],
 	[LineKind.RIGHT_OFFSETS, right_offsets, 1.0, false, PackedInt64Array(),
-	DEFAULT_RIGHT_OFFSET_COLOR]
+	DEFAULT_RIGHT_OFFSET_COLOR],
+	[LineKind.FORWARDS, forwards, 0.4, false, PackedInt64Array(),
+	DEFAULT_FORWARD_COLOR]
 ]
 #endregion
 @export var edge_color: Color:
@@ -67,8 +72,14 @@ var line_sets: Array = [
 		return line_sets[LineKind.RIGHT_OFFSETS][LineSetField.COLOR]
 	set(p_value):
 		line_sets[LineKind.RIGHT_OFFSETS][LineSetField.COLOR] = p_value
+@export var forward_color: Color:
+	get:
+		return line_sets[LineKind.FORWARDS][LineSetField.COLOR]
+	set(p_value):
+		line_sets[LineKind.FORWARDS][LineSetField.COLOR] = p_value
 @export var left_offset_length := 20.0
 @export var right_offset_length := 20.0
+@export var forward_length := 20.0
 @export var curve := Curve2D.new():
 	get:
 		return curve
@@ -88,6 +99,7 @@ var line_sets: Array = [
 	set(p_value):
 		line_sets[LineKind.RIGHT_OFFSETS][LineSetField.SHOWN_OFFSET_INDEXES] = p_value
 @export var show_offsets := true
+@export var show_forwards := true
 ## Shows all offsets, even when `shown_[left|right]_offset_indexes` aren't
 ## empty.
 @export var show_all_offsets := false
@@ -106,7 +118,6 @@ func _update_from_curve() -> void:
 		var i_point := 1
 		for point in baked_points.slice(1):
 			edges.append([last_point, point, null])
-			
 			left_offsets.append([
 				last_point,
 				last_point\
@@ -120,6 +131,13 @@ func _update_from_curve() -> void:
 					+ (point - last_point).rotated((PI * 0.5)).normalized()\
 					* right_offset_length,
 				null,
+			])
+			forwards.append([
+				last_point,
+				last_point\
+					+ (point - last_point).normalized()\
+					* forward_length,
+				null
 			])
 			last_point = point
 			i_point += 1
