@@ -339,7 +339,7 @@ static func get_point_transform(
 	p_idx: int
 ) -> Transform3D:
 	return p_curve.sample_baked_with_rotation(
-		Curve3DDebugFuncs.get_closest_offset_on_curve_or_zero(
+		get_closest_offset_on_curve_or_zero(
 			p_curve,
 			p_curve.get_point_position(p_idx)
 		)
