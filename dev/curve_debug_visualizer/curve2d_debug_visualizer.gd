@@ -109,17 +109,44 @@ func _ready() -> void:
 	transform = transform.scaled(Vector2(2.0, 2.0))
 
 
-# TODO: Visualize offset of first point.
-func _update_from_curve() -> void:
+func _update_lines_from_transforms(transform_1: Transform2D, transform_2: Transform2D) -> void:
+	var point_1 := transform_1.origin
+	var point_2 := transform_2.origin
+	edges.append([point_1, point_2, null])
+	left_offsets.append([
+		point_1,
+		point_1 - transform_1.y * left_offset_length,
+		null,
+	])
+	right_offsets.append([
+		point_1,
+		point_1 + transform_1.y * left_offset_length,
+		null,
+	])
+	forwards.append([
+		point_1,
+		point_1\
+			+ (point_2 - point_1).normalized()\
+			* forward_length,
+		null
+	])
+
+
+# TODO: Fix last point not getting offsets and forwards.
+## Updates the data to be drawn based on the relationship between curve points.
+func _update_from_curve_by_calculation() -> void:
 	if curve_changed and curve.point_count > 1:
 		var baked_points := curve.get_baked_points()
 		var last_point := baked_points[0]
 		
 		var i_point := 1
 		for point in baked_points.slice(1):
+			var last_point_transform := GeoFoo.get_baked_point_transform_2d(curve, i_point)
+			#var point_transform := GeoFoo.get_baked_point_transform_2d(curve, i_point)
 			edges.append([last_point, point, null])
 			left_offsets.append([
 				last_point,
+				#last_point + last_point_transform.y * left_offset_length,
 				last_point\
 					+ (point - last_point).rotated(-(PI * 0.5)).normalized()\
 					* left_offset_length,
@@ -142,6 +169,30 @@ func _update_from_curve() -> void:
 			last_point = point
 			i_point += 1
 		curve_changed = false
+
+
+## Updates the data to be drawn based on `Curve2D.sample_baked_with_rotation`.
+func _update_from_curve_by_sampling() -> void:
+	if curve_changed and curve.point_count > 1:
+		var baked_points := curve.get_baked_points()
+		var last_point := baked_points[0]
+		
+		var i_point := 1
+		for point in baked_points.slice(1):
+			var last_point_transform := GeoFoo.get_baked_point_transform_2d(curve, i_point - 1)
+			var point_transform := GeoFoo.get_baked_point_transform_2d(curve, i_point)
+			_update_lines_from_transforms(
+				GeoFoo.get_baked_point_transform_2d(curve, i_point - 1),
+				GeoFoo.get_baked_point_transform_2d(curve, i_point)
+			)
+			last_point = point
+			i_point += 1
+			
+		curve_changed = false
+
+
+func _update_from_curve() -> void:
+	_update_from_curve_by_sampling()
 
 
 func _draw() -> void:

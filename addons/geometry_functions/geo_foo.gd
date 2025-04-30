@@ -169,6 +169,32 @@ static func get_closest_offset_on_curve_or_zero(
 	return offset
 
 
+## Returns the closest offset to `point_idx` or `0.0` if the offset is `NaN`.
+## If the offset is `NaN`, it will also push an error.
+static func get_closest_offset_on_curve_or_zero_2d(
+	curve: Curve2D,
+	point_position: Vector2
+) -> float:
+	var offset := curve.get_closest_offset(point_position)
+	
+	if is_nan(offset):
+		if curve.point_count >= 2:
+			if curve.get_point_position(0) == curve.get_point_position(1):
+				push_error(
+					"The first two point positions in the curve are equal, so "
+					+ "the offset is 'NaN'. Will return '0.0' instead."
+				)
+			else:
+				push_error(
+					"The offset is 'NaN'. Will return '0.0' instead (note: "
+					+ "This is not the \"the first 2 point positions in the "
+					+ "curve are equal\" case)."
+				)
+		offset = 0.0
+	
+	return offset
+
+
 ## Aligns `vertices` along the `new_forward` vector.
 ## For example: If you pass the result of the `to_3d` function, with
 ## `Vector3.FORWARD` passed to its `forward` parameter (the default), to this
@@ -346,6 +372,18 @@ static func get_point_transform(
 	)
 
 
+static func get_point_transform_2d(
+	p_curve: Curve2D,
+	p_idx: int
+) -> Transform2D:
+	return p_curve.sample_baked_with_rotation(
+		get_closest_offset_on_curve_or_zero_2d(
+			p_curve,
+			p_curve.get_point_position(p_idx)
+		)
+	)
+
+
 # Note: There's a copy-paste of this function's body in
 # `get_baked_point_transforms`. If there should ever be changes to this
 # function, make sure to make changes there accordingly as well.
@@ -356,6 +394,19 @@ static func get_baked_point_transform(
 ) -> Transform3D:
 	return p_curve.sample_baked_with_rotation(
 		get_closest_offset_on_curve_or_zero(
+			p_curve,
+			p_curve.get_baked_points()[p_idx]
+		)
+	)
+
+
+## Returns the transform of a baked point in a curve.
+static func get_baked_point_transform_2d(
+	p_curve: Curve2D,
+	p_idx: int
+) -> Transform2D:
+	return p_curve.sample_baked_with_rotation(
+		get_closest_offset_on_curve_or_zero_2d(
 			p_curve,
 			p_curve.get_baked_points()[p_idx]
 		)
