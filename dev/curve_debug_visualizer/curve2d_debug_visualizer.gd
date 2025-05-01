@@ -100,6 +100,7 @@ var line_sets: Array = [
 		line_sets[LineKind.RIGHT_OFFSETS][LineSetField.SHOWN_OFFSET_INDEXES] = p_value
 @export var show_offsets := true
 @export var show_forwards := true
+@export var show_edges := true
 ## Shows all offsets, even when `shown_[left|right]_offset_indexes` aren't
 ## empty.
 @export var show_all_offsets := false
@@ -178,8 +179,13 @@ func _draw() -> void:
 	for line_set in line_sets:
 		var kind: LineKind = line_set[LineSetField.KIND]
 		
-		if not show_offsets\
-		and (kind == LineKind.LEFT_OFFSETS or kind == LineKind.RIGHT_OFFSETS):
+		if not show_offsets and (kind == LineKind.LEFT_OFFSETS or kind == LineKind.RIGHT_OFFSETS):
+			continue
+		
+		if not show_forwards and kind == LineKind.FORWARDS:
+			continue
+		
+		if not show_edges and kind == LineKind.EDGES:
 			continue
 		
 		var shown_offset_indexes: PackedInt64Array = line_set[LineSetField.SHOWN_OFFSET_INDEXES]
