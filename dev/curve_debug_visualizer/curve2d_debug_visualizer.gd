@@ -131,44 +131,6 @@ func _update_lines_from_transforms(transform_1: Transform2D, transform_2: Transf
 	])
 
 
-# TODO: Fix last point not getting offsets and forwards.
-## Updates the data to be drawn based on the relationship between curve points.
-func _update_from_curve_by_calculation() -> void:
-	if curve_changed and curve.point_count > 1:
-		var baked_points := curve.get_baked_points()
-		var last_point := baked_points[0]
-		
-		var i_point := 1
-		for point in baked_points.slice(1):
-			var last_point_transform := GeoFoo.get_baked_point_transform_2d(curve, i_point)
-			#var point_transform := GeoFoo.get_baked_point_transform_2d(curve, i_point)
-			left_offsets.append([
-				last_point,
-				#last_point + last_point_transform.y * left_offset_length,
-				last_point\
-					+ (point - last_point).rotated(-(PI * 0.5)).normalized()\
-					* left_offset_length,
-				null,
-			])
-			right_offsets.append([
-				last_point,
-				last_point\
-					+ (point - last_point).rotated((PI * 0.5)).normalized()\
-					* right_offset_length,
-				null,
-			])
-			forwards.append([
-				last_point,
-				last_point\
-					+ (point - last_point).normalized()\
-					* forward_length,
-				null
-			])
-			last_point = point
-			i_point += 1
-		curve_changed = false
-
-
 ## Updates the data to be drawn based on `Curve2D.sample_baked_with_rotation`.
 func _update_from_curve_by_sampling() -> void:
 	if curve_changed and curve.point_count > 1:
