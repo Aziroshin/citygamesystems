@@ -35,6 +35,7 @@ enum LineSetField {
 	THICKNESS,
 	ANTIALIASED,
 	SHOWN_OFFSET_INDEXES,
+	SHOW,
 	COLOR
 }
 enum LineKind {
@@ -47,13 +48,13 @@ enum LineKind {
 ## Each entry is an array indexed by the `LineSetField` enum and contains the
 ## points and color to draw a line using `draw_line`.
 var line_sets: Array = [
-	[LineKind.EDGES, edges, 2.0, false, PackedInt64Array(),
+	[LineKind.EDGES, edges, 2.0, false, PackedInt64Array(), true,
 	DEFAULT_EDGE_COLOR],
-	[LineKind.LEFT_OFFSETS, left_offsets, 1.0, false, PackedInt64Array(),
+	[LineKind.LEFT_OFFSETS, left_offsets, 1.0, false, PackedInt64Array(), true,
 	DEFAULT_LEFT_OFFSET_COLOR],
-	[LineKind.RIGHT_OFFSETS, right_offsets, 1.0, false, PackedInt64Array(),
+	[LineKind.RIGHT_OFFSETS, right_offsets, 1.0, false, PackedInt64Array(), true,
 	DEFAULT_RIGHT_OFFSET_COLOR],
-	[LineKind.FORWARDS, forwards, 0.4, false, PackedInt64Array(),
+	[LineKind.FORWARDS, forwards, 0.4, false, PackedInt64Array(), true,
 	DEFAULT_FORWARD_COLOR]
 ]
 #endregion
@@ -87,20 +88,37 @@ var line_sets: Array = [
 		curve = p_value
 		curve_changed = true
 ## If non-empty, will only show the left-offsets of indexes in this array.
-@export var shown_left_offset_indexes := PackedInt64Array():
+@export var shown_left_offset_indexes: PackedInt64Array:
 	get:
 		return line_sets[LineKind.LEFT_OFFSETS][LineSetField.SHOWN_OFFSET_INDEXES]
 	set(p_value):
 		line_sets[LineKind.LEFT_OFFSETS][LineSetField.SHOWN_OFFSET_INDEXES] = p_value
 ## If non-empty, will only show the right-offsets of indexes in this array.
-@export var shown_right_offset_indexes := PackedInt64Array():
+@export var shown_right_offset_indexes: PackedInt64Array:
 	get:
 		return line_sets[LineKind.RIGHT_OFFSETS][LineSetField.SHOWN_OFFSET_INDEXES]
 	set(p_value):
 		line_sets[LineKind.RIGHT_OFFSETS][LineSetField.SHOWN_OFFSET_INDEXES] = p_value
-@export var show_offsets := true
-@export var show_forwards := true
-@export var show_edges := true
+@export var show_left_offsets := true:
+	get:
+		return line_sets[LineKind.LEFT_OFFSETS][LineSetField.SHOW]
+	set(p_value):
+		line_sets[LineKind.LEFT_OFFSETS][LineSetField.SHOW] = p_value
+@export var show_right_offsets := true:
+	get:
+		return line_sets[LineKind.RIGHT_OFFSETS][LineSetField.SHOW]
+	set(p_value):
+		line_sets[LineKind.RIGHT_OFFSETS][LineSetField.SHOW] = p_value
+@export var show_forwards := true:
+	get:
+		return line_sets[LineKind.FORWARDS][LineSetField.SHOW]
+	set(p_value):
+		line_sets[LineKind.FORWARDS][LineSetField.SHOW] = p_value
+@export var show_edges := true:
+	get:
+		return line_sets[LineKind.EDGES][LineSetField.SHOW]
+	set(p_value):
+		line_sets[LineKind.EDGES][LineSetField.SHOW] = p_value
 ## Shows all offsets, even when `shown_[left|right]_offset_indexes` aren't
 ## empty.
 @export var show_all_offsets := false
@@ -179,13 +197,7 @@ func _draw() -> void:
 	for line_set in line_sets:
 		var kind: LineKind = line_set[LineSetField.KIND]
 		
-		if not show_offsets and (kind == LineKind.LEFT_OFFSETS or kind == LineKind.RIGHT_OFFSETS):
-			continue
-		
-		if not show_forwards and kind == LineKind.FORWARDS:
-			continue
-		
-		if not show_edges and kind == LineKind.EDGES:
+		if not line_set[LineSetField.SHOW]:
 			continue
 		
 		var shown_offset_indexes: PackedInt64Array = line_set[LineSetField.SHOWN_OFFSET_INDEXES]
