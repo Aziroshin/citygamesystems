@@ -112,7 +112,6 @@ func _ready() -> void:
 func _update_lines_from_transforms(transform_1: Transform2D, transform_2: Transform2D) -> void:
 	var point_1 := transform_1.origin
 	var point_2 := transform_2.origin
-	edges.append([point_1, point_2, null])
 	left_offsets.append([
 		point_1,
 		point_1 - transform_1.y * left_offset_length,
@@ -143,7 +142,6 @@ func _update_from_curve_by_calculation() -> void:
 		for point in baked_points.slice(1):
 			var last_point_transform := GeoFoo.get_baked_point_transform_2d(curve, i_point)
 			#var point_transform := GeoFoo.get_baked_point_transform_2d(curve, i_point)
-			edges.append([last_point, point, null])
 			left_offsets.append([
 				last_point,
 				#last_point + last_point_transform.y * left_offset_length,
@@ -181,12 +179,29 @@ func _update_from_curve_by_sampling() -> void:
 		for point in baked_points.slice(1):
 			var last_point_transform := GeoFoo.get_baked_point_transform_2d(curve, i_point - 1)
 			var point_transform := GeoFoo.get_baked_point_transform_2d(curve, i_point)
+			edges.append([last_point, point, null])
 			_update_lines_from_transforms(
 				GeoFoo.get_baked_point_transform_2d(curve, i_point - 1),
 				GeoFoo.get_baked_point_transform_2d(curve, i_point)
 			)
 			last_point = point
 			i_point += 1
+		
+		var last_point_transform := GeoFoo.get_baked_point_transform_2d(
+			curve,
+			len(baked_points) - 1
+		)
+		var fake_point_beyond_last_point_transform := GeoFoo.get_baked_point_transform_2d(
+			curve,
+			len(baked_points) - 1
+		)
+		fake_point_beyond_last_point_transform.origin =\
+			fake_point_beyond_last_point_transform.origin\
+			+ fake_point_beyond_last_point_transform.x * 5.0
+		_update_lines_from_transforms(
+			last_point_transform,
+			fake_point_beyond_last_point_transform
+		)
 			
 		curve_changed = false
 
