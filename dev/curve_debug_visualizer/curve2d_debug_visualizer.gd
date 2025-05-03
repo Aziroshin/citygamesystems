@@ -15,6 +15,7 @@ var curve_changed = false:
 		curve_changed = p_value
 		if p_value == true:
 			self.queue_redraw()
+		
 #region Lines.
 # Color is set here so individual lines can be given a different color.
 enum LineField {
@@ -34,7 +35,7 @@ enum LineSetField {
 	POINTS_AND_COLOR,
 	THICKNESS,
 	ANTIALIASED,
-	SHOWN_OFFSET_INDEXES,
+	MARKED_INDEXES,
 	SHOW,
 	COLOR
 }
@@ -87,18 +88,21 @@ var line_sets: Array = [
 	set(p_value):
 		curve = p_value
 		curve_changed = true
-## If non-empty, will only show the left-offsets of indexes in this array.
-@export var shown_left_offset_indexes: PackedInt64Array:
+@export var marked_left_offset_indexes: PackedInt64Array:
 	get:
-		return line_sets[LineKind.LEFT_OFFSETS][LineSetField.SHOWN_OFFSET_INDEXES]
+		return line_sets[LineKind.LEFT_OFFSETS][LineSetField.MARKED_INDEXES]
 	set(p_value):
-		line_sets[LineKind.LEFT_OFFSETS][LineSetField.SHOWN_OFFSET_INDEXES] = p_value
-## If non-empty, will only show the right-offsets of indexes in this array.
-@export var shown_right_offset_indexes: PackedInt64Array:
+		line_sets[LineKind.LEFT_OFFSETS][LineSetField.MARKED_INDEXES] = p_value
+@export var marked_right_offset_indexes: PackedInt64Array:
 	get:
-		return line_sets[LineKind.RIGHT_OFFSETS][LineSetField.SHOWN_OFFSET_INDEXES]
+		return line_sets[LineKind.RIGHT_OFFSETS][LineSetField.MARKED_INDEXES]
 	set(p_value):
-		line_sets[LineKind.RIGHT_OFFSETS][LineSetField.SHOWN_OFFSET_INDEXES] = p_value
+		line_sets[LineKind.RIGHT_OFFSETS][LineSetField.MARKED_INDEXES] = p_value
+@export var marked_forward_indexes: PackedInt64Array:
+	get:
+		return line_sets[LineKind.FORWARDS][LineSetField.MARKED_INDEXES]
+	set(p_value):
+		line_sets[LineKind.FORWARDS][LineSetField.MARKED_INDEXES] = p_value
 @export var show_left_offsets := true:
 	get:
 		return line_sets[LineKind.LEFT_OFFSETS][LineSetField.SHOW]
@@ -119,9 +123,23 @@ var line_sets: Array = [
 		return line_sets[LineKind.EDGES][LineSetField.SHOW]
 	set(p_value):
 		line_sets[LineKind.EDGES][LineSetField.SHOW] = p_value
-## Shows all offsets, even when `shown_[left|right]_offset_indexes` aren't
-## empty.
-@export var show_all_offsets := false
+enum FilterMode {
+	NONE,
+	SHOW,
+	HIDE
+}
+@export var marked_indexes_filter_mode := FilterMode.NONE
+enum FilterOverrideDirection {
+	BASE_OVERRIDES_LINE,
+	LINE_OVERRIDES_BASE
+}
+@export var marked_indexes_filter_override_direction := FilterOverrideDirection.LINE_OVERRIDES_BASE
+enum FilterOverrideMode  {
+	ADDITIVE,
+	SUBTRACTIVE
+}
+@export var marked_indexes_filter_override_Mode := FilterOverrideMode.ADDITIVE
+@export var base_marked_indexes := PackedInt64Array()
 
 
 func _ready() -> void:
@@ -200,13 +218,47 @@ func _draw() -> void:
 		if not line_set[LineSetField.SHOW]:
 			continue
 		
-		var shown_offset_indexes: PackedInt64Array = line_set[LineSetField.SHOWN_OFFSET_INDEXES]
-		var hide_non_shown_offsets := not show_all_offsets and not len(shown_offset_indexes) == 0
-		var i_line := 0
+		# The default is assumed to be `FilterOverrideDirection.LINE_OVERRIDES_BASE`:
+		var overriding_marked_indexes: PackedInt64Array = line_set[LineSetField.MARKED_INDEXES]
+		var overridable_marked_indexes: PackedInt64Array = base_marked_indexes
+		if  marked_indexes_filter_override_direction == FilterOverrideDirection.BASE_OVERRIDES_LINE:
+			overriding_marked_indexes = base_marked_indexes
+			overridable_marked_indexes = line_set[LineSetField.MARKED_INDEXES]
+			
+		var i_line := -1  # To accommodate the early increment due to the early continues.
 		for line in line_set[LineSetField.POINTS_AND_COLOR]:
-			if hide_non_shown_offsets:
-				if not i_line in shown_offset_indexes:
-					continue
+			i_line += 1
+			if not kind == LineKind.EDGES:
+				if marked_indexes_filter_mode == FilterMode.SHOW:
+					# For ease of understanding, the conditoinals below are
+					# categorized in a comment each as being a `showlist` or a
+					# `hidelist` in terms of what their *_marked_indexes array
+					# means there.
+					if marked_indexes_filter_override_Mode == FilterOverrideMode.ADDITIVE:
+						# showlist
+						if not i_line in overriding_marked_indexes\
+						# showlist
+						and not i_line in overridable_marked_indexes:
+							continue
+					elif marked_indexes_filter_override_Mode == FilterOverrideMode.SUBTRACTIVE:
+						# hidelist
+						if i_line in overriding_marked_indexes\
+						# showlist
+						or not i_line in overridable_marked_indexes:
+							continue
+				elif marked_indexes_filter_mode == FilterMode.HIDE:
+					if marked_indexes_filter_override_Mode == FilterOverrideMode.ADDITIVE:
+						# hidelist
+						if i_line in overriding_marked_indexes\
+						# hidelist
+						or i_line in overridable_marked_indexes:
+							continue
+					elif marked_indexes_filter_override_Mode == FilterOverrideMode.SUBTRACTIVE:
+						# showlist
+						if not i_line in overriding_marked_indexes\
+						# hidelist
+						and i_line in overridable_marked_indexes:
+							continue
 			
 			var line_offset_color_or_null = line[LineField.COLOR]
 			var color: Color =\
@@ -219,7 +271,6 @@ func _draw() -> void:
 				line_set[LineSetField.THICKNESS],
 				line_set[LineSetField.ANTIALIASED]
 			)
-			i_line += 1
 	finished_drawing.emit()
 
 
