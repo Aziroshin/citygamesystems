@@ -11,7 +11,7 @@ const TestScene := preload("./fixtures/curve2d_test_scene.tscn")
 
 
 class TestScreenshotter2D extends Node2D:
-	var sub_viewport: SubViewport
+	var sub_viewport
 	@onready var viewport_image_or_null: Image = null
 	@onready var viewport_texture: ViewportTexture
 	var delete_file_before_saving := false
@@ -28,21 +28,17 @@ class TestScreenshotter2D extends Node2D:
 		
 		if not p_sub_viewport == null:
 			sub_viewport = p_sub_viewport
-		else:
-			sub_viewport = SubViewport.new()
-		add_child(sub_viewport)
-		sub_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-		sub_viewport.size = Vector2(512, 512)
-		sub_viewport.disable_3d = true
 		
 		
 	func _ready() -> void:
+		if sub_viewport == null:
+			sub_viewport = get_tree().root.get_viewport()
 		viewport_texture = sub_viewport.get_texture()
 		
 		
 	static func get_or_create_if_not_exist(
 		p_parent: Node,
-		p_scene: Node,
+		#p_scene: Node,
 		p_delete_file_before_saving := false,
 		p_name := "TestScreenshotter2D",
 		p_sub_viewport: SubViewport = null
@@ -58,7 +54,6 @@ class TestScreenshotter2D extends Node2D:
 			p_sub_viewport
 		)
 		p_parent.add_child(new_screenshotter)
-		new_screenshotter.sub_viewport.add_child(p_scene)
 		return new_screenshotter
 
 
@@ -68,6 +63,7 @@ class TestScreenshotter2D extends Node2D:
 	func take_screenshot(p_file_path := ""):
 		if wait_for_draw:
 			await RenderingServer.frame_post_draw
+		print("Curve2dDebugVisualizerTest.gd: ")
 		viewport_image_or_null = viewport_texture.get_image()
 		if viewport_image_or_null == null:
 			return
@@ -83,11 +79,14 @@ class TestScreenshotter2D extends Node2D:
 
 func test__update_from_curve() -> void:
 	var scene := TestScene.instantiate()
-	var screenshotter := TestScreenshotter2D.get_or_create_if_not_exist(self, scene, true)
+	var screenshotter := TestScreenshotter2D.get_or_create_if_not_exist(
+		self,
+		true
+	)
 	var runner := scene_runner(scene)
 	var path2d: Path2D = runner.get_property("path")
 	var visualizer: Curve2dDebugVisualizer = runner.get_property("visualizer")
 
-	screenshotter.take_screenshot(
-			"user://curve2d_debug_mess.png"
-		)
+	screenshotter.take_screenshot("user://curve2d_debug_mess.png")
+		
+	return
