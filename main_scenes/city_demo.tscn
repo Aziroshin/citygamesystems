@@ -74,7 +74,7 @@ transform_visualizer = NodePath("CavedigTransform3DVisualizer")
 [node name="CavedigTransform3DVisualizer" type="Node3D" parent="Map/debug_visualizer_for_street_tool"]
 script = ExtResource("9_pmb6e")
 default_circumference = Vector3(0.1, 0.1, 0.1)
-metadata/_custom_type_script = ExtResource("9_pmb6e")
+metadata/_custom_type_script = "uid://ct77olnyjxmtl"
 
 [node name="debug_visualizer_for_layout_tool" parent="Map" node_paths=PackedStringArray("transform_visualizer") instance=ExtResource("8_55k1a")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
@@ -83,7 +83,7 @@ in_handle_material = ExtResource("9_kyia3")
 out_handle_material = ExtResource("9_kyia3")
 tangent_material = ExtResource("9_kyia3")
 get_curve_by_signal = true
-transform_visualizer = NodePath("@Node3D@19088/@Node3D@19089")
+transform_visualizer = NodePath("@Node3D@29216/@Node3D@29217")
 
 [node name="StreetToolMapPreviewer" parent="Map" node_paths=PackedStringArray("map_agent") instance=ExtResource("6_o1idw")]
 map_agent = NodePath("../../street_tool/PlaneMapAgent")
@@ -221,6 +221,13 @@ show_missing_viewport_warning = false
 
 [node name="FullMouse3DRayCaster" parent="Mouse3DRay" instance=ExtResource("25_hy1ne")]
 
+[connection signal="activated" from="street_tool" to="Map/debug_visualizer_for_street_tool" method="show" flags=3]
+[connection signal="activated" from="street_tool" to="ButtonBar/SubButtonBarsBar/StreetToolSubBar" method="show" flags=3]
+[connection signal="curve_changed" from="street_tool" to="Map/debug_visualizer_for_street_tool" method="_on_curve_changed" flags=3]
+[connection signal="deactivated" from="street_tool" to="Map/debug_visualizer_for_street_tool" method="hide" flags=3]
+[connection signal="deactivated" from="street_tool" to="ButtonBar/SubButtonBarsBar/StreetToolSubBar" method="hide" flags=3]
+[connection signal="request_map_points" from="street_tool" to="StreetToolMapRayCaster" method="_on_request_map_points" flags=3]
+[connection signal="street_previewably_changed" from="street_tool" to="Map/StreetToolMapPreviewer" method="_on_previewable_change" flags=3]
 [connection signal="activated" from="LayoutTool" to="Map/debug_visualizer_for_layout_tool" method="show" flags=3]
 [connection signal="activated" from="LayoutTool" to="ButtonBar/SubButtonBarsBar/LayoutToolSubBar" method="show" flags=3]
 [connection signal="curve_changed" from="LayoutTool" to="Map/debug_visualizer_for_layout_tool" method="_on_curve_changed" flags=3]

@@ -59,7 +59,7 @@ transform_visualizer = NodePath("CavedigTransform3DVisualizer")
 script = ExtResource("6_vp43t")
 default_length = Vector3(0.7, 0.7, 0.7)
 default_circumference = Vector3(0.15, 0.15, 0.15)
-metadata/_custom_type_script = ExtResource("6_vp43t")
+metadata/_custom_type_script = "uid://ct77olnyjxmtl"
 
 [node name="Map" parent="." node_paths=PackedStringArray("mouse_3d") instance=ExtResource("4_xm07t")]
 collision_layer = 2147483649

@@ -24,4 +24,3 @@ func _on_previewable_change(
 			p_profile2d
 		)
 		map_agent.get_map_node().add_child(_preview_mesh)
-

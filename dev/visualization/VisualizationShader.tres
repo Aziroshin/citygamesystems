@@ -11,4 +11,4 @@ void fragment() {
 [resource]
 render_priority = 0
 shader = SubResource("1")
-shader_parameter/color = null
+shader_parameter/color = Vector3(0, 0, 0)
