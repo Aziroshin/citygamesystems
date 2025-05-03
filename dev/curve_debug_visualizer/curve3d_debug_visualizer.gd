@@ -76,3 +76,7 @@ func _on_curve_changed(p_curve: Curve3D) -> void:
 		handle_visualizer.set_curve(p_curve)
 		if visualize_transforms:
 			curve_transform_visualizer.set_curve(p_curve)
+
+
+func _on_street_tool_curve_changed(p_curve_copy: Curve3D) -> void:
+	pass # Replace with function body.
